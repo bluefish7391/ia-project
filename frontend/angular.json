@@ -161,7 +161,8 @@
                 "input": "projects/school-hub/public"
               }
             ],
-            "styles": ["projects/school-hub/src/styles.scss"]
+            "styles": ["projects/school-hub/src/styles.scss"],
+            "outputPath": "../dist"
           },
           "configurations": {
             "production": {

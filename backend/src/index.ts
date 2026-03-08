@@ -1,13 +1,13 @@
-const functions = require('firebase-functions/v1');
+import { onRequest } from "firebase-functions/v2/https";
 
-exports.bigben = functions.https.onRequest((req: any, res: any) => {
-  const hours = (new Date().getHours() % 12) + 1  // London is UTC + 1hr;
+export const bigben = onRequest((req, res) => {
+  const hours = (new Date().getHours() % 12) + 1; // London is UTC + 1hr
   res.status(200).send(`<!doctype html>
     <head>
       <title>Time</title>
     </head>
     <body>
-      ${'BONG '.repeat(hours)}
+      ${"BONG ".repeat(hours)}
     </body>
   </html>`);
 });

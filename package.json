@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "build": "npm --prefix backend run build && npm run build:school-hub:full",
+    "build:school-hub": "npm --prefix frontend run ng -- build school-hub",
+    "build:school-hub:full": "npm run build:school-hub && node scripts/post-build-school-hub.js"
+  }
+}

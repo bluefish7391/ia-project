@@ -4,7 +4,8 @@
 		"build:school-hub": "npm --prefix frontend run ng -- build school-hub && node scripts/post-build-school-hub.js",
 		"serve:backend": "firebase emulators:start",
 		"serve:frontend": "npm --prefix frontend run ng -- serve school-hub",
-		"serve": "concurrently \"npm run serve:backend\" \"npm run serve:frontend\""
+		"serve": "concurrently \"npm run serve:backend\" \"npm run serve:frontend\"",
+		"deploy": "npm run build && firebase deploy"
 	},
 	"devDependencies": {
 		"concurrently": "^9.2.1"

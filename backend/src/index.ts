@@ -1,13 +1,15 @@
 import { onRequest } from "firebase-functions/v2/https";
+import express from "express";
+import { TenantRouter } from "./routers/tenant-router";
 
-export const bigben = onRequest((req, res) => {
-  const hours = (new Date().getHours() % 12) + 1; // London is UTC + 1hr
-  res.status(200).send(`<!doctype html>
-    <head>
-      <title>Time</title>
-    </head>
-    <body>
-      ${"BONG ".repeat(hours)}
-    </body>
-  </html>`);
+const expressApp = express();
+expressApp.use(express.json());
+expressApp.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Expires', '0');
+    next();
 });
+
+expressApp.use('/tenants', TenantRouter.buildRouter());
+
+export const xapi = onRequest(expressApp);

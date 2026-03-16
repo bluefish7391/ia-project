@@ -1,36 +1,36 @@
 <section class="tenants">
 	<header class="tenants__header">
-		<div>
-			<h2>Tenants</h2>
-			<p>Manage all tenants in the system.</p>
+		<div class="tenants__title-block">
+			<h2 class="tenants__title">Tenants</h2>
+			<p class="tenants__subtitle">Manage all tenants in the system.</p>
 		</div>
-		<button type="button" (click)="addTenant()">Add Tenant</button>
+		<button type="button" class="tenants__primary-action" (click)="addTenant()">Add Tenant</button>
 	</header>
 
 	@if (actionMessage(); as message) {
-		<p class="tenants__message">{{ message }}</p>
+		<p class="tenants__message" role="status">{{ message }}</p>
 	}
 
 	@if (isLoading()) {
-		<p>Loading tenants...</p>
+		<p class="tenants__state">Loading tenants...</p>
 	} @else if (errorMessage(); as error) {
 		<div class="tenants__error">
 			<p>{{ error }}</p>
-			<button type="button" (click)="loadTenants()">Retry</button>
+			<button type="button" class="tenants__secondary-action" (click)="loadTenants()">Retry</button>
 		</div>
 	} @else if (tenants().length === 0) {
-		<p>No tenants found.</p>
+		<p class="tenants__state">No tenants found.</p>
 	} @else {
 		<ul class="tenants__list">
 			@for (tenant of tenants(); track tenant.id) {
 				<li class="tenants__item">
 					<div class="tenants__details">
-						<h3>{{ tenant.name }}</h3>
-						<p>{{ tenant.description || 'No description provided.' }}</p>
+						<h3 class="tenants__tenant-name">{{ tenant.name }}</h3>
+						<p class="tenants__tenant-description">{{ tenant.description || 'No description provided.' }}</p>
 					</div>
 					<div class="tenants__actions">
-						<button type="button" (click)="updateTenant(tenant)">Update</button>
-						<button type="button" (click)="deleteTenant(tenant)">Delete</button>
+						<button type="button" class="tenants__secondary-action" (click)="updateTenant(tenant)">Update</button>
+						<button type="button" class="tenants__secondary-action" (click)="deleteTenant(tenant)">Delete</button>
 					</div>
 				</li>
 			}

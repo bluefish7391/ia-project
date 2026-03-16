@@ -1,0 +1,30 @@
+<ul class="tenants__list">
+  @for (tenant of tenants; track tenant.id) {
+    <li class="tenants__item">
+      <div class="tenants__details">
+        <h3 class="tenants__tenant-name">{{ tenant.name }}</h3>
+        <p class="tenants__tenant-description">
+          {{ tenant.description || 'No description provided.' }}
+        </p>
+      </div>
+      <div class="tenants__actions">
+        <button
+          type="button"
+          class="tenants__secondary-action"
+          [disabled]="isSubmitting"
+          (click)="requestUpdate(tenant)"
+        >
+          Update
+        </button>
+        <button
+          type="button"
+          class="tenants__secondary-action"
+          [disabled]="isSubmitting"
+          (click)="requestDelete(tenant)"
+        >
+          Delete
+        </button>
+      </div>
+    </li>
+  }
+</ul>

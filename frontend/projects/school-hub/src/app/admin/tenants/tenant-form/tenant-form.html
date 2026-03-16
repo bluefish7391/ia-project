@@ -1,0 +1,35 @@
+<form class="tenants__form" (ngSubmit)="submitTenant()">
+  <div class="tenants__form-field">
+    <label for="tenantName">Tenant Name</label>
+    <input
+      id="tenantName"
+      name="tenantName"
+      [(ngModel)]="tenantName"
+      [disabled]="isSubmitting"
+      required
+    />
+  </div>
+  <div class="tenants__form-field">
+    <label for="tenantDescription">Description</label>
+    <textarea
+      id="tenantDescription"
+      name="tenantDescription"
+      rows="3"
+      [(ngModel)]="tenantDescription"
+      [disabled]="isSubmitting"
+    ></textarea>
+  </div>
+  <div class="tenants__actions tenants__form-actions">
+    <button type="submit" class="tenants__primary-action" [disabled]="isSubmitting">
+      {{ mode === 'add' ? 'Save Tenant' : 'Save Changes' }}
+    </button>
+    <button
+      type="button"
+      class="tenants__secondary-action"
+      [disabled]="isSubmitting"
+      (click)="cancelEdit()"
+    >
+      Cancel
+    </button>
+  </div>
+</form>

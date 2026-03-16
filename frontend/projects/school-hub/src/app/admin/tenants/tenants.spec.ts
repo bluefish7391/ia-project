@@ -5,16 +5,23 @@ import { vi } from 'vitest';
 import { ApiService } from '../../api.service';
 
 import { Tenants } from './tenants';
-
-interface Tenant {
-  id: string;
-  name: string;
-  description?: string;
-}
+import { Tenant } from './tenant.model';
 
 class ApiServiceStub {
   get<T>(_path: string): Observable<T> {
     return of([] as T);
+  }
+
+  post<T>(_path: string, _body: unknown): Observable<T> {
+    return of({} as T);
+  }
+
+  put<T>(_path: string, _body: unknown): Observable<T> {
+    return of({} as T);
+  }
+
+  delete<T>(_path: string): Observable<T> {
+    return of(undefined as T);
   }
 }
 
@@ -62,5 +69,84 @@ describe('Tenants', () => {
     expect(fixture.nativeElement.textContent).toContain(
       'Unable to load tenants. Please try again.',
     );
+  });
+
+  it('should create a tenant using POST', async () => {
+    const instance = component as any;
+    vi.spyOn(apiService, 'get').mockReturnValue(of([]));
+    const createdTenant: Tenant = {
+      id: 'tenant-3',
+      name: 'Gamma School',
+      description: 'Middle campus',
+    };
+    const postSpy = vi
+      .spyOn(apiService, 'post')
+      .mockReturnValue(of(createdTenant));
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    instance.addTenant();
+    instance.saveTenant({
+      name: 'Gamma School',
+      description: 'Middle campus',
+    });
+    await fixture.whenStable();
+
+    expect(postSpy).toHaveBeenCalledWith('tenants', {
+      name: 'Gamma School',
+      description: 'Middle campus',
+    });
+    expect(instance.tenants().some((tenant: Tenant) => tenant.id === 'tenant-3')).toBe(
+      true,
+    );
+  });
+
+  it('should update a tenant using PUT', async () => {
+    const instance = component as any;
+    vi.spyOn(apiService, 'get').mockReturnValue(of(mockTenants));
+    const updatedTenant: Tenant = {
+      id: 'tenant-1',
+      name: 'Alpha School Updated',
+      description: 'Updated description',
+    };
+    const putSpy = vi.spyOn(apiService, 'put').mockReturnValue(of(updatedTenant));
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    instance.updateTenant(mockTenants[0]);
+    instance.saveTenant({
+      name: 'Alpha School Updated',
+      description: 'Updated description',
+    });
+    await fixture.whenStable();
+
+    expect(putSpy).toHaveBeenCalledWith('tenants/tenant-1', {
+      name: 'Alpha School Updated',
+      description: 'Updated description',
+    });
+    expect(instance.tenants().find((tenant: Tenant) => tenant.id === 'tenant-1')?.name).toBe(
+      'Alpha School Updated',
+    );
+  });
+
+  it('should delete a tenant using DELETE', async () => {
+    const instance = component as any;
+    vi.spyOn(apiService, 'get').mockReturnValue(of(mockTenants));
+    const deleteSpy = vi.spyOn(apiService, 'delete').mockReturnValue(of(undefined));
+    vi.stubGlobal('confirm', () => true);
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    instance.deleteTenant(mockTenants[0]);
+    await fixture.whenStable();
+
+    expect(deleteSpy).toHaveBeenCalledWith('tenants/tenant-1');
+    expect(instance.tenants().some((tenant: Tenant) => tenant.id === 'tenant-1')).toBe(
+      false,
+    );
+    vi.unstubAllGlobals();
   });
 });

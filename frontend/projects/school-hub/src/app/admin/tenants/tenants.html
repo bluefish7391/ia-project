@@ -4,8 +4,19 @@
 			<h2 class="tenants__title">Tenants</h2>
 			<p class="tenants__subtitle">Manage all tenants in the system.</p>
 		</div>
-		<button type="button" class="tenants__primary-action" (click)="addTenant()">Add Tenant</button>
+		<button type="button" class="tenants__primary-action" [disabled]="isSubmitting()" (click)="addTenant()">Add Tenant</button>
 	</header>
+
+	@if (formMode(); as mode) {
+		<app-tenant-form
+			[mode]="mode"
+			[isSubmitting]="isSubmitting()"
+			[initialName]="formName()"
+			[initialDescription]="formDescription()"
+			(save)="saveTenant($event)"
+			(cancel)="cancelTenantForm()"
+		/>
+	}
 
 	@if (actionMessage(); as message) {
 		<p class="tenants__message" role="status">{{ message }}</p>
@@ -21,19 +32,11 @@
 	} @else if (tenants().length === 0) {
 		<p class="tenants__state">No tenants found.</p>
 	} @else {
-		<ul class="tenants__list">
-			@for (tenant of tenants(); track tenant.id) {
-				<li class="tenants__item">
-					<div class="tenants__details">
-						<h3 class="tenants__tenant-name">{{ tenant.name }}</h3>
-						<p class="tenants__tenant-description">{{ tenant.description || 'No description provided.' }}</p>
-					</div>
-					<div class="tenants__actions">
-						<button type="button" class="tenants__secondary-action" (click)="updateTenant(tenant)">Update</button>
-						<button type="button" class="tenants__secondary-action" (click)="deleteTenant(tenant)">Delete</button>
-					</div>
-				</li>
-			}
-		</ul>
+		<app-tenant-list
+			[tenants]="tenants()"
+			[isSubmitting]="isSubmitting()"
+			(update)="updateTenant($event)"
+			(delete)="deleteTenant($event)"
+		/>
 	}
 </section>

@@ -8,15 +8,15 @@
 		],
 		"rewrites": [
 			{
-				"source": "/bigben",
+				"source": "/api{,/**}",
 				"function": {
-					"functionId": "bigben",
+					"functionId": "api",
 					"region": "us-central1",
 					"pinTag": true
 				}
 			},
 			{
-				"source": "**",
+				"source": "/{,/**}",
 				"destination": "/index.html"
 			}
 		]

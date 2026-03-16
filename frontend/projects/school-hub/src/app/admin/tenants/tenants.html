@@ -1,1 +1,39 @@
-<p>tenants works!</p>
+<section class="tenants">
+	<header class="tenants__header">
+		<div>
+			<h2>Tenants</h2>
+			<p>Manage all tenants in the system.</p>
+		</div>
+		<button type="button" (click)="addTenant()">Add Tenant</button>
+	</header>
+
+	@if (actionMessage(); as message) {
+		<p class="tenants__message">{{ message }}</p>
+	}
+
+	@if (isLoading()) {
+		<p>Loading tenants...</p>
+	} @else if (errorMessage(); as error) {
+		<div class="tenants__error">
+			<p>{{ error }}</p>
+			<button type="button" (click)="loadTenants()">Retry</button>
+		</div>
+	} @else if (tenants().length === 0) {
+		<p>No tenants found.</p>
+	} @else {
+		<ul class="tenants__list">
+			@for (tenant of tenants(); track tenant.id) {
+				<li class="tenants__item">
+					<div class="tenants__details">
+						<h3>{{ tenant.name }}</h3>
+						<p>{{ tenant.description || 'No description provided.' }}</p>
+					</div>
+					<div class="tenants__actions">
+						<button type="button" (click)="updateTenant(tenant)">Update</button>
+						<button type="button" (click)="deleteTenant(tenant)">Delete</button>
+					</div>
+				</li>
+			}
+		</ul>
+	}
+</section>

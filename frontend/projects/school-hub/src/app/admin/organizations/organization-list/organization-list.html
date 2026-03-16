@@ -1,0 +1,31 @@
+<ul class="organizations__list">
+  @for (organization of organizations; track organization.id) {
+    <li class="organizations__item">
+      <div class="organizations__details">
+        <h3 class="organizations__name">{{ organization.name }}</h3>
+        <p class="organizations__description">
+          {{ organization.description || 'No description provided.' }}
+        </p>
+      </div>
+
+      <div class="organizations__actions">
+        <button
+          type="button"
+          class="organizations__secondary-action"
+          [disabled]="isSubmitting"
+          (click)="requestUpdate(organization)"
+        >
+          Update
+        </button>
+        <button
+          type="button"
+          class="organizations__secondary-action"
+          [disabled]="isSubmitting"
+          (click)="requestDelete(organization)"
+        >
+          Delete
+        </button>
+      </div>
+    </li>
+  }
+</ul>

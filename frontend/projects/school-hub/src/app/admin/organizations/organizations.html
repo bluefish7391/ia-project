@@ -1,0 +1,57 @@
+<section class="organizations">
+  <header class="organizations__header">
+    <div class="organizations__title-block">
+      <h2 class="organizations__title">Organizations</h2>
+      <p class="organizations__subtitle">
+        Manage all organizations in the system.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="organizations__primary-action"
+      [disabled]="isSubmitting()"
+      (click)="addOrganization()"
+    >
+      Add Organization
+    </button>
+  </header>
+
+  @if (formMode(); as mode) {
+    <app-organization-form
+      [mode]="mode"
+      [isSubmitting]="isSubmitting()"
+      [initialName]="formName()"
+      [initialDescription]="formDescription()"
+      (save)="saveOrganization($event)"
+      (cancel)="cancelOrganizationForm()"
+    />
+  }
+
+  @if (actionMessage(); as message) {
+    <p class="organizations__message" role="status">{{ message }}</p>
+  }
+
+  @if (isLoading()) {
+    <p class="organizations__state">Loading organizations...</p>
+  } @else if (errorMessage(); as error) {
+    <div class="organizations__error">
+      <p>{{ error }}</p>
+      <button
+        type="button"
+        class="organizations__secondary-action"
+        (click)="loadOrganizations()"
+      >
+        Retry
+      </button>
+    </div>
+  } @else if (organizations().length === 0) {
+    <p class="organizations__state">No organizations found.</p>
+  } @else {
+    <app-organization-list
+      [organizations]="organizations()"
+      [isSubmitting]="isSubmitting()"
+      (update)="updateOrganization($event)"
+      (delete)="deleteOrganization($event)"
+    />
+  }
+</section>

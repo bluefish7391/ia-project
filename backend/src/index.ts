@@ -12,4 +12,4 @@ expressApp.use((req, res, next) => {
 
 expressApp.use('/tenants', TenantRouter.buildRouter());
 
-export const xapi = onRequest(expressApp);
+export const api = onRequest(expressApp);

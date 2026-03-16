@@ -30,12 +30,6 @@
       "path": "./tsconfig.spec.json"
     },
     {
-      "path": "./projects/slides-player/tsconfig.app.json"
-    },
-    {
-      "path": "./projects/slides-player/tsconfig.spec.json"
-    },
-    {
       "path": "./projects/school-hub/tsconfig.app.json"
     },
     {

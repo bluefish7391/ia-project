@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 import { ApiService } from '../../api.service';
 
 import { Tenants } from './tenants';
-import { Tenant } from './tenant.model';
+import { Tenant } from '../../../../../../../shared/kinds';
 
 class ApiServiceStub {
   get<T>(_path: string): Observable<T> {

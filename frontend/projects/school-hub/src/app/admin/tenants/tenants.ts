@@ -3,7 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../api.service';
 import { TenantForm } from './tenant-form/tenant-form';
 import { TenantList } from './tenant-list/tenant-list';
-import { Tenant, TenantUpsertPayload } from './tenant.model';
+import { TenantUpsertPayload } from './tenant.model';
+import { Tenant } from '../../../../../../../shared/kinds';
 
 @Component({
   selector: 'app-tenants',

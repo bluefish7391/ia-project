@@ -1,5 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { ApiService } from '../../api.service';
 import { Organization } from '../../../../../../../shared/kinds';
 import { OrganizationUpsertPayload } from './organization.model';
 import { OrganizationForm } from './organization-form/organization-form';
@@ -12,8 +14,11 @@ import { OrganizationList } from './organization-list/organization-list';
   styleUrl: './organizations.scss',
 })
 export class Organizations {
+  private readonly apiService = inject(ApiService);
+  private readonly destroyRef = inject(DestroyRef);
+
   protected readonly organizations = signal<Organization[]>([]);
-  protected readonly isLoading = signal(false);
+  protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly actionMessage = signal<string | null>(null);
   protected readonly isSubmitting = signal(false);
@@ -22,15 +27,157 @@ export class Organizations {
   protected readonly formName = signal('');
   protected readonly formDescription = signal('');
 
-  protected loadOrganizations(): void {}
+  ngOnInit(): void {
+    this.loadOrganizations();
+  }
 
-  protected addOrganization(): void {}
+  protected loadOrganizations(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
 
-  protected updateOrganization(_organization: Organization): void {}
+    this.apiService
+      .get<Organization[]>('organizations')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (organizations) => {
+          this.organizations.set(organizations);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.errorMessage.set('Unable to load organizations. Please try again.');
+          this.isLoading.set(false);
+        },
+      });
+  }
 
-  protected deleteOrganization(_organization: Organization): void {}
+  protected addOrganization(): void {
+    this.formMode.set('add');
+    this.editingOrganizationId.set(null);
+    this.formName.set('');
+    this.formDescription.set('');
+    this.actionMessage.set(null);
+  }
 
-  protected saveOrganization(_formValue: OrganizationUpsertPayload): void {}
+  protected updateOrganization(organization: Organization): void {
+    this.formMode.set('edit');
+    this.editingOrganizationId.set(organization.id);
+    this.formName.set(organization.name);
+    this.formDescription.set(organization.description ?? '');
+    this.actionMessage.set(null);
+  }
 
-  protected cancelOrganizationForm(): void {}
+  protected deleteOrganization(organization: Organization): void {
+    const shouldDelete = confirm(`Delete organization "${organization.name}"?`);
+    if (!shouldDelete) {
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    this.actionMessage.set(null);
+
+    this.apiService
+      .delete<void>(`organizations/${organization.id}`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.organizations.update((existing) =>
+            existing.filter((current) => current.id !== organization.id),
+          );
+          this.isSubmitting.set(false);
+          this.actionMessage.set(`Deleted ${organization.name}.`);
+          if (this.editingOrganizationId() === organization.id) {
+            this.cancelOrganizationForm();
+          }
+        },
+        error: () => {
+          this.isSubmitting.set(false);
+          this.actionMessage.set('Unable to delete organization. Please try again.');
+        },
+      });
+  }
+
+  protected saveOrganization(formValue: OrganizationUpsertPayload): void {
+    const name = formValue.name.trim();
+    const description = (formValue.description ?? '').trim();
+    if (!name) {
+      this.actionMessage.set('Organization name is required.');
+      return;
+    }
+
+    const payload: OrganizationUpsertPayload = { name };
+    if (description.length > 0) {
+      payload.description = description;
+    }
+
+    const mode = this.formMode();
+    if (mode === 'add') {
+      this.createOrganization(payload);
+      return;
+    }
+
+    if (mode === 'edit') {
+      const organizationId = this.editingOrganizationId();
+      if (!organizationId) {
+        this.actionMessage.set('Unable to update organization. Missing organization id.');
+        return;
+      }
+      this.editOrganization(organizationId, payload);
+    }
+  }
+
+  protected cancelOrganizationForm(): void {
+    this.formMode.set(null);
+    this.editingOrganizationId.set(null);
+    this.formName.set('');
+    this.formDescription.set('');
+  }
+
+  private createOrganization(payload: OrganizationUpsertPayload): void {
+    this.isSubmitting.set(true);
+    this.actionMessage.set(null);
+
+    this.apiService
+      .post<Organization>('organizations', payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (organization) => {
+          this.organizations.update((existing) => [...existing, organization]);
+          this.isSubmitting.set(false);
+          this.cancelOrganizationForm();
+          this.actionMessage.set(`Added ${organization.name}.`);
+        },
+        error: () => {
+          this.isSubmitting.set(false);
+          this.actionMessage.set('Unable to add organization. Please try again.');
+        },
+      });
+  }
+
+  private editOrganization(
+    organizationId: string,
+    payload: OrganizationUpsertPayload,
+  ): void {
+    this.isSubmitting.set(true);
+    this.actionMessage.set(null);
+
+    this.apiService
+      .put<Organization>(`organizations/${organizationId}`, payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (organization) => {
+          this.organizations.update((existing) =>
+            existing.map((current) =>
+              current.id === organization.id ? organization : current,
+            ),
+          );
+          this.isSubmitting.set(false);
+          this.cancelOrganizationForm();
+          this.actionMessage.set(`Updated ${organization.name}.`);
+        },
+        error: () => {
+          this.isSubmitting.set(false);
+          this.actionMessage.set('Unable to update organization. Please try again.');
+        },
+      });
+  }
 }

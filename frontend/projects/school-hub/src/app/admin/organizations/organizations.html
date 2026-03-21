@@ -22,6 +22,8 @@
       [isSubmitting]="isSubmitting()"
       [initialName]="formName()"
       [initialDescription]="formDescription()"
+      [initialParentOrganizationID]="formParentOrganizationID()"
+      [availableParents]="availableParents()"
       (save)="saveOrganization($event)"
       (cancel)="cancelOrganizationForm()"
     />
@@ -52,6 +54,7 @@
       [isSubmitting]="isSubmitting()"
       (update)="updateOrganization($event)"
       (delete)="deleteOrganization($event)"
+      (addSubOrg)="addSubOrganization($event)"
     />
   }
 </section>

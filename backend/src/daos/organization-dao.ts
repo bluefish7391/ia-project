@@ -41,6 +41,14 @@ export class OrganizationDAO {
 		return organization;
 	}
 
+	public async getChildOrganizations(parentId: string): Promise<Organization[]> {
+		const query = datastore
+			.createQuery(OrganizationDAO.ORGANIZATION_KIND)
+			.filter("parentOrganizationID", "=", parentId);
+		const data = await query.run();
+		return data[0] as Organization[];
+	}
+
 	public async deleteOrganization(id: string): Promise<boolean> {
 		const key = datastore.key([OrganizationDAO.ORGANIZATION_KIND, id]);
 		const [existing] = await datastore.get(key);

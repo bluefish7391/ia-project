@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ApiService } from '../../api.service';
@@ -26,6 +26,12 @@ export class Organizations {
   protected readonly editingOrganizationId = signal<string | null>(null);
   protected readonly formName = signal('');
   protected readonly formDescription = signal('');
+  protected readonly formParentOrganizationID = signal<string | null>(null);
+
+  protected readonly availableParents = computed(() => {
+    const editingId = this.editingOrganizationId();
+    return this.organizations().filter((org) => org.id !== editingId);
+  });
 
   ngOnInit(): void {
     this.loadOrganizations();
@@ -55,6 +61,16 @@ export class Organizations {
     this.editingOrganizationId.set(null);
     this.formName.set('');
     this.formDescription.set('');
+    this.formParentOrganizationID.set(null);
+    this.actionMessage.set(null);
+  }
+
+  protected addSubOrganization(parentId: string): void {
+    this.formMode.set('add');
+    this.editingOrganizationId.set(null);
+    this.formName.set('');
+    this.formDescription.set('');
+    this.formParentOrganizationID.set(parentId);
     this.actionMessage.set(null);
   }
 
@@ -63,6 +79,7 @@ export class Organizations {
     this.editingOrganizationId.set(organization.id);
     this.formName.set(organization.name);
     this.formDescription.set(organization.description ?? '');
+    this.formParentOrganizationID.set(organization.parentOrganizationID ?? null);
     this.actionMessage.set(null);
   }
 
@@ -89,9 +106,15 @@ export class Organizations {
             this.cancelOrganizationForm();
           }
         },
-        error: () => {
+        error: (err) => {
           this.isSubmitting.set(false);
-          this.actionMessage.set('Unable to delete organization. Please try again.');
+          if (err?.status === 409) {
+            this.actionMessage.set(
+              'Cannot delete an organization that has sub-organizations.',
+            );
+          } else {
+            this.actionMessage.set('Unable to delete organization. Please try again.');
+          }
         },
       });
   }
@@ -130,11 +153,17 @@ export class Organizations {
     this.editingOrganizationId.set(null);
     this.formName.set('');
     this.formDescription.set('');
+    this.formParentOrganizationID.set(null);
   }
 
   private createOrganization(payload: OrganizationUpsertPayload): void {
     this.isSubmitting.set(true);
     this.actionMessage.set(null);
+
+    const parentId = this.formParentOrganizationID();
+    if (parentId) {
+      payload.parentOrganizationID = parentId;
+    }
 
     this.apiService
       .post<Organization>('organizations', payload)

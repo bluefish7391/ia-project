@@ -41,8 +41,24 @@ export class OrganizationManager {
 		}
 	}
 
+	async hasChildren(id: string): Promise<boolean> {
+		try {
+			const children = await organizationDAO.getChildOrganizations(id);
+			return children.length > 0;
+		} catch (error) {
+			console.error("Error checking organization children:", error);
+			throw error;
+		}
+	}
+
 	async deleteOrganization(id: string): Promise<boolean> {
 		try {
+			const hasChildren = await this.hasChildren(id);
+			if (hasChildren) {
+				const err = new Error("Cannot delete an organization that has sub-organizations.");
+				(err as Error & { code: string }).code = "HAS_CHILDREN";
+				throw err;
+			}
 			return await organizationDAO.deleteOrganization(id);
 		} catch (error) {
 			console.error("Error deleting organization:", error);

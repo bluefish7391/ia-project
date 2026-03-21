@@ -27,13 +27,14 @@ export class OrganizationRouter {
 
 	async createOrganization(req: Request, res: Response) {
 		try {
-			const body = req.body as { name?: string; description?: string };
+			const body = req.body as { name?: string; description?: string; parentOrganizationID?: string };
 			if (!body.name) {
 				res.status(400).json({ error: "name is required." });
 				return;
 			}
 			const data: Omit<Organization, "id"> = { name: body.name };
 			if (body.description !== undefined) data.description = body.description;
+			if (body.parentOrganizationID !== undefined) data.parentOrganizationID = body.parentOrganizationID;
 			const organization = await organizationManager.createOrganization(data);
 			res.status(201).json(organization);
 		} catch (error) {
@@ -43,9 +44,11 @@ export class OrganizationRouter {
 
 	async updateOrganization(req: Request, res: Response) {
 		try {
-			const body = req.body as Organization;
-			body.id = req.params["id"] as string;
-			const organization = await organizationManager.updateOrganization(body);
+			const body = req.body as { name?: string; description?: string };
+			const id = req.params["id"] as string;
+			// parentOrganizationID is immutable after creation — never accept it in updates
+			const updates: Organization = { id, name: body.name ?? "", description: body.description };
+			const organization = await organizationManager.updateOrganization(updates);
 			if (!organization) {
 				res.status(404).json({ error: "Organization not found." });
 				return;
@@ -65,6 +68,10 @@ export class OrganizationRouter {
 			}
 			res.status(204).send();
 		} catch (error) {
+			if ((error as Error & { code?: string }).code === "HAS_CHILDREN") {
+				res.status(409).json({ error: "Cannot delete an organization that has sub-organizations." });
+				return;
+			}
 			res.status(500).json({ error: "An error occurred while deleting the organization." });
 		}
 	}

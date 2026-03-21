@@ -17,7 +17,8 @@
 }
 
 .organizations__form-field input,
-.organizations__form-field textarea {
+.organizations__form-field textarea,
+.organizations__form-field select {
   font: var(--mat-sys-body-medium);
   padding: 0.6rem 0.7rem;
   border-radius: 0.5rem;
@@ -27,9 +28,19 @@
 }
 
 .organizations__form-field input:focus-visible,
-.organizations__form-field textarea:focus-visible {
+.organizations__form-field textarea:focus-visible,
+.organizations__form-field select:focus-visible {
   outline: 2px solid var(--mat-sys-primary);
   outline-offset: 1px;
+}
+
+.organizations__form-label {
+  font: var(--mat-sys-label-medium);
+}
+
+.organizations__form-static {
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .organizations__actions {

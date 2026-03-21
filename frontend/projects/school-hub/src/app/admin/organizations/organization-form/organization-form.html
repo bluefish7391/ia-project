@@ -21,6 +21,28 @@
     ></textarea>
   </div>
 
+  @if (mode === 'add') {
+    <div class="organizations__form-field">
+      <label for="parentOrganization">Parent Organization</label>
+      <select
+        id="parentOrganization"
+        name="parentOrganization"
+        [(ngModel)]="selectedParentId"
+        [disabled]="isSubmitting"
+      >
+        <option value="">None (root organization)</option>
+        @for (parent of availableParents; track parent.id) {
+          <option [value]="parent.id">{{ parent.name }}</option>
+        }
+      </select>
+    </div>
+  } @else {
+    <div class="organizations__form-field">
+      <span class="organizations__form-label">Parent Organization</span>
+      <span class="organizations__form-static">{{ parentOrganizationName }}</span>
+    </div>
+  }
+
   <div class="organizations__actions organizations__form-actions">
     <button
       type="submit"

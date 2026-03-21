@@ -1,0 +1,55 @@
+<div class="org-node" [class.org-node--nested]="depth > 0">
+  <div class="org-node__item">
+    <div class="org-node__details">
+      <h3 class="org-node__name">{{ node.organization.name }}</h3>
+      <p class="org-node__description">
+        {{ node.organization.description || 'No description provided.' }}
+      </p>
+    </div>
+
+    <div class="org-node__actions">
+      <button
+        type="button"
+        class="org-node__action"
+        [disabled]="isSubmitting"
+        (click)="requestUpdate()"
+      >
+        Update
+      </button>
+      <button
+        type="button"
+        class="org-node__action"
+        [disabled]="isSubmitting"
+        (click)="requestAddSubOrg()"
+      >
+        Add Sub-organization
+      </button>
+      <button
+        type="button"
+        class="org-node__action org-node__action--danger"
+        [disabled]="isSubmitting || hasChildren"
+        [title]="hasChildren ? 'Cannot delete an organization that has sub-organizations.' : ''"
+        (click)="requestDelete()"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+
+  @if (node.children.length > 0) {
+    <ul class="org-node__children">
+      @for (child of node.children; track child.organization.id) {
+        <li>
+          <app-organization-tree-node
+            [node]="child"
+            [isSubmitting]="isSubmitting"
+            [depth]="childDepth"
+            (update)="bubbleUpdate($event)"
+            (delete)="bubbleDelete($event)"
+            (addSubOrg)="bubbleAddSubOrg($event)"
+          />
+        </li>
+      }
+    </ul>
+  }
+</div>

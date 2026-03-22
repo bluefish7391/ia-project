@@ -3,6 +3,7 @@ import { initializeApp } from "firebase-admin/app";
 import express from "express";
 import { TenantRouter } from "./routers/tenant-router";
 import { OrganizationRouter } from "./routers/organization-router";
+import { AppUserRouter } from "./routers/app-user-router";
 import { authMiddleware } from "./middleware/auth-middleware";
 import { Logger } from "./logger";
 
@@ -22,5 +23,6 @@ expressApp.use((req, res, next) => {
 expressApp.use(authMiddleware);
 expressApp.use('/tenants', TenantRouter.buildRouter());
 expressApp.use('/organizations', OrganizationRouter.buildRouter());
+expressApp.use('/app-users', AppUserRouter.buildRouter());
 
 export const api = onRequest(expressApp);

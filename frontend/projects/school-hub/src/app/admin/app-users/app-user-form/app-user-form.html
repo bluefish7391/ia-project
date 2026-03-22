@@ -1,0 +1,26 @@
+<form class="app-users__form" (ngSubmit)="submitAppUser()">
+  <div class="app-users__form-field">
+    <label for="appUserEmail">Email</label>
+    <input
+      id="appUserEmail"
+      name="appUserEmail"
+      type="email"
+      [(ngModel)]="appUserEmail"
+      [disabled]="isSubmitting"
+      required
+    />
+  </div>
+  <div class="app-users__actions app-users__form-actions">
+    <button type="submit" class="app-users__primary-action" [disabled]="isSubmitting">
+      {{ mode === 'add' ? 'Save App User' : 'Save Changes' }}
+    </button>
+    <button
+      type="button"
+      class="app-users__secondary-action"
+      [disabled]="isSubmitting"
+      (click)="cancelEdit()"
+    >
+      Cancel
+    </button>
+  </div>
+</form>

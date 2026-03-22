@@ -16,6 +16,11 @@ const routes: Routes = [
         loadComponent: () => import('./tenants/tenants').then((module) => module.Tenants),
       },
       {
+        path: 'app-users',
+        loadComponent: () =>
+          import('./app-users/app-users').then((module) => module.AppUsers),
+      },
+      {
         path: 'todo-list',
         loadComponent: () =>
           import('./todo-list/todo-list').then((module) => module.TodoList),

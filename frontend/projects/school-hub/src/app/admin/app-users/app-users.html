@@ -1,0 +1,41 @@
+<section class="app-users">
+	<header class="app-users__header">
+		<div class="app-users__title-block">
+			<h2 class="app-users__title">App Users</h2>
+			<p class="app-users__subtitle">Manage all app users in the system.</p>
+		</div>
+		<button type="button" class="app-users__primary-action" [disabled]="isSubmitting()" (click)="addAppUser()">Add App User</button>
+	</header>
+
+	@if (formMode(); as mode) {
+		<app-app-user-form
+			[mode]="mode"
+			[isSubmitting]="isSubmitting()"
+			[initialEmail]="formEmail()"
+			(save)="saveAppUser($event)"
+			(cancel)="cancelAppUserForm()"
+		/>
+	}
+
+	@if (actionMessage(); as message) {
+		<p class="app-users__message" role="status">{{ message }}</p>
+	}
+
+	@if (isLoading()) {
+		<p class="app-users__state">Loading app users...</p>
+	} @else if (errorMessage(); as error) {
+		<div class="app-users__error">
+			<p>{{ error }}</p>
+			<button type="button" class="app-users__secondary-action" (click)="loadAppUsers()">Retry</button>
+		</div>
+	} @else if (appUsers().length === 0) {
+		<p class="app-users__state">No app users found.</p>
+	} @else {
+		<app-app-user-list
+			[appUsers]="appUsers()"
+			[isSubmitting]="isSubmitting()"
+			(update)="updateAppUser($event)"
+			(delete)="deleteAppUser($event)"
+		/>
+	}
+</section>

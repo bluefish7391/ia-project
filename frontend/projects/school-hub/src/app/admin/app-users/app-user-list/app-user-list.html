@@ -1,0 +1,28 @@
+<ul class="app-users__list">
+  @for (appUser of appUsers; track appUser.id) {
+    <li class="app-users__item">
+      <div class="app-users__details">
+        <h3 class="app-users__user-email">{{ appUser.email }}</h3>
+        <p class="app-users__user-id">ID: {{ appUser.id }}</p>
+      </div>
+      <div class="app-users__actions">
+        <button
+          type="button"
+          class="app-users__secondary-action"
+          [disabled]="isSubmitting"
+          (click)="requestUpdate(appUser)"
+        >
+          Update
+        </button>
+        <button
+          type="button"
+          class="app-users__secondary-action"
+          [disabled]="isSubmitting"
+          (click)="requestDelete(appUser)"
+        >
+          Delete
+        </button>
+      </div>
+    </li>
+  }
+</ul>

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './auth/auth.guard';
+import { firebaseOnlyGuard } from './auth/firebase-only.guard';
 
 export const routes: Routes = [
   {
@@ -19,6 +20,14 @@ export const routes: Routes = [
     path: 'forgot-password',
     loadComponent: () =>
       import('./auth/forgot-password/forgot-password').then((m) => m.ForgotPasswordComponent),
+  },
+  {
+    path: 'select-tenant',
+    canActivate: [firebaseOnlyGuard],
+    loadComponent: () =>
+      import('./auth/tenant-selector/tenant-selector.component').then(
+        (m) => m.TenantSelectorComponent,
+      ),
   },
   {
     path: 'admin',

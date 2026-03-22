@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { SessionService } from '../auth/session.service';
 
 @Component({
   selector: 'app-admin-shell',
@@ -10,9 +11,11 @@ import { AuthService } from '../auth/auth.service';
 })
 export class AdminShellComponent {
   private readonly authService = inject(AuthService);
+  private readonly sessionService = inject(SessionService);
   private readonly router = inject(Router);
 
   protected async logout(): Promise<void> {
+    this.sessionService.clearSession();
     await this.authService.signOut();
     await this.router.navigate(['/login']);
   }

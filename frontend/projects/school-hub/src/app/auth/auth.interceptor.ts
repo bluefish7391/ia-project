@@ -1,26 +1,27 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Auth } from '@angular/fire/auth';
-import { from, switchMap } from 'rxjs';
+import { SessionService } from './session.service';
 
+/** Injects the AppUserSession ID as the Bearer token for all /api/* requests.
+ *  Requests to /api/security/* are excluded — they pass the Firebase token in the request body. */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith('/api')) {
     return next(req);
   }
 
-  const auth = inject(Auth);
-  const user = auth.currentUser;
-
-  if (!user) {
+  // Security endpoints (tenant list + session creation) carry the token in the body.
+  if (req.url.startsWith('/api/security/')) {
     return next(req);
   }
 
-  return from(user.getIdToken()).pipe(
-    switchMap((token) => {
-      const authReq = req.clone({
-        setHeaders: { Authorization: `Bearer ${token}` },
-      });
-      return next(authReq);
-    }),
+  const sessionService = inject(SessionService);
+  const sessionID = sessionService.session()?.sessionID;
+
+  if (!sessionID) {
+    return next(req);
+  }
+
+  return next(
+    req.clone({ setHeaders: { Authorization: `Bearer ${sessionID}` } }),
   );
 };

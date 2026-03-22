@@ -29,7 +29,7 @@ export class LoginComponent {
     try {
       const { email, password } = this.form.getRawValue();
       await this.authService.signIn(email, password);
-      await this.router.navigate(['/admin']);
+      await this.router.navigate(['/select-tenant']);
     } catch (err: unknown) {
       this.error.set(err instanceof Error ? err.message : 'Sign-in failed.');
     } finally {

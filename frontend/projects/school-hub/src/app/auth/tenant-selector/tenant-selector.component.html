@@ -1,0 +1,33 @@
+<div class="tenant-selector-container">
+  <h1>Select School</h1>
+  <p class="subtitle">Choose the school you want to sign in to.</p>
+
+  @if (loading()) {
+    <p class="status">Loading schools…</p>
+  } @else if (error()) {
+    <p class="error">{{ error() }}</p>
+  } @else if (tenants().length === 0) {
+    <p class="status">No schools found for your account.</p>
+  } @else {
+    <ul class="tenant-list">
+      @for (tenant of tenants(); track tenant.id) {
+        <li>
+          <button
+            class="tenant-btn"
+            [disabled]="selecting()"
+            (click)="selectTenant(tenant.id)"
+          >
+            <span class="tenant-name">{{ tenant.name }}</span>
+            @if (tenant.description) {
+              <span class="tenant-desc">{{ tenant.description }}</span>
+            }
+          </button>
+        </li>
+      }
+    </ul>
+
+    @if (selecting()) {
+      <p class="status">Starting session…</p>
+    }
+  }
+</div>

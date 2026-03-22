@@ -4,17 +4,17 @@ import { datastore } from "./datastore-factory";
 export class OrganizationDAO {
 	static readonly ORGANIZATION_KIND = "Organization";
 
-	public async getAllOrganizations() {
-		const query = datastore.createQuery(OrganizationDAO.ORGANIZATION_KIND);
+	public async getAllOrganizations(tenantID: string): Promise<Organization[]> {
+		const query = datastore.createQuery(OrganizationDAO.ORGANIZATION_KIND).filter("tenantID", "=", tenantID);
 		const data = await query.run();
 		const organizations = data[0];
 		return organizations;
 	}
 
-	public async getOrganization(id: string): Promise<Organization | null> {
+	public async getOrganization(tenantID: string, id: string): Promise<Organization | null> {
 		const key = datastore.key([OrganizationDAO.ORGANIZATION_KIND, id]);
 		const [entity] = await datastore.get(key);
-		if (!entity) return null;
+		if (!entity || entity.tenantID !== tenantID) return null;
 		return { id, ...entity };
 	}
 

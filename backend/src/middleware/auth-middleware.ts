@@ -15,15 +15,12 @@ export async function authMiddleware(
 ): Promise<void> {
 	const logger = new Logger("AuthMiddleware");
 	const authHeader = req.headers.authorization;
-	logger.info("Received request with Authorization header:", authHeader);
 	if (!authHeader?.startsWith("Bearer ")) {
-		logger.warn("Authorization header is missing or invalid");
 		res.status(401).json({ error: "Unauthorized" });
 		return;
 	}
 
 	const token = authHeader.slice("Bearer ".length);
-
 	try {
 		const decoded = await getAuth().verifyIdToken(token);
 		(req as Request & { user: typeof decoded }).user = decoded;

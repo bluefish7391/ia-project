@@ -1,11 +1,13 @@
 import express, { Request, Response } from "express";
 import { appUserManager } from "../managers/manager-factor";
 import { AppUser } from "../../../shared/kinds";
+import { RequestContext } from "../request-context";
 
 export class AppUserRouter {
 	async getAllAppUsers(req: Request, res: Response) {
 		try {
-			const appUsers = await appUserManager.getAllAppUsers();
+			const requestContext = new RequestContext(req);
+			const appUsers = await appUserManager.getAllAppUsers(requestContext);
 			res.status(200).json(appUsers);
 		} catch (error) {
 			res.status(500).json({ error: "An error occurred while fetching app users." });
@@ -14,7 +16,7 @@ export class AppUserRouter {
 
 	async getAppUser(req: Request, res: Response) {
 		try {
-			const appUser = await appUserManager.getAppUser(req.params["id"] as string);
+			const appUser = await appUserManager.getAppUser(new RequestContext(req), req.params["id"] as string);
 			if (!appUser) {
 				res.status(404).json({ error: "App user not found." });
 				return;
@@ -27,13 +29,14 @@ export class AppUserRouter {
 
 	async createAppUser(req: Request, res: Response) {
 		try {
-			const body = req.body as { email?: string };
+			const body = req.body as { email?: string, organizationID: string };
 			if (!body.email) {
 				res.status(400).json({ error: "email is required." });
 				return;
 			}
-			const data: Omit<AppUser, "id"> = { email: body.email };
-			const appUser = await appUserManager.createAppUser(data);
+			const requestContext = new RequestContext(req);
+			const data: Omit<AppUser, "id"> = { email: body.email, tenantID: requestContext.getCurrentTenantID(), organizationID: body.organizationID };
+			const appUser = await appUserManager.createAppUser(requestContext, data);
 			res.status(201).json(appUser);
 		} catch (error) {
 			res.status(500).json({ error: "An error occurred while creating the app user." });
@@ -44,7 +47,7 @@ export class AppUserRouter {
 		try {
 			const body = req.body as AppUser;
 			body.id = req.params["id"] as string;
-			const appUser = await appUserManager.updateAppUser(body);
+			const appUser = await appUserManager.updateAppUser(new RequestContext(req), body);
 			if (!appUser) {
 				res.status(404).json({ error: "App user not found." });
 				return;
@@ -57,7 +60,7 @@ export class AppUserRouter {
 
 	async deleteAppUser(req: Request, res: Response) {
 		try {
-			const deleted = await appUserManager.deleteAppUser(req.params["id"] as string);
+			const deleted = await appUserManager.deleteAppUser(new RequestContext(req), req.params["id"] as string);
 			if (!deleted) {
 				res.status(404).json({ error: "App user not found." });
 				return;

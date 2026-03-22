@@ -4,16 +4,16 @@ import { datastore } from "./datastore-factory";
 export class AppUserDAO {
 	static readonly APP_USER_KIND = "AppUser";
 
-	public async getAllAppUsers(): Promise<AppUser[]> {
-		const query = datastore.createQuery(AppUserDAO.APP_USER_KIND);
+	public async getAllAppUsers(tenantID: string): Promise<AppUser[]> {
+		const query = datastore.createQuery(AppUserDAO.APP_USER_KIND).filter("tenantID", "=", tenantID);
 		const data = await query.run();
 		return data[0];
 	}
 
-	public async getAppUser(id: string): Promise<AppUser | null> {
+	public async getAppUser(tenantID: string, id: string): Promise<AppUser | null> {
 		const key = datastore.key([AppUserDAO.APP_USER_KIND, id]);
 		const [entity] = await datastore.get(key);
-		if (!entity) return null;
+		if (!entity || entity.tenantID !== tenantID) return null;
 		return { id, ...entity };
 	}
 

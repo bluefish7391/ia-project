@@ -16,7 +16,8 @@
   font: var(--mat-sys-label-medium);
 }
 
-.app-users__form-field input {
+.app-users__form-field input,
+.app-users__form-field select {
   font: var(--mat-sys-body-medium);
   padding: 0.6rem 0.7rem;
   border-radius: 0.5rem;
@@ -25,7 +26,8 @@
   color: var(--mat-sys-on-surface);
 }
 
-.app-users__form-field input:focus-visible {
+.app-users__form-field input:focus-visible,
+.app-users__form-field select:focus-visible {
   outline: 2px solid var(--mat-sys-primary);
   outline-offset: 1px;
 }

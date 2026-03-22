@@ -4,7 +4,7 @@ import { ApiService } from '../../api.service';
 import { AppUserForm } from './app-user-form/app-user-form';
 import { AppUserList } from './app-user-list/app-user-list';
 import { AppUserUpsertPayload } from './app-user.model';
-import { AppUser } from '../../../../../../../shared/kinds';
+import { AppUser, Organization } from '../../../../../../../shared/kinds';
 
 @Component({
   selector: 'app-app-users',
@@ -17,6 +17,7 @@ export class AppUsers implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly appUsers = signal<AppUser[]>([]);
+  protected readonly organizations = signal<Organization[]>([]);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly actionMessage = signal<string | null>(null);
@@ -24,9 +25,11 @@ export class AppUsers implements OnInit {
   protected readonly formMode = signal<'add' | 'edit' | null>(null);
   protected readonly editingAppUserId = signal<string | null>(null);
   protected readonly formEmail = signal('');
+  protected readonly formOrganizationId = signal('');
 
   ngOnInit(): void {
     this.loadAppUsers();
+    this.loadOrganizations();
   }
 
   protected loadAppUsers(): void {
@@ -48,10 +51,25 @@ export class AppUsers implements OnInit {
       });
   }
 
+  private loadOrganizations(): void {
+    this.apiService
+      .get<Organization[]>('organizations')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (organizations) => {
+          this.organizations.set(organizations);
+        },
+        error: () => {
+          // organizations list is non-critical for page load; silently fail
+        },
+      });
+  }
+
   protected addAppUser(): void {
     this.formMode.set('add');
     this.editingAppUserId.set(null);
     this.formEmail.set('');
+    this.formOrganizationId.set('');
     this.actionMessage.set(null);
   }
 
@@ -59,6 +77,7 @@ export class AppUsers implements OnInit {
     this.formMode.set('edit');
     this.editingAppUserId.set(appUser.id);
     this.formEmail.set(appUser.email);
+    this.formOrganizationId.set(appUser.organizationID);
     this.actionMessage.set(null);
   }
 
@@ -99,7 +118,13 @@ export class AppUsers implements OnInit {
       return;
     }
 
-    const payload: AppUserUpsertPayload = { email };
+    const organizationID = formValue.organizationID;
+    if (!organizationID) {
+      this.actionMessage.set('Organization is required.');
+      return;
+    }
+
+    const payload: AppUserUpsertPayload = { email, organizationID };
 
     const mode = this.formMode();
     if (mode === 'add') {
@@ -121,6 +146,7 @@ export class AppUsers implements OnInit {
     this.formMode.set(null);
     this.editingAppUserId.set(null);
     this.formEmail.set('');
+    this.formOrganizationId.set('');
   }
 
   private createAppUser(payload: AppUserUpsertPayload): void {

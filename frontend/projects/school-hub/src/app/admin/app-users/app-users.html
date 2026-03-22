@@ -12,6 +12,8 @@
 			[mode]="mode"
 			[isSubmitting]="isSubmitting()"
 			[initialEmail]="formEmail()"
+			[initialOrganizationId]="formOrganizationId()"
+			[organizations]="organizations()"
 			(save)="saveAppUser($event)"
 			(cancel)="cancelAppUserForm()"
 		/>

@@ -10,6 +10,21 @@
       required
     />
   </div>
+  <div class="app-users__form-field">
+    <label for="appUserOrganization">Organization</label>
+    <select
+      id="appUserOrganization"
+      name="appUserOrganization"
+      [(ngModel)]="organizationId"
+      [disabled]="isSubmitting"
+      required
+    >
+      <option value="" disabled>Select an organization</option>
+      @for (org of organizations; track org.id) {
+        <option [value]="org.id">{{ org.name }}</option>
+      }
+    </select>
+  </div>
   <div class="app-users__actions app-users__form-actions">
     <button type="submit" class="app-users__primary-action" [disabled]="isSubmitting">
       {{ mode === 'add' ? 'Save App User' : 'Save Changes' }}

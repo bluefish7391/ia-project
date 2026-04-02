@@ -38,10 +38,9 @@ import { BaseRouter, RouterInitializable } from "./base-router";
 
 export class SecurityRouter extends BaseRouter implements RouterInitializable {
 	public initializeRoutes() {
-		const securityRouter = new SecurityRouter();
 		return express.Router()
-			.post("/tenants", this.wrapAsync(securityRouter.getUserTenants.bind(securityRouter)))
-			.post("/app-session", this.wrapAsync(securityRouter.createAppSession.bind(securityRouter)));
+			.post("/tenants", this.wrapAsync(this.getUserTenants.bind(this)))
+			.post("/app-session", this.wrapAsync(this.createAppSession.bind(this)));
 	}
 
 	private async getUserTenants(req: Request, res: Response) {

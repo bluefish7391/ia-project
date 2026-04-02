@@ -27,11 +27,11 @@ export class SecurityManager {
 		}
 	}
 
-	public async createAppSession(tenantID: string, googleToken: string | undefined): Promise<AppUserSession> {
+	public async createAppSession(tenantID?: string, googleToken?: string): Promise<AppUserSession> {
 		try {
-			if (!googleToken) {
-				throw new BadRequestError("Google token is required.");
-			}
+			if (!tenantID) throw new BadRequestError("Tenant ID is required.");
+			if (!googleToken) throw new BadRequestError("Google token is required.");
+			
 			const decoded = await getAuth().verifyIdToken(googleToken);
 			const email = decoded.email;
 			if (!email) {

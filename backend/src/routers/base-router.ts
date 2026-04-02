@@ -10,16 +10,16 @@ export abstract class BaseRouter {
 		res.status(statusCode).json(resObj);
 	}
 
-	protected sendSuccess(res: Response, data: any, status = 200): void {
-		this.sendResponse(res, data, status);
+	protected sendSuccess(res: Response, data: any): void {
+		this.sendResponse(res, data, 200);
 	}
 
-	protected sendBadRequestError(res: Response, data: any, status = 400): void {
-		this.sendResponse(res, data, status);
+	protected sendBadRequestError(res: Response, data: any): void {
+		this.sendResponse(res, data, 400);
 	}
 
-	protected sendServerError(res: Response, data: any, status = 500): void {
-		this.sendResponse(res, data, status);
+	protected sendServerError(res: Response, data: any): void {
+		this.sendResponse(res, data, 500);
 	}
 
 	protected wrapAsync(

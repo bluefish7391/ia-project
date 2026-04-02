@@ -2,17 +2,18 @@ import { getAuth } from "firebase-admin/auth";
 import { AppUserSession, Tenant } from "../../../shared/kinds";
 import { organizationDAO, securityDAO, tenantDAO } from "../daos/dao-factory";
 import { generateId } from "../idutilities";
+import { BadRequestError, ServerError } from "../kinds";
 
 export class SecurityManager {
 	public async getUserTenants(googleToken: string | undefined): Promise<Tenant[]> {
 		try {
 			if (!googleToken) {
-				throw new Error("Google token is required.");
+				throw new BadRequestError("Google token is required.");
 			}
 			const decoded = await getAuth().verifyIdToken(googleToken);
 			const email = decoded.email;
 			if (!email) {
-				throw new Error("Email not found in token.");
+				throw new BadRequestError("Email not found in token.");
 			}
 			const appUsers = await securityDAO.getAppUsersByEmail(email);
 			if (!appUsers) {
@@ -22,24 +23,24 @@ export class SecurityManager {
 			return await securityDAO.getTenantsByIDs(tenantIDs);
 		} catch (error) {
 			console.error("Error fetching user tenants:", error);
-			throw new Error("Failed to fetch user tenants.");
+			throw new ServerError("Failed to fetch user tenants.");
 		}
 	}
 
 	public async createAppSession(tenantID: string, googleToken: string | undefined): Promise<AppUserSession> {
 		try {
 			if (!googleToken) {
-				throw new Error("Google token is required.");
+				throw new BadRequestError("Google token is required.");
 			}
 			const decoded = await getAuth().verifyIdToken(googleToken);
 			const email = decoded.email;
 			if (!email) {
-				throw new Error("Email not found in token.");
+				throw new BadRequestError("Email not found in token.");
 			}
 
 			const appUser = await securityDAO.getAppUserByEmailAndTenantID(email, tenantID);
 			if (!appUser) {
-				throw new Error("User not found for the given tenant.");
+				throw new ServerError("User not found for the given tenant.");
 			}
 
 			const tenant = await tenantDAO.getTenant(tenantID);
@@ -55,7 +56,7 @@ export class SecurityManager {
 			return appUserSession;
 		} catch (error) {
 			console.error("Error verifying Google token:", error);
-			throw new Error("Failed to verify Google token.");
+			throw new ServerError("Failed to verify Google token.");
 		}
 	}
 }

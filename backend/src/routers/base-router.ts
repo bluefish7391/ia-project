@@ -1,19 +1,11 @@
 import { Request, Response, Router } from "express";
 import { BadRequestError, ServerError } from "../kinds";
 
+export interface RouterInitializable {
+	initializeRoutes(): Router;
+}
+
 export abstract class BaseRouter {
-	protected router: Router;
-
-	constructor() {
-		this.router = this.initializeRoutes();
-	}
-
-	public abstract initializeRoutes(): Router;
-
-	public getRouter(): Router {
-		return this.router;
-	}
-
 	protected sendResponse(res: Response, resObj: any, statusCode: number) {
 		res.status(statusCode).json(resObj);
 	}

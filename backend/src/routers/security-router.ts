@@ -1,7 +1,7 @@
 
 import express, { Request, Response } from "express";
 import { securityManager } from "../managers/manager-factor";
-import { BaseRouter } from "./base-router";
+import { BaseRouter, RouterInitializable } from "./base-router";
 
 // export class SecurityRouter {
 // 	async getUserTenants(req: Request, res: Response) {
@@ -36,7 +36,7 @@ import { BaseRouter } from "./base-router";
 // 	}
 // }
 
-export class SecurityRouter extends BaseRouter {
+export class SecurityRouter extends BaseRouter implements RouterInitializable {
 	public initializeRoutes() {
 		const securityRouter = new SecurityRouter();
 		return express.Router()

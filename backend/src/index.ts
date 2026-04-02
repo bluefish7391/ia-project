@@ -23,7 +23,8 @@ expressApp.use((req, res, next) => {
 
 // Security routes (tenant list + session creation) must be mounted BEFORE
 // authMiddleware because they are called before a session exists.
-expressApp.use('/security', SecurityRouter.buildRouter());
+const securityRouter = new SecurityRouter();
+expressApp.use('/security', securityRouter.getRouter());
 
 expressApp.use(authMiddleware);
 expressApp.use('/tenants', TenantRouter.buildRouter());

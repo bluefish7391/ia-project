@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import { BadRequestError, ServerError } from "../kinds";
 
 export abstract class BaseRouter {
-	protected abstract initializeRoutes(): void;
+	public abstract initializeRoutes(): Router;
 
 	protected sendResponse(res: Response, resObj: any, statusCode: number) {
 		res.status(statusCode).json(resObj);
@@ -27,17 +27,21 @@ export abstract class BaseRouter {
 			try {
 				await handler(req, res);
 			} catch (error: any) {
-				if (error instanceof ServerError) {
-					console.log("Server error:", error);
-					this.sendServerError(res, { error: error.message });
-				} else if (error instanceof BadRequestError) {
-					console.log("Bad request error:", error);
-					this.sendBadRequestError(res, { error: error.message });
-				} else {
-					console.log("Unexpected error:", error);
-					this.sendServerError(res, { error: "An unexpected error occurred" });
-				}
+				this.handleError(res, error);
 			}
 		};
+	}
+
+	private handleError(res: Response, error: any) {
+		if (error instanceof ServerError) {
+			console.log("Server error:", error);
+			this.sendServerError(res, { error: error.message });
+		} else if (error instanceof BadRequestError) {
+			console.log("Bad request error:", error);
+			this.sendBadRequestError(res, { error: error.message });
+		} else {
+			console.log("Unexpected error:", error);
+			this.sendServerError(res, { error: "An unexpected error occurred" });
+		}
 	}
 }

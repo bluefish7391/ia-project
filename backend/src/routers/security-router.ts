@@ -5,10 +5,10 @@ import { BaseRouter } from "./base-router";
 
 export class SecurityRouter extends BaseRouter {
 	public static initializeRoutes() {
-		const sr = new SecurityRouter();
+		const securityRouter = new SecurityRouter();
 		return express.Router()
-			.post("/tenants", sr.wrapAsync(sr.getUserTenants.bind(this)))
-			.post("/app-session", sr.wrapAsync(sr.createAppSession.bind(this)));
+			.post("/tenants", securityRouter.wrapAsync(securityRouter.getUserTenants.bind(this)))
+			.post("/app-session", securityRouter.wrapAsync(securityRouter.createAppSession.bind(this)));
 	}
 
 	private async getUserTenants(req: Request, res: Response) {

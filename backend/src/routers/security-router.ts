@@ -1,13 +1,14 @@
 
 import express, { Request, Response } from "express";
 import { securityManager } from "../managers/manager-factor";
-import { BaseRouter, RouterInitializable } from "./base-router";
+import { BaseRouter } from "./base-router";
 
-export class SecurityRouter extends BaseRouter implements RouterInitializable {
-	public initializeRoutes() {
+export class SecurityRouter extends BaseRouter {
+	public static initializeRoutes() {
+		const sr = new SecurityRouter();
 		return express.Router()
-			.post("/tenants", this.wrapAsync(this.getUserTenants.bind(this)))
-			.post("/app-session", this.wrapAsync(this.createAppSession.bind(this)));
+			.post("/tenants", sr.wrapAsync(sr.getUserTenants.bind(this)))
+			.post("/app-session", sr.wrapAsync(sr.createAppSession.bind(this)));
 	}
 
 	private async getUserTenants(req: Request, res: Response) {

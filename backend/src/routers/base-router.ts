@@ -1,9 +1,5 @@
-import { Request, Response, Router } from "express";
+import { Request, Response } from "express";
 import { BadRequestError, ServerError } from "../kinds";
-
-export interface RouterInitializable {
-	initializeRoutes(): Router;
-}
 
 export abstract class BaseRouter {
 	protected sendResponse(res: Response, resObj: any, statusCode: number) {

@@ -7,8 +7,8 @@ export class SecurityRouter extends BaseRouter {
 	public static initializeRoutes() {
 		const securityRouter = new SecurityRouter();
 		return express.Router()
-			.post("/tenants", securityRouter.wrapAsync(securityRouter.getUserTenants.bind(this)))
-			.post("/app-session", securityRouter.wrapAsync(securityRouter.createAppSession.bind(this)));
+			.post("/tenants", securityRouter.wrapAsync(securityRouter.getUserTenants.bind(securityRouter)))
+			.post("/app-session", securityRouter.wrapAsync(securityRouter.createAppSession.bind(securityRouter)));
 	}
 
 	private async getUserTenants(req: Request, res: Response) {

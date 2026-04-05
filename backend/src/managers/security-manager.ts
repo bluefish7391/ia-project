@@ -56,6 +56,7 @@ export class SecurityManager {
 			organizationName: organization ? organization.name : "",
 		};
 		console.log("createAppSession: appUserSession=", appUserSession);
+		await securityDAO.createAppSession(appUserSession);
 		return appUserSession;
 	}
 }

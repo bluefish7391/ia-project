@@ -17,6 +17,8 @@ export async function authMiddleware(
 	const logger = new Logger("AuthMiddleware");
 	const authHeader = req.headers.authorization;
 	if (!authHeader?.startsWith("Bearer ")) {
+		logger.warn("Authorization header missing or does not start with Bearer");
+		logger.warn("Received headers:", req.headers);
 		res.status(401).json({ error: "Unauthorized" });
 		return;
 	}
@@ -25,6 +27,8 @@ export async function authMiddleware(
 		const sessionID = authHeader.slice("Bearer ".length);
 		const appSession = await securityDAO.getAppSession(sessionID);
 		if (!appSession) {
+			logger.warn("Invalid session ID");
+			logger.warn("Received session ID:", sessionID);
 			res.status(401).json({ error: "Unauthorized" });
 			return;
 		}

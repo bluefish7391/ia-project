@@ -1,52 +1,45 @@
 import { tenantDAO } from "../daos/dao-factory";
 import { generateId } from "../idutilities";
 import { Tenant } from "../../../shared/kinds";
+import { BadRequestError, ServerError } from "../kinds";
 
 export class TenantManager {
-	async getAllTenants() {
-		try {
-			const tenants = await tenantDAO.getAllTenants();
-			return tenants;
-		} catch (error) {
-			console.error("Error fetching tenants:", error);
-			throw error;
-		}
+	async getAllTenants(): Promise<Tenant[]> {
+		const tenants = await tenantDAO.getAllTenants();
+		console.log("getAllTenants: tenants=", tenants);
+		return tenants;
 	}
 
 	async getTenant(id: string): Promise<Tenant | null> {
-		try {
-			return await tenantDAO.getTenant(id);
-		} catch (error) {
-			console.error("Error fetching tenant:", error);
-			throw error;
+		const tenant = await tenantDAO.getTenant(id);
+		console.log("getTenant: tenant=", tenant);
+		if (!tenant) {
+			throw new BadRequestError("No tenant with that id");
 		}
+		return tenant;
 	}
 
 	async createTenant(data: Omit<Tenant, "id">): Promise<Tenant> {
-		try {
-			const tenant: Tenant = { id: generateId(), ...data };
-			return await tenantDAO.createTenant(tenant);
-		} catch (error) {
-			console.error("Error creating tenant:", error);
-			throw error;
-		}
+		const tenant: Tenant = { id: generateId(), ...data };
+		console.log("createTenant: tenant=", tenant);
+		return await tenantDAO.createTenant(tenant);
 	}
 
 	async updateTenant(tenant: Tenant): Promise<Tenant | null> {
-		try {
-			return await tenantDAO.updateTenant(tenant);
-		} catch (error) {
-			console.error("Error updating tenant:", error);
-			throw error;
+		const currentTenant = await tenantDAO.getTenant(tenant.id);
+		console.log("updateTenant: currentTenant=", currentTenant);
+		if (!currentTenant) {
+			throw new ServerError("Tenant not found.");
 		}
+		return await tenantDAO.updateTenant(tenant);
 	}
 
 	async deleteTenant(id: string): Promise<boolean> {
-		try {
-			return await tenantDAO.deleteTenant(id);
-		} catch (error) {
-			console.error("Error deleting tenant:", error);
-			throw error;
+		const tenant = await tenantDAO.getTenant(id);
+		console.log("deleteTenant: tenant=", tenant);
+		if (!tenant) {
+			throw new BadRequestError("Tenant not found.");
 		}
+		return await tenantDAO.deleteTenant(id);
 	}
 }

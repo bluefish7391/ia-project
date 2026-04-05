@@ -25,6 +25,11 @@ const routes: Routes = [
         loadComponent: () =>
           import('./todo-list/todo-list').then((module) => module.TodoList),
       },
+      {
+        path: 'students',
+        loadComponent: () =>
+          import('./students').then((module) => module.Students),
+      },
     ],
   },
 ];

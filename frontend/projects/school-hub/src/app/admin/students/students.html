@@ -1,0 +1,56 @@
+<section class="students">
+  <header class="students__header">
+    <div class="students__title-block">
+      <h2 class="students__title">Students</h2>
+      <p class="students__subtitle">Manage all students in the system.</p>
+    </div>
+    <button
+      type="button"
+      class="students__primary-action"
+      [disabled]="isSubmitting()"
+      (click)="addStudent()"
+    >
+      Add Student
+    </button>
+  </header>
+
+  @if (formMode(); as mode) {
+    <app-student-form
+      [mode]="mode"
+      [isSubmitting]="isSubmitting()"
+      [initialId]="formId()"
+      [initialFirstName]="formFirstName()"
+      [initialLastName]="formLastName()"
+      (save)="saveStudent($event)"
+      (cancel)="cancelStudentForm()"
+    />
+  }
+
+  @if (actionMessage(); as message) {
+    <p class="students__message" role="status">{{ message }}</p>
+  }
+
+  @if (isLoading()) {
+    <p class="students__state">Loading students...</p>
+  } @else if (errorMessage(); as error) {
+    <div class="students__error">
+      <p>{{ error }}</p>
+      <button
+        type="button"
+        class="students__secondary-action"
+        (click)="loadStudents()"
+      >
+        Retry
+      </button>
+    </div>
+  } @else if (students().length === 0) {
+    <p class="students__state">No students found.</p>
+  } @else {
+    <app-student-list
+      [students]="students()"
+      [isSubmitting]="isSubmitting()"
+      (update)="updateStudent($event)"
+      (delete)="deleteStudent($event)"
+    />
+  }
+</section>

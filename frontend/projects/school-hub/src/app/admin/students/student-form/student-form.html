@@ -1,0 +1,59 @@
+<form class="students__form" (ngSubmit)="submitStudent()">
+  @if (mode === 'add') {
+    <div class="students__form-field">
+      <label for="studentId">Student ID</label>
+      <input
+        id="studentId"
+        name="studentId"
+        [(ngModel)]="studentId"
+        [disabled]="isSubmitting"
+        required
+      />
+    </div>
+  } @else {
+    <div class="students__form-field">
+      <span class="students__form-label">Student ID</span>
+      <span class="students__form-static">{{ initialId }}</span>
+    </div>
+  }
+
+  <div class="students__form-field">
+    <label for="studentFirstName">First Name</label>
+    <input
+      id="studentFirstName"
+      name="studentFirstName"
+      [(ngModel)]="studentFirstName"
+      [disabled]="isSubmitting"
+      required
+    />
+  </div>
+
+  <div class="students__form-field">
+    <label for="studentLastName">Last Name</label>
+    <input
+      id="studentLastName"
+      name="studentLastName"
+      [(ngModel)]="studentLastName"
+      [disabled]="isSubmitting"
+      required
+    />
+  </div>
+
+  <div class="students__actions students__form-actions">
+    <button
+      type="submit"
+      class="students__primary-action"
+      [disabled]="isSubmitting"
+    >
+      {{ mode === 'add' ? 'Save Student' : 'Save Changes' }}
+    </button>
+    <button
+      type="button"
+      class="students__secondary-action"
+      [disabled]="isSubmitting"
+      (click)="cancelEdit()"
+    >
+      Cancel
+    </button>
+  </div>
+</form>

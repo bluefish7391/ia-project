@@ -4,6 +4,16 @@ import { Tenant } from "../../../shared/kinds";
 import { BaseRouter } from "./base-router";
 
 export class TenantRouter extends BaseRouter {
+	public static buildRouter() {
+		const tenantRouter = new TenantRouter();
+		return express.Router()
+			.get("", tenantRouter.wrapAsync(tenantRouter.getAllTenants.bind(tenantRouter)))
+			.post("", tenantRouter.wrapAsync(tenantRouter.createTenant.bind(tenantRouter)))
+			.get("/:id", tenantRouter.wrapAsync(tenantRouter.getTenant.bind(tenantRouter)))
+			.put("/:id", tenantRouter.wrapAsync(tenantRouter.updateTenant.bind(tenantRouter)))
+			.delete("/:id", tenantRouter.wrapAsync(tenantRouter.deleteTenant.bind(tenantRouter)));
+	}
+
 	async getAllTenants(req: Request, res: Response) {
 		const tenants = await tenantManager.getAllTenants();
 		this.sendSuccess(res, tenants);
@@ -49,15 +59,5 @@ export class TenantRouter extends BaseRouter {
 			return;
 		}
 		this.sendSuccess(res, { message: "Tenant successfully deleted." });
-	}
-
-	static buildRouter() {
-		const tenantRouter = new TenantRouter();
-		return express.Router()
-			.get("", tenantRouter.wrapAsync(tenantRouter.getAllTenants.bind(tenantRouter)))
-			.post("", tenantRouter.wrapAsync(tenantRouter.createTenant.bind(tenantRouter)))
-			.get("/:id", tenantRouter.wrapAsync(tenantRouter.getTenant.bind(tenantRouter)))
-			.put("/:id", tenantRouter.wrapAsync(tenantRouter.updateTenant.bind(tenantRouter)))
-			.delete("/:id", tenantRouter.wrapAsync(tenantRouter.deleteTenant.bind(tenantRouter)));
 	}
 }

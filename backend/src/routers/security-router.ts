@@ -4,7 +4,7 @@ import { securityManager } from "../managers/manager-factor";
 import { BaseRouter } from "./base-router";
 
 export class SecurityRouter extends BaseRouter {
-	public static initializeRoutes() {
+	public static buildRouter() {
 		const securityRouter = new SecurityRouter();
 		return express.Router()
 			.post("/tenants", securityRouter.wrapAsync(securityRouter.getUserTenants.bind(securityRouter)))

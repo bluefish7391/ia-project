@@ -5,6 +5,16 @@ import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
 
 export class OrganizationRouter extends BaseRouter {
+	public static buildRouter() {
+		const organizationRouter = new OrganizationRouter();
+		return express.Router()
+			.get("", organizationRouter.wrapAsync(organizationRouter.getAllOrganizations.bind(organizationRouter)))
+			.post("", organizationRouter.wrapAsync(organizationRouter.createOrganization.bind(organizationRouter)))
+			.get("/:id", organizationRouter.wrapAsync(organizationRouter.getOrganization.bind(organizationRouter)))
+			.put("/:id", organizationRouter.wrapAsync(organizationRouter.updateOrganization.bind(organizationRouter)))
+			.delete("/:id", organizationRouter.wrapAsync(organizationRouter.deleteOrganization.bind(organizationRouter)));
+	}
+
 	async getAllOrganizations(req: Request, res: Response) {
 		const organizations = await organizationManager.getAllOrganizations(new RequestContext(req));
 		this.sendSuccess(res, organizations);
@@ -52,15 +62,5 @@ export class OrganizationRouter extends BaseRouter {
 			return;
 		}
 		this.sendSuccess(res, { message: "Organization successfully deleted." });
-	}
-
-	static buildRouter() {
-		const organizationRouter = new OrganizationRouter();
-		return express.Router()
-			.get("", organizationRouter.wrapAsync(organizationRouter.getAllOrganizations.bind(organizationRouter)))
-			.post("", organizationRouter.wrapAsync(organizationRouter.createOrganization.bind(organizationRouter)))
-			.get("/:id", organizationRouter.wrapAsync(organizationRouter.getOrganization.bind(organizationRouter)))
-			.put("/:id", organizationRouter.wrapAsync(organizationRouter.updateOrganization.bind(organizationRouter)))
-			.delete("/:id", organizationRouter.wrapAsync(organizationRouter.deleteOrganization.bind(organizationRouter)));
 	}
 }

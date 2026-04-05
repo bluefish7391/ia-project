@@ -6,57 +6,47 @@ import { BadRequestError, ServerError } from "../kinds";
 
 export class SecurityManager {
 	public async getUserTenants(googleToken: string | undefined): Promise<Tenant[]> {
-		try {
-			if (!googleToken) {
-				throw new BadRequestError("Google token is required.");
-			}
-			const decoded = await getAuth().verifyIdToken(googleToken);
-			const email = decoded.email;
-			if (!email) {
-				throw new BadRequestError("Email not found in token.");
-			}
-			const appUsers = await securityDAO.getAppUsersByEmail(email);
-			if (!appUsers) {
-				return [];
-			}
-			const tenantIDs = new Set(appUsers.map((user) => user.tenantID));
-			return await securityDAO.getTenantsByIDs(tenantIDs);
-		} catch (error) {
-			console.error("Error fetching user tenants:", error);
-			throw new ServerError("Failed to fetch user tenants.");
+		if (!googleToken) {
+			throw new BadRequestError("Google token is required.");
 		}
+		const decoded = await getAuth().verifyIdToken(googleToken);
+		const email = decoded.email;
+		if (!email) {
+			throw new BadRequestError("Email not found in token.");
+		}
+		const appUsers = await securityDAO.getAppUsersByEmail(email);
+		if (!appUsers) {
+			return [];
+		}
+		const tenantIDs = new Set(appUsers.map((user) => user.tenantID));
+		return await securityDAO.getTenantsByIDs(tenantIDs);
 	}
 
 	public async createAppSession(tenantID?: string, googleToken?: string): Promise<AppUserSession> {
-		try {
-			if (!tenantID) throw new BadRequestError("Tenant ID is required.");
-			if (!googleToken) throw new BadRequestError("Google token is required.");
-			
-			const decoded = await getAuth().verifyIdToken(googleToken);
-			const email = decoded.email;
-			if (!email) {
-				throw new BadRequestError("Email not found in token.");
-			}
+		if (!tenantID) throw new BadRequestError("Tenant ID is required.");
+		if (!googleToken) throw new BadRequestError("Google token is required.");
 
-			const appUser = await securityDAO.getAppUserByEmailAndTenantID(email, tenantID);
-			if (!appUser) {
-				throw new ServerError("User not found for the given tenant.");
-			}
-
-			const tenant = await tenantDAO.getTenant(tenantID);
-			const organization = await organizationDAO.getOrganization(tenantID, appUser.organizationID);
-			const appUserSession: AppUserSession = {
-				sessionID: generateId() + generateId() + generateId(),
-				tenantID,
-				userID: appUser.id,
-				tenantName: tenant ? tenant.name : "",
-				organizationID: appUser.organizationID,
-				organizationName: organization ? organization.name : "",
-			};
-			return appUserSession;
-		} catch (error) {
-			console.error("Error verifying Google token:", error);
-			throw new ServerError("Failed to verify Google token.");
+		const decoded = await getAuth().verifyIdToken(googleToken);
+		const email = decoded.email;
+		if (!email) {
+			throw new BadRequestError("Email not found in token.");
 		}
+
+		const appUser = await securityDAO.getAppUserByEmailAndTenantID(email, tenantID);
+		if (!appUser) {
+			throw new ServerError("User not found for the given tenant.");
+		}
+
+		const tenant = await tenantDAO.getTenant(tenantID);
+		const organization = await organizationDAO.getOrganization(tenantID, appUser.organizationID);
+		const appUserSession: AppUserSession = {
+			sessionID: generateId() + generateId() + generateId(),
+			tenantID,
+			userID: appUser.id,
+			tenantName: tenant ? tenant.name : "",
+			organizationID: appUser.organizationID,
+			organizationName: organization ? organization.name : "",
+		};
+		return appUserSession;
 	}
 }

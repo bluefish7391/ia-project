@@ -2,60 +2,47 @@ import { appUserDAO } from "../daos/dao-factory";
 import { generateId } from "../idutilities";
 import { AppUser } from "../../../shared/kinds";
 import { RequestContext } from "../request-context";
+import { BadRequestError, ServerError } from "../kinds";
 
 export class AppUserManager {
 	async getAllAppUsers(requestContext: RequestContext): Promise<AppUser[]> {
-		try {
-			return await appUserDAO.getAllAppUsers(requestContext.getCurrentTenantID());
-		} catch (error) {
-			console.error("Error fetching app users:", error);
-			throw error;
-		}
+		const appUsers = await appUserDAO.getAllAppUsers(requestContext.getCurrentTenantID());
+		console.log("getAllAppUsers: appUsers=", appUsers);
+		return appUsers;
 	}
 
 	async getAppUser(requestContext: RequestContext, id: string): Promise<AppUser | null> {
-		try {
-			return await appUserDAO.getAppUser(requestContext.getCurrentTenantID(), id);
-		} catch (error) {
-			console.error("Error fetching app user:", error);
-			throw error;
+		const appUser = await appUserDAO.getAppUser(requestContext.getCurrentTenantID(), id);
+		console.log("getAppUser: appUser=", appUser);
+		if (!appUser) {
+			throw new BadRequestError("No app user with that id");
 		}
+		return appUser;
 	}
 
 	async createAppUser(requestContext: RequestContext, data: Omit<AppUser, "id">): Promise<AppUser> {
-		try {
-			const appUser: AppUser = { ...data, id: generateId(), tenantID: requestContext.getCurrentTenantID() };
-			return await appUserDAO.createAppUser(appUser);
-		} catch (error) {
-			console.error("Error creating app user:", error);
-			throw error;
-		}
+		const appUser: AppUser = { ...data, id: generateId(), tenantID: requestContext.getCurrentTenantID() };
+		console.log("createAppUser: appUser=", appUser);
+		await appUserDAO.createAppUser(appUser);
+		return appUser;
 	}
 
 	async updateAppUser(requestContext: RequestContext, appUser: AppUser): Promise<AppUser | null> {
-		try {
-			const currentAppUser = await appUserDAO.getAppUser(requestContext.getCurrentTenantID(), appUser.id);
-			if (!currentAppUser) {
-				throw new Error("App user not found.");
-			};
-			appUser.tenantID = requestContext.getCurrentTenantID();
-			return await appUserDAO.updateAppUser(appUser);
-		} catch (error) {
-			console.error("Error updating app user:", error);
-			throw error;
-		}
+		const currentAppUser = await appUserDAO.getAppUser(requestContext.getCurrentTenantID(), appUser.id);
+		console.log("updateAppUser: currentAppUser=", currentAppUser);
+		if (!currentAppUser) {
+			throw new ServerError("App user not found.");
+		};
+		appUser.tenantID = requestContext.getCurrentTenantID();
+		return await appUserDAO.updateAppUser(appUser);
 	}
 
 	async deleteAppUser(requestContext: RequestContext, id: string): Promise<boolean> {
-		try {
-			const appUser = await appUserDAO.getAppUser(requestContext.getCurrentTenantID(), id);
-			if (!appUser) {
-				throw new Error("App user not found.");
-			}
-			return await appUserDAO.deleteAppUser(id);
-		} catch (error) {
-			console.error("Error deleting app user:", error);
-			throw error;
+		const appUser = await appUserDAO.getAppUser(requestContext.getCurrentTenantID(), id);
+		console.log("deleteAppUser: appUser=", appUser);
+		if (!appUser) {
+			throw new Error("App user not found.");
 		}
+		return await appUserDAO.deleteAppUser(id);
 	}
 }

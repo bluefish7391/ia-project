@@ -4,6 +4,7 @@ import express from "express";
 import { TenantRouter } from "./routers/tenant-router";
 import { OrganizationRouter } from "./routers/organization-router";
 import { AppUserRouter } from "./routers/app-user-router";
+import { StudentRouter } from "./routers/student-router";
 import { authMiddleware } from "./middleware/auth-middleware";
 import { Logger } from "./logger";
 import { SecurityRouter } from "./routers/security-router";
@@ -29,5 +30,6 @@ expressApp.use(authMiddleware);
 expressApp.use('/tenants', TenantRouter.buildRouter());
 expressApp.use('/organizations', OrganizationRouter.buildRouter());
 expressApp.use('/app-users', AppUserRouter.buildRouter());
+expressApp.use('/students', StudentRouter.buildRouter());
 
 export const api = onRequest(expressApp);

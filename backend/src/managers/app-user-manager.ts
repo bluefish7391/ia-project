@@ -41,7 +41,7 @@ export class AppUserManager {
 		const appUser = await appUserDAO.getAppUser(requestContext.getCurrentTenantID(), id);
 		console.log("deleteAppUser: appUser=", appUser);
 		if (!appUser) {
-			throw new Error("App user not found.");
+			throw new ServerError("App user not found.");
 		}
 		return await appUserDAO.deleteAppUser(id);
 	}

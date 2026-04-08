@@ -15,6 +15,7 @@ export class AppUserForm implements OnChanges {
   @Input() isSubmitting = false;
   @Input() initialEmail = '';
   @Input() initialOrganizationId = '';
+  @Input() initialRoleIDs: string[] = [];
   @Input() organizations: Organization[] = [];
 
   @Output() save = new EventEmitter<AppUserUpsertPayload>();
@@ -22,6 +23,7 @@ export class AppUserForm implements OnChanges {
 
   protected appUserEmail = '';
   protected organizationId = '';
+  protected roleIDs: string[] = [];
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['initialEmail'] || changes['mode']) {
@@ -30,10 +32,13 @@ export class AppUserForm implements OnChanges {
     if (changes['initialOrganizationId'] || changes['mode']) {
       this.organizationId = this.initialOrganizationId;
     }
+    if (changes['initialRoleIDs'] || changes['mode']) {
+      this.roleIDs = this.initialRoleIDs;
+    }
   }
 
   protected submitAppUser(): void {
-    this.save.emit({ email: this.appUserEmail, organizationID: this.organizationId });
+    this.save.emit({ email: this.appUserEmail, organizationID: this.organizationId, roleIDs: [] });
   }
 
   protected cancelEdit(): void {

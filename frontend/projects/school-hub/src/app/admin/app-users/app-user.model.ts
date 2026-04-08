@@ -1,4 +1,5 @@
 export interface AppUserUpsertPayload {
-  email: string;
-  organizationID: string;
+	email: string;
+	organizationID: string;
+	roleIDs: string[];
 }

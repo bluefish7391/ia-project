@@ -5,6 +5,7 @@ import { TenantRouter } from "./routers/tenant-router";
 import { OrganizationRouter } from "./routers/organization-router";
 import { AppUserRouter } from "./routers/app-user-router";
 import { StudentRouter } from "./routers/student-router";
+import { AppRoleRouter } from "./routers/app-role-router";
 import { authMiddleware } from "./middleware/auth-middleware";
 import { Logger } from "./logger";
 import { SecurityRouter } from "./routers/security-router";
@@ -31,5 +32,6 @@ expressApp.use('/tenants', TenantRouter.buildRouter());
 expressApp.use('/organizations', OrganizationRouter.buildRouter());
 expressApp.use('/app-users', AppUserRouter.buildRouter());
 expressApp.use('/students', StudentRouter.buildRouter());
+expressApp.use('/app-roles', AppRoleRouter.buildRouter());
 
 export const api = onRequest(expressApp);

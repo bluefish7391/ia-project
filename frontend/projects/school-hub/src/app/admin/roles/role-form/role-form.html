@@ -1,0 +1,96 @@
+<form class="roles__form" (ngSubmit)="submitRole()">
+  <div class="roles__form-field">
+    <label for="roleName">Name</label>
+    <input
+      id="roleName"
+      name="roleName"
+      [(ngModel)]="roleName"
+      [disabled]="isSubmitting"
+      required
+    />
+  </div>
+
+  <div class="roles__form-field">
+    <label for="roleDescription">Description</label>
+    <textarea
+      id="roleDescription"
+      name="roleDescription"
+      [(ngModel)]="roleDescription"
+      [disabled]="isSubmitting"
+      rows="3"
+    ></textarea>
+  </div>
+
+  <div class="roles__permissions-dnd">
+    <div class="roles__permissions-column">
+      <span class="roles__permissions-column-label">Available</span>
+      <div
+        id="availableList"
+        cdkDropList
+        class="roles__permissions-drop-zone"
+        [cdkDropListData]="availablePermissions"
+        [cdkDropListConnectedTo]="['selectedList']"
+        [cdkDropListDisabled]="isSubmitting"
+        (cdkDropListDropped)="dropPermission($event)"
+      >
+        @for (entry of availablePermissions; track entry[0]) {
+          <div
+            class="roles__permission-box"
+            cdkDrag
+            [cdkDragData]="entry"
+            [cdkDragDisabled]="isSubmitting"
+          >
+            <span class="roles__permission-box-name">{{ entry[1].name }}</span>
+            <span class="roles__permission-box-description">{{ entry[1].description }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="roles__permissions-column">
+      <span class="roles__permissions-column-label">Assigned</span>
+      <div
+        id="selectedList"
+        cdkDropList
+        class="roles__permissions-drop-zone roles__permissions-drop-zone--selected"
+        [cdkDropListData]="selectedPermissions"
+        [cdkDropListConnectedTo]="['availableList']"
+        [cdkDropListDisabled]="isSubmitting"
+        (cdkDropListDropped)="dropPermission($event)"
+      >
+        @if (selectedPermissions.length === 0) {
+          <span class="roles__permissions-empty-hint">Drag permissions here</span>
+        }
+        @for (entry of selectedPermissions; track entry[0]) {
+          <div
+            class="roles__permission-box roles__permission-box--selected"
+            cdkDrag
+            [cdkDragData]="entry"
+            [cdkDragDisabled]="isSubmitting"
+          >
+            <span class="roles__permission-box-name">{{ entry[1].name }}</span>
+            <span class="roles__permission-box-description">{{ entry[1].description }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="roles__actions roles__form-actions">
+    <button
+      type="submit"
+      class="roles__primary-action"
+      [disabled]="isSubmitting"
+    >
+      {{ mode === 'add' ? 'Save Role' : 'Save Changes' }}
+    </button>
+    <button
+      type="button"
+      class="roles__secondary-action"
+      [disabled]="isSubmitting"
+      (click)="cancelEdit()"
+    >
+      Cancel
+    </button>
+  </div>
+</form>

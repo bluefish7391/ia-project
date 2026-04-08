@@ -30,6 +30,11 @@ const routes: Routes = [
         loadComponent: () =>
           import('./students').then((module) => module.Students),
       },
+      {
+        path: 'app-roles',
+        loadComponent: () =>
+          import('./roles').then((module) => module.Roles),
+      },
     ],
   },
 ];

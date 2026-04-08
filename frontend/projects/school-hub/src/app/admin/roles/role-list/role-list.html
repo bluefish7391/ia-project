@@ -1,0 +1,35 @@
+<ul class="roles__list">
+  @for (role of roles; track role.id) {
+    <li class="roles__list-item">
+      <div class="roles__list-details">
+        <span class="roles__list-name">{{ role.name }}</span>
+        @if (role.description) {
+          <span class="roles__list-description">{{ role.description }}</span>
+        }
+        @if (role.appPermissions.length > 0) {
+          <span class="roles__list-permissions">
+            {{ role.appPermissions.length }} permission{{ role.appPermissions.length === 1 ? '' : 's' }}
+          </span>
+        }
+      </div>
+      <div class="roles__list-actions">
+        <button
+          type="button"
+          class="roles__list-action"
+          [disabled]="isSubmitting"
+          (click)="update.emit(role)"
+        >
+          Edit
+        </button>
+        <button
+          type="button"
+          class="roles__list-action roles__list-action--danger"
+          [disabled]="isSubmitting"
+          (click)="delete.emit(role)"
+        >
+          Delete
+        </button>
+      </div>
+    </li>
+  }
+</ul>

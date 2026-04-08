@@ -1,0 +1,56 @@
+<section class="roles">
+  <header class="roles__header">
+    <div class="roles__title-block">
+      <h2 class="roles__title">Roles</h2>
+      <p class="roles__subtitle">Manage roles and their permissions for this tenant.</p>
+    </div>
+    <button
+      type="button"
+      class="roles__primary-action"
+      [disabled]="isSubmitting()"
+      (click)="addRole()"
+    >
+      Add Role
+    </button>
+  </header>
+
+  @if (formMode(); as mode) {
+    <app-role-form
+      [mode]="mode"
+      [isSubmitting]="isSubmitting()"
+      [initialName]="formName()"
+      [initialDescription]="formDescription()"
+      [initialAppPermissions]="formAppPermissions()"
+      (save)="saveRole($event)"
+      (cancel)="cancelRoleForm()"
+    />
+  }
+
+  @if (actionMessage(); as message) {
+    <p class="roles__message" role="status">{{ message }}</p>
+  }
+
+  @if (isLoading()) {
+    <p class="roles__state">Loading roles...</p>
+  } @else if (errorMessage(); as error) {
+    <div class="roles__error">
+      <p>{{ error }}</p>
+      <button
+        type="button"
+        class="roles__secondary-action"
+        (click)="loadRoles()"
+      >
+        Retry
+      </button>
+    </div>
+  } @else if (roles().length === 0) {
+    <p class="roles__state">No roles found.</p>
+  } @else {
+    <app-role-list
+      [roles]="roles()"
+      [isSubmitting]="isSubmitting()"
+      (update)="updateRole($event)"
+      (delete)="deleteRole($event)"
+    />
+  }
+</section>

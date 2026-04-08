@@ -22,8 +22,8 @@ export class AppUserRouter extends BaseRouter {
 	}
 
 	async getAppUser(req: Request, res: Response) {
-		const appUser = await appUserManager.getAppUser(new RequestContext(req), req.params["id"] as string);
-		this.sendSuccess(res, appUser);
+		const appUserDetail = await appUserManager.getAppUser(new RequestContext(req), req.params["id"] as string);
+		this.sendSuccess(res, appUserDetail);
 	}
 
 	async createAppUser(req: Request, res: Response) {

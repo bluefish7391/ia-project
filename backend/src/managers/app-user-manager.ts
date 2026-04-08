@@ -1,6 +1,6 @@
-import { appUserDAO } from "../daos/dao-factory";
+import { appRoleDAO, appUserDAO } from "../daos/dao-factory";
 import { generateId } from "../idutilities";
-import { AppUser } from "../../../shared/kinds";
+import { AppUser, AppUserDetail, UserRole } from "../../../shared/kinds";
 import { RequestContext } from "../request-context";
 import { BadRequestError, ServerError } from "../kinds";
 
@@ -17,7 +17,13 @@ export class AppUserManager {
 		if (!appUser) {
 			throw new BadRequestError("No app user with that id");
 		}
-		return appUser;
+
+		const appUserDetail: AppUserDetail = { ...appUser, roleIDs: [] };
+		const appUserRoles: UserRole[] = await appRoleDAO.getAppRolesForAppUser(requestContext.getCurrentTenantID(), id);
+		appUserDetail.roleIDs = appUserRoles.map((r) => r.appRoleID);
+		console.log("getAppUser: appUserRoles=", appUserRoles);
+
+		return appUserDetail;
 	}
 
 	async createAppUser(requestContext: RequestContext, data: Omit<AppUser, "id">): Promise<AppUser> {

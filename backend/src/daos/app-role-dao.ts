@@ -1,8 +1,9 @@
-import { AppRole } from "../../../shared/kinds";
+import { AppRole, UserRole } from "../../../shared/kinds";
 import { datastore } from "./datastore-factory";
 
 export class AppRoleDAO {
     static readonly APP_ROLE_KIND = "AppRole";
+	static readonly USER_ROLE_KIND = "UserRole";
 
     public async getAllAppRoles(tenantID: string): Promise<AppRole[]> {
         const query = datastore.createQuery(AppRoleDAO.APP_ROLE_KIND).filter("tenantID", "=", tenantID);
@@ -16,6 +17,14 @@ export class AppRoleDAO {
         if (!entity || entity.tenantID !== tenantID) return null;
         return { id, ...entity } as AppRole;
     }
+
+	public async getAppRolesForAppUser(tenantID: string, appUserID: string): Promise<UserRole[]> {
+		const query = datastore.createQuery(AppRoleDAO.USER_ROLE_KIND)
+			.filter("tenantID", "=", tenantID)
+			.filter("appUserID", "=", appUserID);
+		const data = await query.run();
+		return data[0] as UserRole[];
+	}
 
     public async createAppRole(appRole: AppRole): Promise<AppRole> {
         const key = datastore.key([AppRoleDAO.APP_ROLE_KIND, appRole.id]);

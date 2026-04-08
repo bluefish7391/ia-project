@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { Organization } from '../../../../../../../../shared/kinds';
+import { AppRole, Organization } from '../../../../../../../../shared/kinds';
 import { AppUserUpsertPayload } from '../app-user.model';
 
 @Component({
@@ -17,6 +17,7 @@ export class AppUserForm implements OnChanges {
   @Input() initialOrganizationId = '';
   @Input() initialRoleIDs: string[] = [];
   @Input() organizations: Organization[] = [];
+  @Input() appRoles: AppRole[] = [];
 
   @Output() save = new EventEmitter<AppUserUpsertPayload>();
   @Output() cancel = new EventEmitter<void>();
@@ -38,7 +39,7 @@ export class AppUserForm implements OnChanges {
   }
 
   protected submitAppUser(): void {
-    this.save.emit({ email: this.appUserEmail, organizationID: this.organizationId, roleIDs: [] });
+    this.save.emit({ email: this.appUserEmail, organizationID: this.organizationId, roleIDs: this.roleIDs });
   }
 
   protected cancelEdit(): void {

@@ -4,7 +4,7 @@ import { ApiService } from '../../api.service';
 import { AppUserForm } from './app-user-form/app-user-form';
 import { AppUserList } from './app-user-list/app-user-list';
 import { AppUserUpsertPayload } from './app-user.model';
-import { AppRole, AppUser, Organization } from '../../../../../../../shared/kinds';
+import { AppRole, AppUser, AppUserDetail, Organization } from '../../../../../../../shared/kinds';
 
 @Component({
   selector: 'app-app-users',
@@ -92,12 +92,29 @@ export class AppUsers implements OnInit {
   }
 
   protected updateAppUser(appUser: AppUser): void {
-    this.formMode.set('edit');
-    this.editingAppUserId.set(appUser.id);
-    this.formEmail.set(appUser.email);
-    this.formOrganizationId.set(appUser.organizationID);
-    this.formRoleIDs.set([]); // TODO: set role IDs when role management is implemented
-    this.actionMessage.set(null);
+	this.apiService
+		.get<AppUserDetail>(`app-users/${appUser.id}`)
+		.pipe(takeUntilDestroyed(this.destroyRef))
+		.subscribe({
+			next: (appUserDetail) => {
+				const { roleIDs, ...appUserFields } = appUserDetail;
+				
+				// Refresh the list entry with any updated fields from the fetch
+				this.appUsers.update((existing) => 
+					existing.map((u) => u.id === appUser.id ? { ...u, ...appUserFields } : u)
+				);
+
+				this.formMode.set('edit');
+				this.editingAppUserId.set(appUserFields.id);
+				this.formEmail.set(appUserFields.email);
+				this.formOrganizationId.set(appUserFields.organizationID);
+				this.formRoleIDs.set(roleIDs);
+				this.actionMessage.set(null);
+			},
+			error: () => {
+				this.actionMessage.set('Unable to load app user details. Please try again.');
+			}
+		});	
   }
 
   protected deleteAppUser(appUser: AppUser): void {

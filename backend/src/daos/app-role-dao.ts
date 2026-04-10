@@ -18,14 +18,6 @@ export class AppRoleDAO {
         return { id, ...entity } as AppRole;
     }
 
-	public async getAppRolesForAppUser(tenantID: string, appUserID: string): Promise<UserRole[]> {
-		const query = datastore.createQuery(AppRoleDAO.USER_ROLE_KIND)
-			.filter("tenantID", "=", tenantID)
-			.filter("appUserID", "=", appUserID);
-		const data = await query.run();
-		return data[0] as UserRole[];
-	}
-
     public async createAppRole(appRole: AppRole): Promise<AppRole> {
         const key = datastore.key([AppRoleDAO.APP_ROLE_KIND, appRole.id]);
         const entity = { key, data: appRole };
@@ -50,4 +42,28 @@ export class AppRoleDAO {
         await datastore.delete(key);
         return true;
     }
+
+	public async getUserRolesForAppUser(tenantID: string, appUserID: string): Promise<UserRole[]> {
+		const query = datastore.createQuery(AppRoleDAO.USER_ROLE_KIND)
+			.filter("tenantID", "=", tenantID)
+			.filter("appUserID", "=", appUserID);
+		const data = await query.run();
+		return data[0] as UserRole[];
+	}
+
+	public async createUserRole(userRole: UserRole): Promise<void> {
+		const key = datastore.key([AppRoleDAO.USER_ROLE_KIND, userRole.appUserID + userRole.appRoleID]);
+        const entity = { key, data: userRole };
+        await datastore.save(entity);
+	}
+
+	public async deleteUserRole(appUserID: string, appRoleID: string): Promise<boolean> {
+		const key = datastore.key([AppRoleDAO.USER_ROLE_KIND, appUserID + appRoleID]);
+		const [existing] = await datastore.get(key);
+		if (!existing) {
+			return false;
+		}
+		await datastore.delete(key);
+		return true;
+	}
 }

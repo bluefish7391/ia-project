@@ -19,7 +19,7 @@ export class AppUserManager {
 		}
 
 		const appUserDetail: AppUserDetail = { ...appUser, roleIDs: [] };
-		const appUserRoles: UserRole[] = await appRoleDAO.getAppRolesForAppUser(requestContext.getCurrentTenantID(), id);
+		const appUserRoles: UserRole[] = await appRoleDAO.getUserRolesForAppUser(requestContext.getCurrentTenantID(), id);
 		appUserDetail.roleIDs = appUserRoles.map((r) => r.appRoleID);
 		console.log("getAppUser: appUserRoles=", appUserRoles);
 
@@ -42,6 +42,28 @@ export class AppUserManager {
 		appUser.tenantID = requestContext.getCurrentTenantID();
 		return await appUserDAO.updateAppUser(appUser);
 	}
+
+	// private async updateAppUserRoles(tenantID: string, appUserDetail: AppUserDetail): Promise<void> {	
+	// 	/**
+	// 	 * Update UserRole objects in database to reflect roles held by user according to appUserDetail
+	// 	 * Below is my implementation of a "nuclear method", deleting every existing UserRole and 
+	// 	 * creating new ones for each role id in appUserDetail. This may or may not be the best option.
+	// 	 */
+
+	// 	// Delete all existing UserRoles for user
+	// 	const userRolesCurrent: UserRole[] = await appRoleDAO.getUserRolesForAppUser(tenantID, appUserDetail.id);
+	// 	userRolesCurrent.forEach(async r => await appRoleDAO.deleteUserRole(r.appUserID, r.appRoleID));
+
+	// 	// Create new ones according to updated info
+	// 	appUserDetail.roleIDs.forEach(async r => {
+	// 		const userRole: UserRole = {
+	// 			tenantID: tenantID,
+	// 			appUserID: appUserDetail.id,
+	// 			appRoleID: r
+	// 		};
+	// 		await appRoleDAO.createUserRole(userRole);
+	// 	});
+	// }
 
 	async deleteAppUser(requestContext: RequestContext, id: string): Promise<boolean> {
 		const appUser = await appUserDAO.getAppUser(requestContext.getCurrentTenantID(), id);

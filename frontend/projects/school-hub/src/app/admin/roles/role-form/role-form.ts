@@ -18,7 +18,7 @@ import {
 import {
   AppPermission,
   AppPermissions,
-} from '../../../../../../../../shared/kinds';
+} from 'shared/kinds';
 import { AppRoleUpsertPayload } from '../role.model';
 
 @Component({

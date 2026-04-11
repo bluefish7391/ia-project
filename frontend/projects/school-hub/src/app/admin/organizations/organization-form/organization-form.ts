@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { Organization } from '../../../../../../../../shared/kinds';
+import { Organization } from 'shared/kinds';
 import { OrganizationUpsertPayload } from '../organization.model';
 
 @Component({

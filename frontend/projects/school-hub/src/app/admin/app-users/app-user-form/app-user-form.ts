@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AppRole, Organization, AppUserUpsertPayload } from '../../../../../../../../shared/kinds';
+import { AppRole, Organization, AppUserUpsertPayload } from 'shared/kinds';
 
 @Component({
   selector: 'app-app-user-form',

@@ -2,7 +2,7 @@ import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ApiService } from '../../api.service';
-import { Student } from '../../../../../../../shared/kinds';
+import { Student } from 'shared/kinds';
 import { StudentUpsertPayload } from './student.model';
 import { StudentForm } from './student-form/student-form';
 import { StudentList } from './student-list/student-list';

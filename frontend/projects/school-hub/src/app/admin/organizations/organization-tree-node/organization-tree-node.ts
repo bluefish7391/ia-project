@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { Organization } from '../../../../../../../../shared/kinds';
+import { Organization } from 'shared/kinds';
 import { OrganizationTreeNode as OrganizationTreeNodeComponent } from './organization-tree-node';
 
 export interface OrgTreeNode {

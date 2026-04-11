@@ -4,7 +4,7 @@ import { ApiService } from '../../api.service';
 import { TenantForm } from './tenant-form/tenant-form';
 import { TenantList } from './tenant-list/tenant-list';
 import { TenantUpsertPayload } from './tenant.model';
-import { Tenant } from '../../../../../../../shared/kinds';
+import { Tenant } from 'shared/kinds';
 
 @Component({
   selector: 'app-tenants',

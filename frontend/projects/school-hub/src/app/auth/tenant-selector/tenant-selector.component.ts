@@ -4,7 +4,7 @@ import { Auth } from '@angular/fire/auth';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../api.service';
 import { SessionService } from '../session.service';
-import { Tenant, AppUserSession } from '../../../../../../../shared/kinds';
+import { Tenant, AppUserSession } from 'shared/kinds';
 
 @Component({
   selector: 'app-tenant-selector',

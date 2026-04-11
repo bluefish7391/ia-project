@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { AppRole } from '../../../../../../../../shared/kinds';
+import { AppRole } from 'shared/kinds';
 
 @Component({
   selector: 'app-role-list',

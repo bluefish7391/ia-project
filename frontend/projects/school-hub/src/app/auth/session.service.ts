@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { AppUserSession } from '../../../../../../shared/kinds';
+import { AppUserSession } from 'shared/kinds';
 
 const SESSION_KEY = 'app-session';
 

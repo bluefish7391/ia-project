@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { Tenant } from '../../../../../../../../shared/kinds';
+import { Tenant } from 'shared/kinds';
 
 @Component({
   selector: 'app-tenant-list',

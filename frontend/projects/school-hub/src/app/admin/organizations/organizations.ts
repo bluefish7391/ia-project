@@ -2,7 +2,7 @@ import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ApiService } from '../../api.service';
-import { Organization } from '../../../../../../../shared/kinds';
+import { Organization } from 'shared/kinds';
 import { OrganizationUpsertPayload } from './organization.model';
 import { OrganizationForm } from './organization-form/organization-form';
 import { OrganizationList } from './organization-list/organization-list';

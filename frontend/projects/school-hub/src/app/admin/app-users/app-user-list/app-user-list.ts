@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { AppUser } from '../../../../../../../../shared/kinds';
+import { AppUser } from 'shared/kinds';
 
 @Component({
   selector: 'app-app-user-list',

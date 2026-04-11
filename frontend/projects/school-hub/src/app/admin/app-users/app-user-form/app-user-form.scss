@@ -76,6 +76,57 @@
   cursor: not-allowed;
 }
 
+.app-users__roles-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.app-users__role-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-users__role-label {
+  position: relative;
+  cursor: pointer;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+.app-users__role-tooltip {
+  position: absolute;
+  bottom: calc(100% + 0.4rem);
+  left: 0;
+  z-index: 100;
+  max-width: 20rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container-highest);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-small);
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s 0s;
+}
+
+.app-users__role-label:hover .app-users__role-tooltip {
+  opacity: 1;
+  transition: opacity 0.15s 0.5s;
+}
+
+.app-users__roles-empty {
+  margin: 0;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
 @media (max-width: 48rem) {
   .app-users__form-actions .app-users__secondary-action {
     width: 100%;

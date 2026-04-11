@@ -38,6 +38,18 @@ export class AppUserForm implements OnChanges {
     }
   }
 
+  protected isRoleSelected(roleId: string): boolean {
+    return this.roleIDs.includes(roleId);
+  }
+
+  protected toggleRole(roleId: string): void {
+    if (this.isRoleSelected(roleId)) {
+      this.roleIDs = this.roleIDs.filter((id) => id !== roleId);
+    } else {
+      this.roleIDs = [...this.roleIDs, roleId];
+    }
+  }
+
   protected submitAppUser(): void {
     this.save.emit({ email: this.appUserEmail, organizationID: this.organizationId, roleIDs: this.roleIDs });
   }

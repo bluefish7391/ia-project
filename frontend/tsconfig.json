@@ -13,7 +13,10 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
-    "module": "preserve"
+    "module": "preserve",
+	"paths": {
+		"shared/kinds": ["../shared/kinds"]
+	}
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

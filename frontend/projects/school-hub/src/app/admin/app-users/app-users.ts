@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../api.service';
 import { AppUserForm } from './app-user-form/app-user-form';
 import { AppUserList } from './app-user-list/app-user-list';
-import { AppRole, AppUser, AppUserDetail, Organization, AppUserUpsertPayload } from '../../../../../../../shared/kinds';
+import { AppRole, AppUser, AppUserDetail, Organization, AppUserUpsertPayload } from 'shared/kinds';
 
 @Component({
   selector: 'app-app-users',

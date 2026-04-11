@@ -28,7 +28,7 @@ export class AppUserManager {
 
 	async createAppUser(requestContext: RequestContext, data: AppUserUpsertPayload): Promise<AppUser> {
 		const tenantID = requestContext.getCurrentTenantID();
-		const appUser: AppUser = { 
+		const appUser: AppUser = {
 			id: generateId(),
 			email: data.email,
 			tenantID: tenantID,
@@ -54,30 +54,22 @@ export class AppUserManager {
 
 		await appUserDAO.updateAppUser({ ...currentAppUser, email: payload.email, organizationID: payload.organizationID });
 		await this.updateAppUserRoles(requestContext.getCurrentTenantID(), appUserDetail);
-		
+
 		return appUserDetail;
 	}
 
-	private async updateAppUserRoles(tenantID: string, appUserDetail: AppUserDetail): Promise<void> {	
-		/**
-		 * Update UserRole objects in database to reflect roles held by user according to appUserDetail
-		 * Below is my implementation of a "nuclear method", deleting every existing UserRole and 
-		 * creating new ones for each role id in appUserDetail. This may or may not be the best option.
-		 */
+	private async updateAppUserRoles(tenantID: string, appUserDetail: AppUserDetail): Promise<void> {
+		const currentRoles = await appRoleDAO.getUserRolesForAppUser(tenantID, appUserDetail.id);
+		const currentRoleIDs = new Set(currentRoles.map(r => r.appRoleID));
+		const newRoleIDs = new Set(appUserDetail.roleIDs);
 
-		// Delete all existing UserRoles for user
-		const userRolesCurrent: UserRole[] = await appRoleDAO.getUserRolesForAppUser(tenantID, appUserDetail.id);
-		userRolesCurrent.forEach(async r => await appRoleDAO.deleteUserRole(r.appUserID, r.appRoleID));
+		const toDelete = currentRoles.filter(r => !newRoleIDs.has(r.appRoleID));
+		const toAdd = appUserDetail.roleIDs.filter(id => !currentRoleIDs.has(id));
 
-		// Create new ones according to updated info
-		appUserDetail.roleIDs.forEach(async appRoleID => {
-			const userRole: UserRole = {
-				tenantID: tenantID,
-				appUserID: appUserDetail.id,
-				appRoleID: appRoleID
-			};
-			await appRoleDAO.createUserRole(userRole);
-		});
+		await Promise.all([
+			...toDelete.map(r => appRoleDAO.deleteUserRole(r.appUserID, r.appRoleID)),
+			...toAdd.map(appRoleID => appRoleDAO.createUserRole({ tenantID, appUserID: appUserDetail.id, appRoleID }))
+		]);
 	}
 
 	async deleteAppUser(requestContext: RequestContext, id: string): Promise<boolean> {

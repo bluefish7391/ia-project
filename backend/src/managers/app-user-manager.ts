@@ -1,6 +1,6 @@
 import { appRoleDAO, appUserDAO } from "../daos/dao-factory";
 import { generateId } from "../idutilities";
-import { AppUser, AppUserDetail, UserRole } from "../../../shared/kinds";
+import { AppUser, AppUserDetail, AppUserUpsertPayload, UserRole } from "../../../shared/kinds";
 import { RequestContext } from "../request-context";
 import { BadRequestError, ServerError } from "../kinds";
 
@@ -26,10 +26,19 @@ export class AppUserManager {
 		return appUserDetail;
 	}
 
-	async createAppUser(requestContext: RequestContext, data: Omit<AppUser, "id">): Promise<AppUser> {
-		const appUser: AppUser = { ...data, id: generateId(), tenantID: requestContext.getCurrentTenantID() };
+	async createAppUser(requestContext: RequestContext, data: AppUserUpsertPayload): Promise<AppUser> {
+		const tenantID = requestContext.getCurrentTenantID();
+		const appUser: AppUser = { 
+			id: generateId(),
+			email: data.email,
+			tenantID: tenantID,
+			organizationID: data.organizationID
+		};
 		console.log("createAppUser: appUser=", appUser);
+
 		await appUserDAO.createAppUser(appUser);
+		await this.updateAppUserRoles(tenantID, { ...appUser, roleIDs: data.roleIDs });
+
 		return appUser;
 	}
 
@@ -43,27 +52,27 @@ export class AppUserManager {
 		return await appUserDAO.updateAppUser(appUser);
 	}
 
-	// private async updateAppUserRoles(tenantID: string, appUserDetail: AppUserDetail): Promise<void> {	
-	// 	/**
-	// 	 * Update UserRole objects in database to reflect roles held by user according to appUserDetail
-	// 	 * Below is my implementation of a "nuclear method", deleting every existing UserRole and 
-	// 	 * creating new ones for each role id in appUserDetail. This may or may not be the best option.
-	// 	 */
+	private async updateAppUserRoles(tenantID: string, appUserDetail: AppUserDetail): Promise<void> {	
+		/**
+		 * Update UserRole objects in database to reflect roles held by user according to appUserDetail
+		 * Below is my implementation of a "nuclear method", deleting every existing UserRole and 
+		 * creating new ones for each role id in appUserDetail. This may or may not be the best option.
+		 */
 
-	// 	// Delete all existing UserRoles for user
-	// 	const userRolesCurrent: UserRole[] = await appRoleDAO.getUserRolesForAppUser(tenantID, appUserDetail.id);
-	// 	userRolesCurrent.forEach(async r => await appRoleDAO.deleteUserRole(r.appUserID, r.appRoleID));
+		// Delete all existing UserRoles for user
+		const userRolesCurrent: UserRole[] = await appRoleDAO.getUserRolesForAppUser(tenantID, appUserDetail.id);
+		userRolesCurrent.forEach(async r => await appRoleDAO.deleteUserRole(r.appUserID, r.appRoleID));
 
-	// 	// Create new ones according to updated info
-	// 	appUserDetail.roleIDs.forEach(async r => {
-	// 		const userRole: UserRole = {
-	// 			tenantID: tenantID,
-	// 			appUserID: appUserDetail.id,
-	// 			appRoleID: r
-	// 		};
-	// 		await appRoleDAO.createUserRole(userRole);
-	// 	});
-	// }
+		// Create new ones according to updated info
+		appUserDetail.roleIDs.forEach(async appRoleID => {
+			const userRole: UserRole = {
+				tenantID: tenantID,
+				appUserID: appUserDetail.id,
+				appRoleID: appRoleID
+			};
+			await appRoleDAO.createUserRole(userRole);
+		});
+	}
 
 	async deleteAppUser(requestContext: RequestContext, id: string): Promise<boolean> {
 		const appUser = await appUserDAO.getAppUser(requestContext.getCurrentTenantID(), id);

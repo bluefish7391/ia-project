@@ -1,8 +1,9 @@
 import express, { Request, Response } from "express";
 import { appUserManager } from "../managers/manager-factor";
-import { AppUser } from "../../../shared/kinds";
+import { AppUser, AppUserUpsertPayload } from "../../../shared/kinds";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
+import { BadRequestError } from "../kinds";
 
 export class AppUserRouter extends BaseRouter {
 	public static buildRouter() {
@@ -27,14 +28,19 @@ export class AppUserRouter extends BaseRouter {
 	}
 
 	async createAppUser(req: Request, res: Response) {
-		const body = req.body as { email?: string, organizationID: string };
-		if (!body.email) {
-			this.sendBadRequestError(res, { message: "No email provided" });
-			return;
+		const body = req.body as Partial<AppUserUpsertPayload>;
+
+		if (!body.email || !body.organizationID || !Array.isArray(body.roleIDs)) {
+			throw new BadRequestError("Request body must include email, organizationID, and roleIDs");
 		}
-		const requestContext = new RequestContext(req);
-		const data: Omit<AppUser, "id"> = { email: body.email, tenantID: requestContext.getCurrentTenantID(), organizationID: body.organizationID };
-		const appUser = await appUserManager.createAppUser(requestContext, data);
+
+		const payload: AppUserUpsertPayload = {
+			email: body.email,
+			organizationID: body.organizationID,
+			roleIDs: body.roleIDs,
+		};
+
+		const appUser = await appUserManager.createAppUser(new RequestContext(req), payload);
 		this.sendSuccess(res, appUser);
 	}
 

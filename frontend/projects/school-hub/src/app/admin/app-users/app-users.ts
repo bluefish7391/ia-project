@@ -3,8 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../api.service';
 import { AppUserForm } from './app-user-form/app-user-form';
 import { AppUserList } from './app-user-list/app-user-list';
-import { AppUserUpsertPayload } from './app-user.model';
-import { AppRole, AppUser, AppUserDetail, Organization } from '../../../../../../../shared/kinds';
+import { AppRole, AppUser, AppUserDetail, Organization, AppUserUpsertPayload } from '../../../../../../../shared/kinds';
 
 @Component({
   selector: 'app-app-users',
@@ -160,7 +159,6 @@ export class AppUsers implements OnInit {
       return;
     }
 
-	// === TODO: use roleIDs from form when role management is implemented ===
     const payload: AppUserUpsertPayload = { email, organizationID, roleIDs: formValue.roleIDs };
 
     const mode = this.formMode();

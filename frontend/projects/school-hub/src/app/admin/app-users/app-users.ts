@@ -3,8 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../api.service';
 import { AppUserForm } from './app-user-form/app-user-form';
 import { AppUserList } from './app-user-list/app-user-list';
-import { AppUserUpsertPayload } from './app-user.model';
-import { AppUser, Organization } from '../../../../../../../shared/kinds';
+import { AppRole, AppUser, AppUserDetail, Organization, AppUserUpsertPayload } from '../../../../../../../shared/kinds';
 
 @Component({
   selector: 'app-app-users',
@@ -17,6 +16,7 @@ export class AppUsers implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly appUsers = signal<AppUser[]>([]);
+  protected readonly appRoles = signal<AppRole[]>([]);
   protected readonly organizations = signal<Organization[]>([]);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
@@ -26,10 +26,12 @@ export class AppUsers implements OnInit {
   protected readonly editingAppUserId = signal<string | null>(null);
   protected readonly formEmail = signal('');
   protected readonly formOrganizationId = signal('');
+  protected readonly formRoleIDs = signal<string[]>([]);
 
   ngOnInit(): void {
     this.loadAppUsers();
     this.loadOrganizations();
+	this.loadAppRoles();
   }
 
   protected loadAppUsers(): void {
@@ -51,6 +53,20 @@ export class AppUsers implements OnInit {
       });
   }
 
+  private loadAppRoles(): void {
+	this.apiService
+		.get<AppRole[]>('app-roles')
+		.pipe(takeUntilDestroyed(this.destroyRef))
+		.subscribe({
+			next: (appRoles) => {
+				this.appRoles.set(appRoles);
+			},
+			error: () => {
+				// app roles list is non-critical for page load; silently fail
+			},
+		});
+  }
+
   private loadOrganizations(): void {
     this.apiService
       .get<Organization[]>('organizations')
@@ -70,15 +86,34 @@ export class AppUsers implements OnInit {
     this.editingAppUserId.set(null);
     this.formEmail.set('');
     this.formOrganizationId.set('');
+    this.formRoleIDs.set([]);
     this.actionMessage.set(null);
   }
 
   protected updateAppUser(appUser: AppUser): void {
-    this.formMode.set('edit');
-    this.editingAppUserId.set(appUser.id);
-    this.formEmail.set(appUser.email);
-    this.formOrganizationId.set(appUser.organizationID);
-    this.actionMessage.set(null);
+	this.apiService
+		.get<AppUserDetail>(`app-users/${appUser.id}`)
+		.pipe(takeUntilDestroyed(this.destroyRef))
+		.subscribe({
+			next: (appUserDetail) => {
+				const { roleIDs, ...appUserFields } = appUserDetail;
+
+				// Refresh the list entry with any updated fields from the fetch
+				this.appUsers.update((existing) => 
+					existing.map((u) => u.id === appUser.id ? { ...u, ...appUserFields } : u)
+				);
+
+				this.formMode.set('edit');
+				this.editingAppUserId.set(appUserFields.id);
+				this.formEmail.set(appUserFields.email);
+				this.formOrganizationId.set(appUserFields.organizationID);
+				this.formRoleIDs.set(roleIDs);
+				this.actionMessage.set(null);
+			},
+			error: () => {
+				this.actionMessage.set('Unable to load app user details. Please try again.');
+			}
+		});	
   }
 
   protected deleteAppUser(appUser: AppUser): void {
@@ -124,7 +159,7 @@ export class AppUsers implements OnInit {
       return;
     }
 
-    const payload: AppUserUpsertPayload = { email, organizationID };
+    const payload: AppUserUpsertPayload = { email, organizationID, roleIDs: formValue.roleIDs };
 
     const mode = this.formMode();
     if (mode === 'add') {
@@ -147,6 +182,7 @@ export class AppUsers implements OnInit {
     this.editingAppUserId.set(null);
     this.formEmail.set('');
     this.formOrganizationId.set('');
+    this.formRoleIDs.set([]);
   }
 
   private createAppUser(payload: AppUserUpsertPayload): void {

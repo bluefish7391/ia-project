@@ -25,6 +25,30 @@
       }
     </select>
   </div>
+  <div class="app-users__form-field">
+    <label>Roles</label>
+    @if (appRoles.length > 0) {
+      <ul class="app-users__roles-list">
+        @for (role of appRoles; track role.id) {
+          <li class="app-users__role-item">
+            <input
+              type="checkbox"
+              [id]="'role-' + role.id"
+              [checked]="isRoleSelected(role.id)"
+              (change)="toggleRole(role.id)"
+              [disabled]="isSubmitting"
+            />
+            <label [for]="'role-' + role.id" class="app-users__role-label">
+              {{ role.name }}
+              <span class="app-users__role-tooltip">{{ role.description }}</span>
+            </label>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="app-users__roles-empty">No roles available.</p>
+    }
+  </div>
   <div class="app-users__actions app-users__form-actions">
     <button type="submit" class="app-users__primary-action" [disabled]="isSubmitting">
       {{ mode === 'add' ? 'Save App User' : 'Save Changes' }}

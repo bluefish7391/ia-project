@@ -1,0 +1,187 @@
+.roles__form {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: var(--mat-sys-surface-container-low);
+}
+
+.roles__form-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.roles__form-field label {
+  font: var(--mat-sys-label-medium);
+}
+
+.roles__form-field input,
+.roles__form-field textarea {
+  font: var(--mat-sys-body-medium);
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--mat-sys-outline);
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  resize: vertical;
+}
+
+.roles__form-field input:focus-visible,
+.roles__form-field textarea:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 1px;
+}
+
+.roles__permissions-dnd {
+  display: flex;
+  gap: 1rem;
+}
+
+.roles__permissions-column {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.roles__permissions-column-label {
+  font: var(--mat-sys-label-medium);
+}
+
+.roles__permissions-drop-zone {
+  flex: 1;
+  min-height: 8rem;
+  border: 1px dashed var(--mat-sys-outline-variant);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  background: var(--mat-sys-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  overflow-y: auto;
+  transition: background 0.15s ease;
+}
+
+.roles__permissions-drop-zone--selected {
+  border-color: var(--mat-sys-primary);
+  border-style: solid;
+  background: color-mix(in srgb, var(--mat-sys-primary) 5%, var(--mat-sys-surface));
+}
+
+.cdk-drop-list-dragging .roles__permissions-drop-zone,
+.roles__permissions-drop-zone.cdk-drop-list-receiving {
+  background: color-mix(in srgb, var(--mat-sys-primary) 10%, var(--mat-sys-surface));
+}
+
+.roles__permission-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container-low);
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 0.1s ease;
+}
+
+.roles__permission-box:active {
+  cursor: grabbing;
+}
+
+.roles__permission-box--selected {
+  border-color: var(--mat-sys-primary);
+  background: color-mix(in srgb, var(--mat-sys-primary) 8%, var(--mat-sys-surface));
+}
+
+.roles__permission-box-name {
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+.roles__permission-box-description {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.roles__permissions-empty-hint {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+  opacity: 0.6;
+  padding: 0.5rem 0.25rem;
+  pointer-events: none;
+}
+
+.cdk-drag-preview {
+  border-radius: 0.375rem;
+  border: 1px solid var(--mat-sys-outline);
+  background: var(--mat-sys-surface-container-highest);
+  padding: 0.5rem 0.65rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cdk-drag-placeholder {
+  border: 1px dashed var(--mat-sys-primary);
+  border-radius: 0.375rem;
+  background: color-mix(in srgb, var(--mat-sys-primary) 10%, transparent);
+  min-height: 2.5rem;
+  opacity: 0.6;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.roles__permissions-drop-zone.cdk-drop-list-dragging .roles__permission-box:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.roles__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.roles__form-actions {
+  justify-content: flex-start;
+}
+
+.roles__primary-action,
+.roles__secondary-action {
+  font: var(--mat-sys-label-large);
+  border-radius: 999px;
+  border: 1px solid var(--mat-sys-outline);
+  padding: 0.5rem 0.9rem;
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  cursor: pointer;
+}
+
+.roles__primary-action:disabled,
+.roles__secondary-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.roles__primary-action {
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  border-color: var(--mat-sys-primary);
+}
+
+.roles__primary-action:hover:not(:disabled),
+.roles__secondary-action:hover:not(:disabled) {
+  filter: brightness(0.98);
+}
+
+.roles__primary-action:focus-visible,
+.roles__secondary-action:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}

@@ -25,7 +25,9 @@ export class SecurityManager {
 
 		const tenantIDs = new Set(appUsers.map((user) => user.tenantID));
 		console.log("getUserTenants: tenantIDs=", tenantIDs);
-		return await securityDAO.getTenantsByIDs(tenantIDs);
+		const tenants = await securityDAO.getTenantsByIDs(tenantIDs);
+		console.log("getUserTenants: tenants=", tenants);
+		return tenants;
 	}
 
 	public async createAppSession(tenantID?: string, googleToken?: string): Promise<AppUserSession> {

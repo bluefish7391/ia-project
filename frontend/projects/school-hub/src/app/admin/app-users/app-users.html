@@ -13,7 +13,9 @@
 			[isSubmitting]="isSubmitting()"
 			[initialEmail]="formEmail()"
 			[initialOrganizationId]="formOrganizationId()"
+			[initialRoleIDs]="formRoleIDs()"
 			[organizations]="organizations()"
+			[appRoles]="appRoles()"
 			(save)="saveAppUser($event)"
 			(cancel)="cancelAppUserForm()"
 		/>

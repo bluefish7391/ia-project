@@ -11,7 +11,7 @@ export class AppUserManager {
 		return appUsers;
 	}
 
-	async getAppUser(requestContext: RequestContext, id: string): Promise<AppUser | null> {
+	async getAppUser(requestContext: RequestContext, id: string): Promise<AppUserDetail | null> {
 		const appUser = await appUserDAO.getAppUser(requestContext.getCurrentTenantID(), id);
 		console.log("getAppUser: appUser=", appUser);
 		if (!appUser) {
@@ -42,14 +42,20 @@ export class AppUserManager {
 		return appUser;
 	}
 
-	async updateAppUser(requestContext: RequestContext, appUser: AppUser): Promise<AppUser | null> {
-		const currentAppUser = await appUserDAO.getAppUser(requestContext.getCurrentTenantID(), appUser.id);
+	async updateAppUser(requestContext: RequestContext, id: string, payload: AppUserUpsertPayload): Promise<AppUserDetail> {
+		const currentAppUser = await appUserDAO.getAppUser(requestContext.getCurrentTenantID(), id);
 		console.log("updateAppUser: currentAppUser=", currentAppUser);
+
 		if (!currentAppUser) {
 			throw new ServerError("App user not found.");
-		};
-		appUser.tenantID = requestContext.getCurrentTenantID();
-		return await appUserDAO.updateAppUser(appUser);
+		}
+
+		const appUserDetail: AppUserDetail = { ...currentAppUser, roleIDs: payload.roleIDs };
+
+		await appUserDAO.updateAppUser({ ...currentAppUser, email: payload.email, organizationID: payload.organizationID });
+		await this.updateAppUserRoles(requestContext.getCurrentTenantID(), appUserDetail);
+		
+		return appUserDetail;
 	}
 
 	private async updateAppUserRoles(tenantID: string, appUserDetail: AppUserDetail): Promise<void> {	

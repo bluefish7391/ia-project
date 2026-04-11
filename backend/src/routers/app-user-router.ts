@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { appUserManager } from "../managers/manager-factor";
-import { AppUser, AppUserUpsertPayload } from "../../../shared/kinds";
+import { AppUserDetail, AppUserUpsertPayload } from "../../../shared/kinds";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
 import { BadRequestError } from "../kinds";
@@ -31,6 +31,7 @@ export class AppUserRouter extends BaseRouter {
 		const body = req.body as Partial<AppUserUpsertPayload>;
 
 		if (!body.email || !body.organizationID || !Array.isArray(body.roleIDs)) {
+			console.log("updateAppUser: invalid body=", body);
 			throw new BadRequestError("Request body must include email, organizationID, and roleIDs");
 		}
 
@@ -45,14 +46,22 @@ export class AppUserRouter extends BaseRouter {
 	}
 
 	async updateAppUser(req: Request, res: Response) {
-		const body = req.body as AppUser;
-		body.id = req.params["id"] as string;
-		const appUser = await appUserManager.updateAppUser(new RequestContext(req), body);
-		if (!appUser) {
-			this.sendServerError(res, { message: "No app user found" });
-			return;
+		const id = req.params["id"] as string;
+		const body = req.body as Partial<AppUserUpsertPayload>;
+
+		if (!body.email || !body.organizationID || !Array.isArray(body.roleIDs)) {
+			console.log("updateAppUser: invalid body=", body);
+			throw new BadRequestError("Request body must include email, organizationID, and roleIDs");
 		}
-		this.sendSuccess(res, appUser);
+
+		const payload: AppUserUpsertPayload = {
+			email: body.email,
+			organizationID: body.organizationID,
+			roleIDs: body.roleIDs,
+		};
+		
+		const appUserDetail: AppUserDetail = await appUserManager.updateAppUser(new RequestContext(req), id, payload);
+		this.sendSuccess(res, appUserDetail);
 	}
 
 	async deleteAppUser(req: Request, res: Response) {

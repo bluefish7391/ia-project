@@ -97,7 +97,7 @@ export class AppUsers implements OnInit {
 		.subscribe({
 			next: (appUserDetail) => {
 				const { roleIDs, ...appUserFields } = appUserDetail;
-				
+
 				// Refresh the list entry with any updated fields from the fetch
 				this.appUsers.update((existing) => 
 					existing.map((u) => u.id === appUser.id ? { ...u, ...appUserFields } : u)

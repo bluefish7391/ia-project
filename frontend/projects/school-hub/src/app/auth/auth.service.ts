@@ -1,6 +1,6 @@
 import { Injectable, Signal, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Auth, User, authState, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendEmailVerification } from '@angular/fire/auth';
+import { Auth, User, authState, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendEmailVerification, ActionCodeSettings } from '@angular/fire/auth';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -17,7 +17,10 @@ export class AuthService {
   }
 
   sendVerificationEmail(): Promise<void> {
-    return sendEmailVerification(this.auth.currentUser!);
+    const actionCodeSettings: ActionCodeSettings = {
+      url: window.location.origin + '/login',
+    };
+    return sendEmailVerification(this.auth.currentUser!, actionCodeSettings);
   }
 
   signOut(): Promise<void> {

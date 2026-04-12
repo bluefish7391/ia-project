@@ -1,6 +1,6 @@
 import { Injectable, Signal, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Auth, User, authState, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from '@angular/fire/auth';
+import { Auth, User, authState, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendEmailVerification } from '@angular/fire/auth';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -8,12 +8,16 @@ export class AuthService {
 
   readonly currentUser: Signal<User | null | undefined> = toSignal(authState(this.auth));
 
-  signIn(email: string, password: string): Promise<void> {
-    return signInWithEmailAndPassword(this.auth, email, password).then(() => undefined);
+  signIn(email: string, password: string): Promise<User> {
+    return signInWithEmailAndPassword(this.auth, email, password).then((cred) => cred.user);
   }
 
   signUp(email: string, password: string): Promise<void> {
     return createUserWithEmailAndPassword(this.auth, email, password).then(() => undefined);
+  }
+
+  sendVerificationEmail(): Promise<void> {
+    return sendEmailVerification(this.auth.currentUser!);
   }
 
   signOut(): Promise<void> {

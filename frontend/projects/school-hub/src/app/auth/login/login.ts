@@ -28,7 +28,14 @@ export class LoginComponent {
     this.loading.set(true);
     try {
       const { email, password } = this.form.getRawValue();
-      await this.authService.signIn(email, password);
+      const user = await this.authService.signIn(email, password);
+
+      if (!user.emailVerified) {
+        await this.authService.signOut();
+        this.error.set('Your email address has not been verified. Please check your inbox for the verification link.');
+        return;
+      }
+
       await this.router.navigate(['/select-tenant']);
     } catch (err: unknown) {
       this.error.set(err instanceof Error ? err.message : 'Sign-in failed.');

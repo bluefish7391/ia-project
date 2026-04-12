@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../auth.service';
 
 function passwordMatch(control: AbstractControl): ValidationErrors | null {
@@ -17,7 +17,6 @@ function passwordMatch(control: AbstractControl): ValidationErrors | null {
 })
 export class RegisterComponent {
   private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
   protected readonly form = this.fb.nonNullable.group(
@@ -31,6 +30,8 @@ export class RegisterComponent {
 
   protected readonly error = signal<string | null>(null);
   protected readonly loading = signal(false);
+  protected readonly registered = signal(false);
+  protected readonly registeredEmail = signal('');
 
   protected async onSubmit(): Promise<void> {
     if (this.form.invalid) return;
@@ -39,7 +40,10 @@ export class RegisterComponent {
     try {
       const { email, password } = this.form.getRawValue();
       await this.authService.signUp(email, password);
-      await this.router.navigate(['/admin']);
+      await this.authService.sendVerificationEmail();
+      await this.authService.signOut();
+      this.registeredEmail.set(email);
+      this.registered.set(true);
     } catch (err: unknown) {
       this.error.set(err instanceof Error ? err.message : 'Registration failed.');
     } finally {

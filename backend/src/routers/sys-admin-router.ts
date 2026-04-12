@@ -16,11 +16,13 @@ export class SysAdminRouter extends BaseRouter {
 			this.sendBadRequestError(res, { error: "Email is required." });
 			return;
 		}
-		const success = await sysAdminManager.deleteUser(new RequestContext(req), email);
-		if (!success) {
-			this.sendServerError(res, { error: "Failed to delete user. User may not exist." });
+		const deleteResultMessage = await sysAdminManager.deleteUser(new RequestContext(req), email);
+
+		if (!deleteResultMessage) {
+			this.sendSuccess(res, { success: true, message: `User with email "${email}" was deleted successfully.` });
 			return;
 		}
-		this.sendSuccess(res, { message: `User with email "${email}" was deleted successfully.` });
+
+		this.sendSuccess(res, { success: false, message: deleteResultMessage});
 	}
 }

@@ -2,6 +2,7 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../api.service';
+import { GeneralAPIResponse } from 'shared/kinds';
 
 @Component({
   selector: 'app-delete-user',
@@ -27,12 +28,16 @@ export class DeleteUser {
     this.errorMessage.set(null);
 
     this.apiService
-      .delete<void>(`sys-admin/users/${encodeURIComponent(email)}`)
+      .delete<GeneralAPIResponse>(`sys-admin/users/${encodeURIComponent(email)}`)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
-          this.successMessage.set(`User "${email}" was deleted successfully.`);
-          this.email = '';
+        next: (response) => {
+          if (response.success) {
+            this.successMessage.set(`User "${email}" was deleted successfully.`);
+            this.email = '';
+          } else {
+            this.errorMessage.set(response.message || 'Failed to delete user. Please verify the email and try again.');
+          }
           this.isSubmitting.set(false);
         },
         error: () => {

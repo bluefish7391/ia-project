@@ -90,3 +90,8 @@ export interface UserRole {
 	appUserID: string;
 	appRoleID: string;
 }
+
+export interface GeneralAPIResponse {
+	success: boolean;
+	message?: string;
+}

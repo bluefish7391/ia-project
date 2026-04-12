@@ -66,4 +66,15 @@ export class AppRoleDAO {
 		await datastore.delete(key);
 		return true;
 	}
+
+	public async getAppRolesFromUserRoles(tenantID: string, appRoleIDs: string[]): Promise<AppRole[]> {
+		if (appRoleIDs.length === 0) return [];
+		const keys = appRoleIDs.map(id => datastore.key([AppRoleDAO.APP_ROLE_KIND, id]));
+		const [entities] = await datastore.get(keys);
+		return (entities as (AppRole | null)[])
+			.map((e, i) => (e && (e as AppRole & { tenantID: string }).tenantID === tenantID)
+				? ({ ...e, id: appRoleIDs[i] }) as AppRole
+				: null)
+			.filter((e): e is AppRole => e !== null);
+	}
 }

@@ -1,4 +1,5 @@
 import { sysAdminManager } from "../managers/manager-factory";
+import { authenticator } from "../middleware/authenticator";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
 import express, { Request, Response } from "express";
@@ -7,7 +8,7 @@ export class SysAdminRouter extends BaseRouter {
 	public static buildRouter() {
 		const sysAdminRouter = new SysAdminRouter();
 		return express.Router()
-			.delete("/users/:email", sysAdminRouter.wrapAsync(sysAdminRouter.deleteUser.bind(sysAdminRouter)));
+			.delete("/users/:email", authenticator(["SYS_ADMIN_DELETE_USER"]), sysAdminRouter.wrapAsync(sysAdminRouter.deleteUser.bind(sysAdminRouter)));
 	}
 
 	async deleteUser(req: Request, res: Response) {

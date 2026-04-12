@@ -9,6 +9,7 @@ import { AppRoleRouter } from "./routers/app-role-router";
 import { authMiddleware } from "./middleware/auth-middleware";
 import { Logger } from "./logger";
 import { SecurityRouter } from "./routers/security-router";
+import { SysAdminRouter } from "./routers/sys-admin-router";
 
 initializeApp();
 
@@ -33,5 +34,6 @@ expressApp.use('/organizations', OrganizationRouter.buildRouter());
 expressApp.use('/app-users', AppUserRouter.buildRouter());
 expressApp.use('/students', StudentRouter.buildRouter());
 expressApp.use('/app-roles', AppRoleRouter.buildRouter());
+expressApp.use('/sys-admin', SysAdminRouter.buildRouter());
 
 export const api = onRequest(expressApp);

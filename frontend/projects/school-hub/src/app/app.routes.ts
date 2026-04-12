@@ -34,4 +34,9 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () => import('./admin/admin-module').then((module) => module.AdminModule),
   },
+  {
+    path: 'sys-admin',
+    canActivate: [authGuard],
+    loadChildren: () => import('./sys-admin/sys-admin-module').then((module) => module.SysAdminModule),
+  }
 ];

@@ -1,0 +1,37 @@
+<section class="delete-user">
+  <h2 class="delete-user__title">Delete User</h2>
+
+  <form class="delete-user__form" (ngSubmit)="deleteUser()">
+    <label class="delete-user__label" for="email">Email address</label>
+    <input
+      id="email"
+      class="delete-user__input"
+      type="email"
+      [(ngModel)]="email"
+      name="email"
+      placeholder="user@example.com"
+      autocomplete="off"
+      required
+    />
+
+    <button
+      class="delete-user__btn delete-user__btn--danger"
+      type="submit"
+      [disabled]="isSubmitting() || !email.trim()"
+    >
+      @if (isSubmitting()) {
+        Deleting…
+      } @else {
+        Delete User
+      }
+    </button>
+  </form>
+
+  @if (successMessage()) {
+    <p class="delete-user__message delete-user__message--success">{{ successMessage() }}</p>
+  }
+
+  @if (errorMessage()) {
+    <p class="delete-user__message delete-user__message--error">{{ errorMessage() }}</p>
+  }
+</section>

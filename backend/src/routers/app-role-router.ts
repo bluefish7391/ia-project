@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { AppPermission } from "../../../shared/kinds";
-import { appRoleManager } from "../managers/manager-factor";
+import { appRoleManager } from "../managers/manager-factory";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
 

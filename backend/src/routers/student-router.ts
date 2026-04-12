@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { studentManager } from "../managers/manager-factor";
+import { studentManager } from "../managers/manager-factory";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
 

@@ -1,4 +1,4 @@
-import { sysAdminManager } from "../managers/manager-factor";
+import { sysAdminManager } from "../managers/manager-factory";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
 import express, { Request, Response } from "express";

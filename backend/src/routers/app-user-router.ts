@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { appUserManager } from "../managers/manager-factor";
+import { appUserManager } from "../managers/manager-factory";
 import { AppUserDetail, AppUserUpsertPayload } from "../../../shared/kinds";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";

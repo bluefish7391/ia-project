@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { organizationManager } from "../managers/manager-factor";
+import { organizationManager } from "../managers/manager-factory";
 import { Organization } from "../../../shared/kinds";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";

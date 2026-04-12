@@ -1,6 +1,6 @@
 
 import express, { Request, Response } from "express";
-import { securityManager } from "../managers/manager-factor";
+import { securityManager } from "../managers/manager-factory";
 import { BaseRouter } from "./base-router";
 
 export class SecurityRouter extends BaseRouter {

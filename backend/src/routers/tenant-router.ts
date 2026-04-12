@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { tenantManager } from "../managers/manager-factor";
+import { tenantManager } from "../managers/manager-factory";
 import { Tenant } from "../../../shared/kinds";
 import { BaseRouter } from "./base-router";
 

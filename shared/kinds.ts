@@ -74,6 +74,10 @@ export const AppPermissions = {
 	LIST_USERS: {
 		name: "List users",
 		description: "List users without directly accessing them"
+	},
+	SYS_ADMIN_DELETE_USER: {
+		name: "System admin delete user",
+		description: "Delete users from Google Identity Platform as a system administrator"
 	}
 } as const satisfies Record<string, AppPermission>;
 
@@ -82,7 +86,7 @@ export interface AppRole {
 	tenantID: string;
 	name: string;
 	description: string;
-	appPermissions: AppPermission[];
+	appPermissions: string[];
 }
 
 export interface UserRole {

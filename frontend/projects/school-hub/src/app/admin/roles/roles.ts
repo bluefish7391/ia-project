@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { AppRole, AppPermission } from 'shared/kinds';
+import { AppRole, AppPermission, AppPermissions } from 'shared/kinds';
 import { ApiService } from '../../api.service';
 import { AppRoleUpsertPayload } from './role.model';
 import { RoleForm } from './role-form/role-form';
@@ -61,12 +61,29 @@ export class Roles implements OnInit {
   }
 
   protected updateRole(role: AppRole): void {
+	console.log('Updating role:', role);
+
     this.formMode.set('edit');
     this.editingRoleId.set(role.id);
     this.formName.set(role.name);
     this.formDescription.set(role.description);
-    this.formAppPermissions.set(role.appPermissions);
+    this.formAppPermissions.set(this.getAppRolePermissionsObjectsFromNames(role.appPermissions));
     this.actionMessage.set(null);
+  }
+
+  private getAppRolePermissionsObjectsFromNames(permissions: string[]): AppPermission[] {
+	const allPermissions = Object.entries(AppPermissions) as [
+		string,
+		AppPermission,
+	][];
+
+	return permissions.map((permName) => {
+	  const perm = allPermissions.find(([name, p]) => name === permName)?.[1];
+	  if (!perm) {
+		console.warn(`Permission "${permName}" not found in AppPermissions.`);
+	  }
+	  return perm;
+	}).filter(p => !!p);
   }
 
   protected deleteRole(role: AppRole): void {

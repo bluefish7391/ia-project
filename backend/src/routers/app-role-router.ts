@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import { AppPermission } from "../../../shared/kinds";
 import { appRoleManager } from "../managers/manager-factory";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
@@ -26,7 +25,7 @@ export class AppRoleRouter extends BaseRouter {
     }
 
     async createAppRole(req: Request, res: Response) {
-        const body = req.body as { name?: string; description?: string; appPermissions?: AppPermission[] };
+        const body = req.body as { name?: string; description?: string; appPermissions?: string[] };
         if (!body.name) {
             this.sendBadRequestError(res, { error: "name is required." });
             return;
@@ -48,7 +47,7 @@ export class AppRoleRouter extends BaseRouter {
     }
 
     async updateAppRole(req: Request, res: Response) {
-        const body = req.body as { name?: string; description?: string; appPermissions?: AppPermission[] };
+        const body = req.body as { name?: string; description?: string; appPermissions?: string[] };
         const id = req.params["id"] as string;
         if (!body.name) {
             this.sendBadRequestError(res, { error: "name is required." });

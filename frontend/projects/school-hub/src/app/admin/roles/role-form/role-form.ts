@@ -76,12 +76,12 @@ export class RoleForm implements OnChanges {
   }
 
   protected submitRole(): void {
-    const appPermissions = this.selectedPermissions.map(([, permission]) => permission);
+    const appPermissionNames = this.selectedPermissions.map(([name, ]) => name);
 
     this.save.emit({
       name: this.roleName,
       description: this.roleDescription,
-      appPermissions,
+      appPermissions: appPermissionNames,
     });
   }
 

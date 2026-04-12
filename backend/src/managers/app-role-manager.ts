@@ -1,4 +1,4 @@
-import { AppPermission, AppRole } from "../../../shared/kinds";
+import { AppRole } from "../../../shared/kinds";
 import { appRoleDAO } from "../daos/dao-factory";
 import { generateId } from "../idutilities";
 import { BadRequestError, ServerError } from "../kinds";
@@ -22,7 +22,7 @@ export class AppRoleManager {
 
     async createAppRole(
         requestContext: RequestContext,
-        data: { name: string; description: string; appPermissions: AppPermission[] },
+        data: { name: string; description: string; appPermissions: string[] },
     ): Promise<AppRole> {
         const appRole: AppRole = {
             id: generateId(),
@@ -36,7 +36,7 @@ export class AppRoleManager {
     async updateAppRole(
         requestContext: RequestContext,
         id: string,
-        data: { name: string; description: string; appPermissions: AppPermission[] },
+        data: { name: string; description: string; appPermissions: string[] },
     ): Promise<AppRole> {
         const existing = await appRoleDAO.getAppRole(requestContext.getCurrentTenantID(), id);
         console.log("updateAppRole: existing=", existing);

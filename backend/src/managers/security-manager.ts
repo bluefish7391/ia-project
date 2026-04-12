@@ -17,6 +17,10 @@ export class SecurityManager {
 			throw new BadRequestError("Email not found in token.");
 		}
 
+		if (!decoded.email_verified) {
+			throw new BadRequestError("Email not verified.");
+		}
+
 		const appUsers = await securityDAO.getAppUsersByEmail(email);
 		console.log("getUserTenants: appUsers=", appUsers);
 		if (!appUsers) {
@@ -39,6 +43,10 @@ export class SecurityManager {
 		console.log("createAppSession: decoded=", decoded);
 		if (!email) {
 			throw new BadRequestError("Email not found in token.");
+		}
+
+		if (!decoded.email_verified) {
+			throw new BadRequestError("Email not verified.");
 		}
 
 		const appUser = await securityDAO.getAppUserByEmailAndTenantID(email, tenantID);

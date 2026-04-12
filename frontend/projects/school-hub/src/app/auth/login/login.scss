@@ -30,6 +30,28 @@
     margin-bottom: 0.75rem;
   }
 
+  .success {
+    color: #2e7d32;
+    margin-bottom: 0.75rem;
+  }
+
+  .resend {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    background: none;
+    border: 1px solid #1565c0;
+    color: #1565c0;
+    border-radius: 4px;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
   button {
     width: 100%;
     padding: 0.6rem;

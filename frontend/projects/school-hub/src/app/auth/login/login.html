@@ -16,6 +16,16 @@
       <p class="error">{{ error() }}</p>
     }
 
+    @if (showResendVerification()) {
+      <button type="button" class="resend" [disabled]="resendLoading()" (click)="resendVerificationEmail()">
+        {{ resendLoading() ? 'Sending…' : 'Resend verification email' }}
+      </button>
+    }
+
+    @if (resendSent()) {
+      <p class="success">Verification email sent. Please check your inbox.</p>
+    }
+
     <button type="submit" [disabled]="loading()">
       {{ loading() ? 'Signing in…' : 'Sign In' }}
     </button>

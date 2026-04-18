@@ -1,4 +1,4 @@
-import { QueryStudentLunchCheckRequest, SaveStudentLunchCheckRequest } from "../../../shared/kinds";
+import { GetStudentLunchCheckInAndOutHistoryRequest, QueryStudentLunchCheckRequest, SaveStudentLunchCheckRequest } from "../../../shared/kinds";
 import { lunchCheckManager } from "../managers/manager-factory";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
@@ -9,7 +9,8 @@ export class LunchCheckRouter extends BaseRouter {
 		const lunchCheckRouter = new LunchCheckRouter();
 		return express.Router()
 			.post("/student-lunch-check-records", lunchCheckRouter.wrapAsync(lunchCheckRouter.getAllStudentLunchCheckRecords.bind(lunchCheckRouter)))
-			.put("/student-lunch-check-record", lunchCheckRouter.wrapAsync(lunchCheckRouter.saveStudentLunchCheck.bind(lunchCheckRouter)));
+			.put("/student-lunch-check-record", lunchCheckRouter.wrapAsync(lunchCheckRouter.saveStudentLunchCheck.bind(lunchCheckRouter)))
+			.get("/student-lunch-check-in-and-out-history", lunchCheckRouter.wrapAsync(lunchCheckRouter.getStudentLunchCheckInAndOutHistory.bind(lunchCheckRouter)));
 	}
 
 	async getAllStudentLunchCheckRecords(req: Request, res: Response) {
@@ -32,5 +33,15 @@ export class LunchCheckRouter extends BaseRouter {
 
 		const lunchCheckRecord = await lunchCheckManager.saveStudentLunchCheck(new RequestContext(req), body);
 		this.sendSuccess(res, { lunchCheckRecord });
+	}
+
+	async getStudentLunchCheckInAndOutHistory(req: Request, res: Response) {
+		const body = req.body as GetStudentLunchCheckInAndOutHistoryRequest;
+		if (!body.studentID) {
+			this.sendBadRequestError(res, { error: "studentID is required." });
+			return;
+		}
+		const history = await lunchCheckManager.getStudentLunchCheckInAndOutHistory(new RequestContext(req), body);
+		this.sendSuccess(res, history);
 	}
 }

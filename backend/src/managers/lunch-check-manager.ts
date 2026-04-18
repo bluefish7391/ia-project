@@ -1,4 +1,4 @@
-import { LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, SaveStudentLunchCheckRequest, SaveStudentLunchCheckResponse, StudentLunchCheck, StudentLunchCheckCompositeRecord } from "../../../shared/kinds";
+import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, SaveStudentLunchCheckRequest, SaveStudentLunchCheckResponse, StudentLunchCheck, StudentLunchCheckCompositeRecord } from "../../../shared/kinds";
 import { lunchCheckDAO, studentDAO } from "../daos/dao-factory";
 import { generateId } from "../idutilities";
 import { BadRequestError } from "../kinds";
@@ -8,18 +8,9 @@ export class LunchCheckManager {
 	async getAllStudents(requestContext: RequestContext, filterOptions: QueryStudentLunchCheckRequest): Promise<QueryStudentLunchCheckResponse> {
 		const tenantID = requestContext.getCurrentTenantID();
 		// Validate lunchDate format
-		if (isNaN(Date.parse(filterOptions.lunchDate))) {
+		if (!this.isValidISODateString(filterOptions.lunchDate)) {
 			throw new Error("Invalid lunchDate format. Expected ISO date string.");
 		}
-
-		/**
-		 * 	schoolStudentID?: string; // Refers to Student.schoolStudentID
-			firstName?: string;
-			lastName?: string;
-			lunchDate: string; // ISO date string (e.g., "2024-01-01")
-			page?: number;
-			pageSize?: number;
-		 */
 
 		let students = await studentDAO.getAllStudents(tenantID);
 
@@ -85,7 +76,7 @@ export class LunchCheckManager {
 	async saveStudentLunchCheck(requestContext: RequestContext, data: SaveStudentLunchCheckRequest): Promise<SaveStudentLunchCheckResponse> {
 		const tenantID = requestContext.getCurrentTenantID();
 		// Validate lunchDate format
-		if (isNaN(Date.parse(data.lunchDate))) {
+		if (!this.isValidISODateString(data.lunchDate)) {
 			throw new BadRequestError("Invalid lunchDate format. Expected ISO date string.");
 		}
 
@@ -139,5 +130,53 @@ export class LunchCheckManager {
 			checkOutTime: !checkingIn ? new Date() : undefined,
 			createdDate: new Date(),
 		};
+	}
+
+	async getStudentLunchCheckInAndOutHistory(requestContext: RequestContext, data: GetStudentLunchCheckInAndOutHistoryRequest): Promise<GetStudentLunchCheckInAndOutHistoryResponse> {
+		const tenantID = requestContext.getCurrentTenantID();
+		// Validate startDate and endDate format
+		if (data.startDate && !this.isValidISODateString(data.startDate)) {
+			throw new BadRequestError("Invalid startDate format. Expected ISO date string.");
+		}
+		if (data.endDate && !this.isValidISODateString(data.endDate)) {
+			throw new BadRequestError("Invalid endDate format. Expected ISO date string.");
+		}
+
+		const student = await studentDAO.getStudent(tenantID, data.studentID);
+		if (!student) {
+			throw new BadRequestError("No student with that id.");
+		}
+
+		let lunchCheckRecords: LunchCheckRecord[] = await lunchCheckDAO.getLunchCheckRecordsByStudent(tenantID, student.id);
+		if (data.startDate) {
+			lunchCheckRecords = lunchCheckRecords.filter(record => record.lunchDate >= data.startDate!);
+		}
+		if (data.endDate) {
+			lunchCheckRecords = lunchCheckRecords.filter(record => record.lunchDate <= data.endDate!);
+		}
+
+		const pageNumber = data.pageNumber && data.pageNumber > 0 ? data.pageNumber : 0;
+		const pageSize = data.pageSize && data.pageSize > 0 ? Math.min(data.pageSize, 100) : 10;
+		let startIndex = pageNumber * pageSize;
+		let endIndex = startIndex + pageSize;
+		let realPageNumberReturned = pageNumber;
+
+		if (startIndex >= lunchCheckRecords.length) {
+			startIndex = lunchCheckRecords.length - (lunchCheckRecords.length % pageSize);
+			realPageNumberReturned = Math.floor(startIndex / pageSize);
+		}
+
+		if (endIndex > lunchCheckRecords.length) {
+			endIndex = lunchCheckRecords.length;
+		}
+
+		lunchCheckRecords = lunchCheckRecords.slice(startIndex, endIndex);
+
+		return { records: lunchCheckRecords, totalRecords: lunchCheckRecords.length, pageNumber: realPageNumberReturned, pageSize } satisfies GetStudentLunchCheckInAndOutHistoryResponse;
+	}
+
+	private isValidISODateString(dateString: string): boolean {
+		const date = new Date(dateString);
+		return !isNaN(date.getTime()) && date.toISOString() === dateString;
 	}
 }

@@ -34,4 +34,12 @@ export class LunchCheckDAO {
 		await datastore.save(entity);
 		return lunchCheckRecord;
 	}
+
+	async getLunchCheckRecordsByStudent(tenantID: string, studentID: string): Promise<LunchCheckRecord[]> {
+		const query = datastore.createQuery(LunchCheckDAO.LUNCH_CHECK_RECORD_KIND)
+			.filter("tenantID", "=", tenantID)
+			.filter("studentID", "=", studentID);
+		const data = await query.run();
+		return data[0] as LunchCheckRecord[];
+	}
 }

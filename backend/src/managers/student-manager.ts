@@ -44,6 +44,12 @@ export class StudentManager {
         if (!currentStudent) {
             throw new ServerError("Student not found.");
         }
+
+		const existingWithSameSchoolID = await studentDAO.getStudentBySchoolID(requestContext.getCurrentTenantID(), student.schoolStudentID);
+		if (existingWithSameSchoolID && existingWithSameSchoolID.id !== student.id) {
+			throw new BadRequestError("A student with that School ID already exists.");
+		}
+		
         return await studentDAO.updateStudent({ ...student, tenantID: requestContext.getCurrentTenantID() });
     }
 

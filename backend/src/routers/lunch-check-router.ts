@@ -1,4 +1,4 @@
-import { QueryStudentLunchCheckRequest } from "../../../shared/kinds";
+import { QueryStudentLunchCheckRequest, SaveStudentLunchCheckRequest } from "../../../shared/kinds";
 import { lunchCheckManager } from "../managers/manager-factory";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
@@ -8,7 +8,8 @@ export class LunchCheckRouter extends BaseRouter {
 	public static buildRouter() {
 		const lunchCheckRouter = new LunchCheckRouter();
 		return express.Router()
-			.post("/student-lunch-check-records", lunchCheckRouter.wrapAsync(lunchCheckRouter.getAllStudentLunchCheckRecords.bind(lunchCheckRouter)));
+			.post("/student-lunch-check-records", lunchCheckRouter.wrapAsync(lunchCheckRouter.getAllStudentLunchCheckRecords.bind(lunchCheckRouter)))
+			.put("/student-lunch-check-record", lunchCheckRouter.wrapAsync(lunchCheckRouter.saveStudentLunchCheck.bind(lunchCheckRouter)));
 	}
 
 	async getAllStudentLunchCheckRecords(req: Request, res: Response) {
@@ -20,5 +21,16 @@ export class LunchCheckRouter extends BaseRouter {
 
 		const students = await lunchCheckManager.getAllStudents(new RequestContext(req), filterOptions);
 		this.sendSuccess(res, students);
+	}
+
+	async saveStudentLunchCheck(req: Request, res: Response) {
+		const body = req.body as SaveStudentLunchCheckRequest;
+		if (!body.studentID || !body.lunchDate || body.checkingIn === undefined) {
+			this.sendBadRequestError(res, { error: "studentID, lunchDate and checkingIn are required." });
+			return;
+		}
+
+		const lunchCheckRecord = await lunchCheckManager.saveStudentLunchCheck(new RequestContext(req), body);
+		this.sendSuccess(res, { lunchCheckRecord });
 	}
 }

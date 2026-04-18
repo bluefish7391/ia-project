@@ -1,5 +1,7 @@
-import { LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, StudentLunchCheck, StudentLunchCheckCompositeRecord } from "../../../shared/kinds";
+import { LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, SaveStudentLunchCheckRequest, SaveStudentLunchCheckResponse, StudentLunchCheck, StudentLunchCheckCompositeRecord } from "../../../shared/kinds";
 import { lunchCheckDAO, studentDAO } from "../daos/dao-factory";
+import { generateId } from "../idutilities";
+import { BadRequestError } from "../kinds";
 import { RequestContext } from "../request-context";
 
 export class LunchCheckManager {
@@ -47,7 +49,7 @@ export class LunchCheckManager {
 
 		if (startIndex >= students.length) {
 			startIndex = students.length - (students.length % pageSize);
-			realPageNumberReturned = Math.floor(startIndex / pageSize);	
+			realPageNumberReturned = Math.floor(startIndex / pageSize);
 		}
 
 		if (endIndex > students.length) {
@@ -78,5 +80,64 @@ export class LunchCheckManager {
 			return { student, studentLunchCheck, lunchCheckRecords: recordsForStudent } satisfies StudentLunchCheckCompositeRecord;
 		});
 		return { records, totalRecords: students.length, pageNumber: realPageNumberReturned, pageSize } satisfies QueryStudentLunchCheckResponse;
+	}
+
+	async saveStudentLunchCheck(requestContext: RequestContext, data: SaveStudentLunchCheckRequest): Promise<SaveStudentLunchCheckResponse> {
+		const tenantID = requestContext.getCurrentTenantID();
+		// Validate lunchDate format
+		if (isNaN(Date.parse(data.lunchDate))) {
+			throw new BadRequestError("Invalid lunchDate format. Expected ISO date string.");
+		}
+
+		const student = await studentDAO.getStudent(tenantID, data.studentID);
+		if (!student) {
+			throw new BadRequestError("No student with that id.");
+		}
+
+		const lunchCheckRecords: LunchCheckRecord[] = await lunchCheckDAO.getLunchCheckRecordsByStudentByDate(tenantID, student.id, data.lunchDate);
+		lunchCheckRecords.sort((a, b) => {
+			// Sort by createdDate ascending
+			return a.createdDate.getTime() - b.createdDate.getTime();
+		});
+
+		let candidateLunchCheckRecordToSave: LunchCheckRecord;
+		if (lunchCheckRecords.length == 0) {
+			candidateLunchCheckRecordToSave = this.createNewLunchCheckRecord(tenantID, student.id, data.lunchDate, data.checkingIn);
+		} else {
+			// Most recent record is the last one in the sorted list
+			candidateLunchCheckRecordToSave = lunchCheckRecords[lunchCheckRecords.length - 1];
+			if (data.checkingIn) {
+				if (candidateLunchCheckRecordToSave.checkInTime) {
+					// If trying to check in but already have a check in time, create a new record
+					candidateLunchCheckRecordToSave = this.createNewLunchCheckRecord(tenantID, student.id, data.lunchDate, data.checkingIn);
+				} else {
+					// If checking in and no check in time, set check in time to now
+					candidateLunchCheckRecordToSave.checkInTime = new Date();
+				}
+			} else {
+				if (candidateLunchCheckRecordToSave.checkOutTime) {
+					// If trying to check out but already have a check out time, create a new record
+					candidateLunchCheckRecordToSave = this.createNewLunchCheckRecord(tenantID, student.id, data.lunchDate, data.checkingIn);
+				} else {
+					// If checking out and no check out time, set check out time to now
+					candidateLunchCheckRecordToSave.checkOutTime = new Date();
+				}
+			}
+		}
+
+		const record = await lunchCheckDAO.saveLunchCheckRecord(candidateLunchCheckRecordToSave);
+		return { lunchCheckRecord: record } satisfies SaveStudentLunchCheckResponse;
+	}
+
+	private createNewLunchCheckRecord(tenantID: string, studentID: string, lunchDate: string, checkingIn: boolean): LunchCheckRecord {
+		return {
+			id: generateId(),
+			tenantID: tenantID,
+			studentID: studentID,
+			lunchDate: lunchDate,
+			checkInTime: checkingIn ? new Date() : undefined,
+			checkOutTime: !checkingIn ? new Date() : undefined,
+			createdDate: new Date(),
+		};
 	}
 }

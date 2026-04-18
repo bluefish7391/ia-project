@@ -59,6 +59,7 @@ export interface LunchCheckRecord {
 	lunchDate: string; // ISO date string (e.g., "2024-01-01")
 	checkInTime?: Date;
 	checkOutTime?: Date;
+	createdDate: Date; // Timestamp for when the record was created
 }
 
 export interface StudentLunchCheckCompositeRecord {
@@ -72,6 +73,16 @@ export interface QueryStudentLunchCheckResponse {
 	totalRecords: number;
 	pageNumber: number; // Real page number being returned based on the number of records and page size, this may differ from the requested page number if the requested page number is out of range
 	pageSize: number; // Real page size being returned based on the number of records and page size, this may differ from the requested page size if the requested page size is out of range
+}
+
+export interface SaveStudentLunchCheckRequest {
+	studentID: string; // Refers to Student.id
+	lunchDate: string; // ISO date string (e.g., "2024-01-01")
+	checkingIn: boolean; // true if checking in, false if checking out
+}
+
+export interface SaveStudentLunchCheckResponse {
+	lunchCheckRecord: LunchCheckRecord; // Record that just got saved
 }
 
 export interface QueryStudentLunchCheckRequest {

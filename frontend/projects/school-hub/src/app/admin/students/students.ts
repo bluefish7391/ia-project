@@ -63,7 +63,7 @@ export class Students implements OnInit {
   protected updateStudent(student: Student): void {
     this.formMode.set('edit');
     this.editingStudentId.set(student.id);
-    this.formId.set(student.id);
+    this.formId.set(student.schoolStudentID);
     this.formFirstName.set(student.firstName);
     this.formLastName.set(student.lastName);
     this.actionMessage.set(null);
@@ -119,7 +119,7 @@ export class Students implements OnInit {
         this.actionMessage.set('Student ID is required.');
         return;
       }
-      this.createStudent({ id, firstName, lastName });
+      this.createStudent({ schoolStudentID: id, firstName, lastName });
       return;
     }
 
@@ -129,7 +129,12 @@ export class Students implements OnInit {
         this.actionMessage.set('Unable to update student. Missing student ID.');
         return;
       }
-      this.editStudent(studentId, { firstName, lastName });
+      const schoolStudentID = (formValue.schoolStudentID ?? '').trim();
+      if (!schoolStudentID) {
+        this.actionMessage.set('Student ID is required.');
+        return;
+      }
+      this.editStudent(studentId, { schoolStudentID, firstName, lastName });
     }
   }
 
@@ -142,7 +147,7 @@ export class Students implements OnInit {
   }
 
   private createStudent(payload: {
-    id: string;
+    schoolStudentID: string;
     firstName: string;
     lastName: string;
   }): void {

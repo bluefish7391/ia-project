@@ -29,9 +29,9 @@ export class StudentRouter extends BaseRouter {
     }
 
     async createStudent(req: Request, res: Response) {
-        const body = req.body as { id?: string; firstName?: string; lastName?: string };
-        if (!body.id) {
-            this.sendBadRequestError(res, { error: "id is required." });
+        const body = req.body as { schoolStudentID?: string; firstName?: string; lastName?: string };
+        if (!body.schoolStudentID) {
+            this.sendBadRequestError(res, { error: "schoolStudentID is required." });
             return;
         }
         if (!body.firstName) {
@@ -43,7 +43,7 @@ export class StudentRouter extends BaseRouter {
             return;
         }
         const student = await studentManager.createStudent(new RequestContext(req), {
-            id: body.id,
+            schoolStudentID: body.schoolStudentID,
             firstName: body.firstName,
             lastName: body.lastName,
         });
@@ -51,8 +51,12 @@ export class StudentRouter extends BaseRouter {
     }
 
     async updateStudent(req: Request, res: Response) {
-        const body = req.body as { firstName?: string; lastName?: string };
+        const body = req.body as { schoolStudentID?: string; firstName?: string; lastName?: string };
         const id = req.params["id"] as string;
+		if (!body.schoolStudentID) {
+			this.sendBadRequestError(res, { error: "schoolStudentID is required." });
+			return;
+		}
         if (!body.firstName) {
             this.sendBadRequestError(res, { error: "firstName is required." });
             return;
@@ -63,13 +67,10 @@ export class StudentRouter extends BaseRouter {
         }
         const student = await studentManager.updateStudent(new RequestContext(req), {
             id,
+            schoolStudentID: body.schoolStudentID,
             firstName: body.firstName,
             lastName: body.lastName,
         });
-        if (!student) {
-            this.sendServerError(res, { error: "Student not found." });
-            return;
-        }
         this.sendSuccess(res, student);
     }
 

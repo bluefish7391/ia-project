@@ -2,6 +2,7 @@ import { studentDAO } from "../daos/dao-factory";
 import { Student } from "../../../shared/kinds";
 import { RequestContext } from "../request-context";
 import { BadRequestError, ServerError } from "../kinds";
+import { generateId } from "../idutilities";
 
 export class StudentManager {
     async getAllStudents(requestContext: RequestContext): Promise<Student[]> {
@@ -21,14 +22,15 @@ export class StudentManager {
 
     async createStudent(
         requestContext: RequestContext,
-        data: { id: string; firstName: string; lastName: string },
+        data: { schoolStudentID: string; firstName: string; lastName: string },
     ): Promise<Student> {
         const tenantID = requestContext.getCurrentTenantID();
-        const existing = await studentDAO.getStudent(tenantID, data.id);
+        const existing = await studentDAO.getStudentBySchoolID(tenantID, data.schoolStudentID);
         if (existing) {
-            throw new BadRequestError("A student with that ID already exists.");
+            throw new BadRequestError("A student with that School ID already exists.");
         }
-        const student: Student = { ...data, tenantID };
+
+        const student: Student = { ...data, tenantID, id: generateId() };
         console.log("createStudent: student=", student);
         return await studentDAO.createStudent(student);
     }

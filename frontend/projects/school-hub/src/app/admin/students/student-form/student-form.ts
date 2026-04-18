@@ -19,25 +19,25 @@ import { StudentUpsertPayload } from '../student.model';
 export class StudentForm implements OnChanges {
   @Input() mode: 'add' | 'edit' = 'add';
   @Input() isSubmitting = false;
-  @Input() initialId = '';
+  @Input() initialSchoolStudentID = '';
   @Input() initialFirstName = '';
   @Input() initialLastName = '';
 
   @Output() save = new EventEmitter<StudentUpsertPayload>();
   @Output() cancel = new EventEmitter<void>();
 
-  protected studentId = '';
+  protected schoolStudentID = '';
   protected studentFirstName = '';
   protected studentLastName = '';
 
   ngOnChanges(changes: SimpleChanges): void {
     if (
-      changes['initialId'] ||
+      changes['initialSchoolStudentID'] ||
       changes['initialFirstName'] ||
       changes['initialLastName'] ||
       changes['mode']
     ) {
-      this.studentId = this.initialId;
+      this.schoolStudentID = this.initialSchoolStudentID;
       this.studentFirstName = this.initialFirstName;
       this.studentLastName = this.initialLastName;
     }
@@ -45,11 +45,12 @@ export class StudentForm implements OnChanges {
 
   protected submitStudent(): void {
     const payload: StudentUpsertPayload = {
+      schoolStudentID: this.schoolStudentID,
       firstName: this.studentFirstName,
       lastName: this.studentLastName,
     };
     if (this.mode === 'add') {
-      payload.id = this.studentId;
+      payload.id = this.schoolStudentID;
     }
     this.save.emit(payload);
   }

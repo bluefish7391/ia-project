@@ -5,15 +5,21 @@
       <input
         id="studentId"
         name="studentId"
-        [(ngModel)]="studentId"
+        [(ngModel)]="schoolStudentID"
         [disabled]="isSubmitting"
         required
       />
     </div>
   } @else {
     <div class="students__form-field">
-      <span class="students__form-label">Student ID</span>
-      <span class="students__form-static">{{ initialId }}</span>
+      <label for="studentId">Student ID</label>
+      <input
+        id="studentId"
+        name="studentId"
+        [(ngModel)]="schoolStudentID"
+        [disabled]="isSubmitting"
+        required
+      />
     </div>
   }
 

@@ -17,6 +17,18 @@ export class StudentDAO {
         return { id, ...entity };
     }
 
+	public async getStudentBySchoolID(tenantID: string, schoolStudentID: string): Promise<Student | null> {
+		const query = datastore
+			.createQuery(StudentDAO.STUDENT_KIND)
+			.filter("tenantID", "=", tenantID)
+			.filter("schoolStudentID", "=", schoolStudentID)
+			.limit(1);
+		const data = await query.run();
+		const students = data[0] as Student[];
+		if (students.length === 0) return null;
+		return students[0];
+	}
+
     public async createStudent(student: Student): Promise<Student> {
         const key = datastore.key([StudentDAO.STUDENT_KIND, student.id]);
         const entity = { key, data: student };

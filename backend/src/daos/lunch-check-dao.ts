@@ -1,0 +1,21 @@
+import { LunchCheckRecord, StudentLunchCheck } from "../../../shared/kinds";
+import { datastore } from "./datastore-factory";
+
+export class LunchCheckDAO {
+	static readonly LUNCH_CHECK_RECORD_KIND = "LunchCheckRecord";
+	static readonly STUDENT_LUNCH_CHECK_KIND = "StudentLunchCheck";
+
+	async getLunchCheckRecordsByDate(tenantID: string, lunchDate: string): Promise<LunchCheckRecord[]> {
+		const query = datastore.createQuery(LunchCheckDAO.LUNCH_CHECK_RECORD_KIND)
+			.filter("tenantID", "=", tenantID)
+			.filter("lunchDate", "=", lunchDate);
+		const data = await query.run();
+		return data[0] as LunchCheckRecord[];
+	}
+
+	async getStudentLunchChecksForStudents(tenantID: string): Promise<StudentLunchCheck[]> {
+		const query = datastore.createQuery(LunchCheckDAO.STUDENT_LUNCH_CHECK_KIND)
+			.filter("tenantID", "=", tenantID);
+		return query.run().then(data => data[0] as StudentLunchCheck[]);
+	}
+}

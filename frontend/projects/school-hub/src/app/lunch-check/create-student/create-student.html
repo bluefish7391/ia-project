@@ -1,4 +1,4 @@
-<form class="cs-form" (ngSubmit)="onSubmit()" novalidate>
+<form class="cs-form" (submit)="$event.preventDefault(); onSubmit()" novalidate>
   <div class="cs-form__row">
     <label class="cs-form__label" for="cs-school-id">School ID</label>
     <input

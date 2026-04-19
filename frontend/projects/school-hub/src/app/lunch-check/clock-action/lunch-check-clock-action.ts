@@ -10,10 +10,20 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, switchMap, catchError, of, startWith } from 'rxjs';
-import { QueryStudentLunchCheckResponse, Student, StudentLunchCheckCompositeRecord } from '../../../../../../../shared/kinds';
+import { LunchCheckRecord, QueryStudentLunchCheckResponse, Student, StudentLunchCheckCompositeRecord } from '../../../../../../../shared/kinds';
 import { LunchCheckService } from '../lunch-check.service';
 import { CreateStudentComponent, CreateStudentFormData } from '../create-student/create-student';
 import { StudentListComponent, getClockStatus } from '../student-list/student-list';
+
+interface ClockEvent {
+	type: 'in' | 'out';
+	time: Date;
+	label: string;
+}
+
+function formatTime(d: Date): string {
+	return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
 
 @Component({
 	selector: 'app-lunch-check-clock-action',
@@ -128,6 +138,23 @@ export class LunchCheckClockActionComponent implements OnInit {
 	});
 
 	protected readonly studentResults = computed(() => this.results().records);
+
+	protected readonly todayHistory = computed((): ClockEvent[] => {
+		const rec = this.selectedRecord();
+		if (!rec) return [];
+		const events: ClockEvent[] = [];
+		for (const r of rec.lunchCheckRecords) {
+			if (r.checkInTime) {
+				const t = new Date(r.checkInTime);
+				events.push({ type: 'in', time: t, label: formatTime(t) });
+			}
+			if (r.checkOutTime) {
+				const t = new Date(r.checkOutTime);
+				events.push({ type: 'out', time: t, label: formatTime(t) });
+			}
+		}
+		return events.sort((a, b) => b.time.getTime() - a.time.getTime());
+	});
 
 	constructor() {
 		// Watch search signals and push to subject

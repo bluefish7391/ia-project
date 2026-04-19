@@ -42,4 +42,11 @@ export class LunchCheckDAO {
 		const data = await query.run();
 		return data[0] as LunchCheckRecord[];
 	}
+
+	async saveStudentLunchCheckConfig(studentLunchCheck: StudentLunchCheck): Promise<StudentLunchCheck> {
+		const key = datastore.key([LunchCheckDAO.STUDENT_LUNCH_CHECK_KIND, studentLunchCheck.studentID]);
+		const entity = { key, data: studentLunchCheck };
+		await datastore.save(entity);
+		return studentLunchCheck;
+	}
 }

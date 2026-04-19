@@ -1,0 +1,47 @@
+<div class="sl-container">
+  @if (isLoading()) {
+    <div class="sl-spinner" role="status" aria-label="Loading students">
+      <div class="sl-spinner__circle"></div>
+    </div>
+  } @else if (records().length === 0) {
+    <p class="sl-empty">No students found. Try adjusting your search.</p>
+  } @else {
+    <ul class="sl-list" role="listbox" aria-label="Student search results">
+      @for (record of records(); track record.student.id) {
+        <li
+          class="sl-card"
+          [class.sl-card--selected]="isSelected(record)"
+          role="option"
+          [attr.aria-selected]="isSelected(record)"
+          (click)="select(record)"
+          (keydown.enter)="select(record)"
+          (keydown.space)="select(record)"
+          tabindex="0"
+        >
+          <div class="sl-card__info">
+            <span class="sl-card__name">{{ record.student.firstName }} {{ record.student.lastName }}</span>
+            <span class="sl-card__id">ID: {{ record.student.schoolStudentID }}</span>
+          </div>
+          <div class="sl-card__badges">
+            @if (record.studentLunchCheck?.contractSigned) {
+              <span class="sl-badge sl-badge--contract">Contract Signed</span>
+            } @else {
+              <span class="sl-badge sl-badge--no-contract">No Contract</span>
+            }
+            @switch (getClockStatus(record.lunchCheckRecords)) {
+              @case ('clocked-in') {
+                <span class="sl-badge sl-badge--clocked-in">Clocked In</span>
+              }
+              @case ('clocked-out') {
+                <span class="sl-badge sl-badge--clocked-out">Clocked Out</span>
+              }
+              @default {
+                <span class="sl-badge sl-badge--not-clocked-in">Not Clocked In</span>
+              }
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

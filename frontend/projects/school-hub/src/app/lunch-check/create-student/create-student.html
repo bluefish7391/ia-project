@@ -1,0 +1,75 @@
+<form class="cs-form" (ngSubmit)="onSubmit()" novalidate>
+  <div class="cs-form__row">
+    <label class="cs-form__label" for="cs-school-id">School ID</label>
+    <input
+      id="cs-school-id"
+      class="cs-form__input"
+      type="text"
+      [value]="schoolStudentID()"
+      (input)="schoolStudentID.set($any($event.target).value)"
+      [disabled]="isSaving()"
+      placeholder="e.g. 12345"
+      autocomplete="off"
+    />
+  </div>
+
+  <div class="cs-form__row">
+    <label class="cs-form__label" for="cs-first-name">First Name</label>
+    <input
+      id="cs-first-name"
+      class="cs-form__input"
+      type="text"
+      [value]="firstName()"
+      (input)="firstName.set($any($event.target).value)"
+      [disabled]="isSaving()"
+      placeholder="First name"
+      autocomplete="off"
+    />
+  </div>
+
+  <div class="cs-form__row">
+    <label class="cs-form__label" for="cs-last-name">Last Name</label>
+    <input
+      id="cs-last-name"
+      class="cs-form__input"
+      type="text"
+      [value]="lastName()"
+      (input)="lastName.set($any($event.target).value)"
+      [disabled]="isSaving()"
+      placeholder="Last name"
+      autocomplete="off"
+    />
+  </div>
+
+  <div class="cs-form__row cs-form__row--toggle">
+    <label class="cs-form__label" for="cs-contract">Contract Signed</label>
+    <button
+      id="cs-contract"
+      type="button"
+      class="cs-toggle"
+      [class.cs-toggle--on]="contractSigned()"
+      [disabled]="isSaving()"
+      (click)="contractSigned.set(!contractSigned())"
+      [attr.aria-pressed]="contractSigned()"
+    >
+      <span class="cs-toggle__thumb"></span>
+    </button>
+  </div>
+
+  @if (validationError()) {
+    <p class="cs-form__error" role="alert">{{ validationError() }}</p>
+  }
+
+  <div class="cs-form__actions">
+    <button type="button" class="cs-btn cs-btn--cancel" (click)="onCancel()" [disabled]="isSaving()">
+      Cancel
+    </button>
+    <button type="submit" class="cs-btn cs-btn--primary" [disabled]="isSaving()">
+      @if (isSaving()) {
+        Saving…
+      } @else {
+        Create Student
+      }
+    </button>
+  </div>
+</form>

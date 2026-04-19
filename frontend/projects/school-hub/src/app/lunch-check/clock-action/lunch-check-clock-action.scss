@@ -1,0 +1,257 @@
+// ─── Host accent colours ─────────────────────────────────────────────────────
+:host {
+  --lca-accent: #1a237e;
+  --lca-accent-light: #e8eaf6;
+  --lca-accent-btn: #1a237e;
+  --lca-accent-btn-hover: #283593;
+
+  display: block;
+}
+
+:host.clock-in-mode {
+  --lca-accent: #2e7d32;
+  --lca-accent-light: #e8f5e9;
+  --lca-accent-btn: #2e7d32;
+  --lca-accent-btn-hover: #388e3c;
+}
+
+:host.clock-out-mode {
+  --lca-accent: #e65100;
+  --lca-accent-light: #fff3e0;
+  --lca-accent-btn: #e65100;
+  --lca-accent-btn-hover: #f57c00;
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
+.lca-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 1.5rem 1.5rem 7rem; // bottom padding for sticky bar
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+// ─── Back link ───────────────────────────────────────────────────────────────
+.lca-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #5c6370;
+  text-decoration: none;
+  transition: color 120ms ease;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    color: var(--lca-accent);
+  }
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────
+.lca-header {
+  &__title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--lca-accent);
+    margin: 0 0 0.25rem;
+    letter-spacing: -0.02em;
+  }
+
+  &__subtitle {
+    font-size: 0.9rem;
+    color: #5c6370;
+    margin: 0;
+  }
+}
+
+// ─── Search ──────────────────────────────────────────────────────────────────
+.lca-search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &__inputs {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1 1 140px;
+    min-width: 0;
+  }
+
+  &__label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #3c4048;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d0d5e2;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    color: #1a237e;
+    background: #fff;
+    outline: none;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: var(--lca-accent);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  &__error {
+    font-size: 0.85rem;
+    color: #c62828;
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    background: #ffebee;
+    border-radius: 6px;
+    border-left: 3px solid #c62828;
+  }
+}
+
+// ─── Results ─────────────────────────────────────────────────────────────────
+.lca-results {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e4ef;
+  padding: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+// ─── Warning banner ──────────────────────────────────────────────────────────
+.lca-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #e65100;
+  font-weight: 500;
+
+  svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+  }
+}
+
+// ─── Save error ──────────────────────────────────────────────────────────────
+.lca-save-error {
+  font-size: 0.85rem;
+  color: #c62828;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background: #ffebee;
+  border-radius: 6px;
+  border-left: 3px solid #c62828;
+}
+
+// ─── Sticky action bar ───────────────────────────────────────────────────────
+.lca-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: #fff;
+  border-top: 1px solid #e0e4ef;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+
+  &__cancel {
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #5c6370;
+    text-decoration: none;
+    border: 1px solid #d0d5e2;
+    background: transparent;
+    transition: background 120ms ease;
+
+    &:hover {
+      background: #f5f7fa;
+    }
+  }
+
+  &__confirm {
+    padding: 0.625rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--lca-accent-btn);
+    border: none;
+    cursor: pointer;
+    transition: background 120ms ease, opacity 120ms ease;
+
+    &:hover:not(:disabled) {
+      background: var(--lca-accent-btn-hover);
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+  }
+}
+
+// ─── Create student section ──────────────────────────────────────────────────
+.lca-create {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e4ef;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+  &__toggle {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--lca-accent);
+    background: var(--lca-accent-light);
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 120ms ease;
+
+    &:hover {
+      background: darken(#e8f5e9, 4%);
+    }
+  }
+
+  &__body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border-top: 1px solid #e0e4ef;
+  }
+}

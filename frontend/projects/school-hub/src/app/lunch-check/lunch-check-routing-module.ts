@@ -14,13 +14,15 @@ const routes: Routes = [
       },
       {
         path: 'clock-in',
+        data: { checkingIn: true },
         loadComponent: () =>
-          import('./home/lunch-check-home').then((m) => m.LunchCheckHomeComponent),
+          import('./clock-action/lunch-check-clock-action').then((m) => m.LunchCheckClockActionComponent),
       },
       {
         path: 'clock-out',
+        data: { checkingIn: false },
         loadComponent: () =>
-          import('./home/lunch-check-home').then((m) => m.LunchCheckHomeComponent),
+          import('./clock-action/lunch-check-clock-action').then((m) => m.LunchCheckClockActionComponent),
       },
       {
         path: 'records',

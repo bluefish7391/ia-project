@@ -1,4 +1,4 @@
-import { GetStudentLunchCheckInAndOutHistoryRequest, QueryStudentLunchCheckRequest, SaveStudentLunchCheckRequest } from "../../../shared/kinds";
+import { GetStudentLunchCheckInAndOutHistoryRequest, QueryStudentLunchCheckRequest, SaveStudentLunchCheckConfigRequest, SaveStudentLunchCheckRequest } from "../../../shared/kinds";
 import { lunchCheckManager } from "../managers/manager-factory";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
@@ -10,7 +10,8 @@ export class LunchCheckRouter extends BaseRouter {
 		return express.Router()
 			.post("/student-lunch-check-records", lunchCheckRouter.wrapAsync(lunchCheckRouter.getAllStudentLunchCheckRecords.bind(lunchCheckRouter)))
 			.put("/student-lunch-check-record", lunchCheckRouter.wrapAsync(lunchCheckRouter.saveStudentLunchCheck.bind(lunchCheckRouter)))
-			.get("/student-lunch-check-in-and-out-history", lunchCheckRouter.wrapAsync(lunchCheckRouter.getStudentLunchCheckInAndOutHistory.bind(lunchCheckRouter)));
+			.get("/student-lunch-check-in-and-out-history", lunchCheckRouter.wrapAsync(lunchCheckRouter.getStudentLunchCheckInAndOutHistory.bind(lunchCheckRouter)))
+			.post("/student-lunch-check", lunchCheckRouter.wrapAsync(lunchCheckRouter.saveStudentLunchCheckConfig.bind(lunchCheckRouter)));
 	}
 
 	async getAllStudentLunchCheckRecords(req: Request, res: Response) {
@@ -43,5 +44,15 @@ export class LunchCheckRouter extends BaseRouter {
 		}
 		const history = await lunchCheckManager.getStudentLunchCheckInAndOutHistory(new RequestContext(req), body);
 		this.sendSuccess(res, history);
+	}
+
+	async saveStudentLunchCheckConfig(req: Request, res: Response) {
+		const body = req.body as SaveStudentLunchCheckConfigRequest;
+		if (!body.studentID || body.contractSigned === undefined) {
+			this.sendBadRequestError(res, { error: "studentID and contractSigned are required." });
+			return;
+		}
+		const result = await lunchCheckManager.saveStudentLunchCheckConfig(new RequestContext(req), body);
+		this.sendSuccess(res, result);
 	}
 }

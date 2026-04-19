@@ -1,4 +1,4 @@
-import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, SaveStudentLunchCheckRequest, SaveStudentLunchCheckResponse, StudentLunchCheck, StudentLunchCheckCompositeRecord } from "../../../shared/kinds";
+import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, SaveStudentLunchCheckConfigRequest, SaveStudentLunchCheckConfigResponse, SaveStudentLunchCheckRequest, SaveStudentLunchCheckResponse, StudentLunchCheck, StudentLunchCheckCompositeRecord } from "../../../shared/kinds";
 import { lunchCheckDAO, studentDAO } from "../daos/dao-factory";
 import { generateId } from "../idutilities";
 import { BadRequestError } from "../kinds";
@@ -177,6 +177,25 @@ export class LunchCheckManager {
 
 	private isValidISODateString(dateString: string): boolean {
 		const date = new Date(dateString);
-		return !isNaN(date.getTime()) && date.toISOString() === dateString;
+		return !isNaN(date.getTime()) && date.toISOString().split("T")[0] === dateString;
+	}
+
+	async saveStudentLunchCheckConfig(requestContext: RequestContext, data: SaveStudentLunchCheckConfigRequest): Promise<SaveStudentLunchCheckConfigResponse> {
+		const tenantID = requestContext.getCurrentTenantID();
+
+		const student = await studentDAO.getStudent(tenantID, data.studentID);
+		if (!student) {
+			throw new BadRequestError("No student with that id.");
+		}
+
+		const studentLunchCheck: StudentLunchCheck = {
+			studentID: data.studentID,
+			tenantID,
+			contractSigned: data.contractSigned,
+			note: data.note,
+		};
+
+		const saved = await lunchCheckDAO.saveStudentLunchCheckConfig(studentLunchCheck);
+		return { studentLunchCheck: saved } satisfies SaveStudentLunchCheckConfigResponse;
 	}
 }

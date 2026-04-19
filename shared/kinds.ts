@@ -164,3 +164,13 @@ export interface GeneralAPIResponse {
 	success: boolean;
 	message?: string;
 }
+
+export interface SaveStudentLunchCheckConfigRequest {
+	studentID: string;
+	contractSigned: boolean;
+	note?: string;
+}
+
+export interface SaveStudentLunchCheckConfigResponse {
+	studentLunchCheck: StudentLunchCheck;
+}

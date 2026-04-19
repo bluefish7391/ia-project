@@ -10,6 +10,7 @@ import { authMiddleware } from "./middleware/auth-middleware";
 import { Logger } from "./logger";
 import { SecurityRouter } from "./routers/security-router";
 import { SysAdminRouter } from "./routers/sys-admin-router";
+import { LunchCheckRouter } from "./routers/lunch-check-router";
 
 initializeApp();
 
@@ -35,5 +36,6 @@ expressApp.use('/app-users', AppUserRouter.buildRouter());
 expressApp.use('/students', StudentRouter.buildRouter());
 expressApp.use('/app-roles', AppRoleRouter.buildRouter());
 expressApp.use('/sys-admin', SysAdminRouter.buildRouter());
+expressApp.use('/lunch-check', LunchCheckRouter.buildRouter());
 
 export const api = onRequest(expressApp);

@@ -38,5 +38,11 @@ export const routes: Routes = [
     path: 'sys-admin',
     canActivate: [authGuard],
     loadChildren: () => import('./sys-admin/sys-admin-module').then((module) => module.SysAdminModule),
-  }
+  },
+  {
+    path: 'lunch-check',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./lunch-check/lunch-check-module').then((module) => module.LunchCheckModule),
+  },
 ];

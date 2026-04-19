@@ -1,0 +1,178 @@
+.lc-home {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lc-home__header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.lc-home__title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1a237e;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.lc-home__subtitle {
+  font-size: 1rem;
+  color: #5c6370;
+  margin: 0;
+}
+
+.lc-home__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 560px;
+}
+
+// ─── Action Card ────────────────────────────────────────────────────────────
+
+.lc-action-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  text-decoration: none;
+  background: #fff;
+  border: 1px solid #e0e4ef;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    border-color: transparent;
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  }
+
+  // ── Icon container ──────────────────────────────────────────────────────
+
+  &__icon {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 26px;
+      height: 26px;
+    }
+  }
+
+  // ── Text ────────────────────────────────────────────────────────────────
+
+  &__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  &__label {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1a1f2e;
+  }
+
+  &__description {
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+
+  // ── Chevron ─────────────────────────────────────────────────────────────
+
+  &__arrow {
+    flex-shrink: 0;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  // ── Variant: Clock In ───────────────────────────────────────────────────
+
+  &--clock-in {
+    .lc-action-card__icon {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    &:hover {
+      background: linear-gradient(135deg, #f1faf2 0%, #fff 100%);
+
+      .lc-action-card__arrow {
+        color: #2e7d32;
+      }
+    }
+  }
+
+  // ── Variant: Clock Out ──────────────────────────────────────────────────
+
+  &--clock-out {
+    .lc-action-card__icon {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    &:hover {
+      background: linear-gradient(135deg, #fff8f0 0%, #fff 100%);
+
+      .lc-action-card__arrow {
+        color: #e65100;
+      }
+    }
+  }
+
+  // ── Variant: Records ────────────────────────────────────────────────────
+
+  &--records {
+    .lc-action-card__icon {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+
+    &:hover {
+      background: linear-gradient(135deg, #eef6fe 0%, #fff 100%);
+
+      .lc-action-card__arrow {
+        color: #1565c0;
+      }
+    }
+  }
+}
+
+// ─── Responsive ─────────────────────────────────────────────────────────────
+
+@media (min-width: 640px) {
+  .lc-home {
+    padding: 4rem 2rem;
+  }
+
+  .lc-home__title {
+    font-size: 2.75rem;
+  }
+}

@@ -2,16 +2,17 @@ import express, { Request, Response } from "express";
 import { studentManager } from "../managers/manager-factory";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
+import { authenticator } from "../middleware/authenticator";
 
 export class StudentRouter extends BaseRouter {
     public static buildRouter() {
         const studentRouter = new StudentRouter();
         return express.Router()
-            .get("", studentRouter.wrapAsync(studentRouter.getAllStudents.bind(studentRouter)))
-            .post("", studentRouter.wrapAsync(studentRouter.createStudent.bind(studentRouter)))
-            .get("/:id", studentRouter.wrapAsync(studentRouter.getStudent.bind(studentRouter)))
-            .put("/:id", studentRouter.wrapAsync(studentRouter.updateStudent.bind(studentRouter)))
-            .delete("/:id", studentRouter.wrapAsync(studentRouter.deleteStudent.bind(studentRouter)));
+            .get("", authenticator(["LIST_STUDENTS"]), studentRouter.wrapAsync(studentRouter.getAllStudents.bind(studentRouter)))
+            .post("", authenticator(["CREATE_STUDENTS"]), studentRouter.wrapAsync(studentRouter.createStudent.bind(studentRouter)))
+            .get("/:id", authenticator(["VIEW_STUDENTS"]), studentRouter.wrapAsync(studentRouter.getStudent.bind(studentRouter)))
+            .put("/:id", authenticator(["EDIT_STUDENTS"]), studentRouter.wrapAsync(studentRouter.updateStudent.bind(studentRouter)))
+            .delete("/:id", authenticator(["DELETE_STUDENTS"]), studentRouter.wrapAsync(studentRouter.deleteStudent.bind(studentRouter)));
     }
 
     async getAllStudents(req: Request, res: Response) {

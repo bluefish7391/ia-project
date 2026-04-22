@@ -2,16 +2,17 @@ import express, { Request, Response } from "express";
 import { appRoleManager } from "../managers/manager-factory";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
+import { authenticator } from "../middleware/authenticator";
 
 export class AppRoleRouter extends BaseRouter {
     public static buildRouter() {
         const appRoleRouter = new AppRoleRouter();
         return express.Router()
-            .get("", appRoleRouter.wrapAsync(appRoleRouter.getAllAppRoles.bind(appRoleRouter)))
-            .post("", appRoleRouter.wrapAsync(appRoleRouter.createAppRole.bind(appRoleRouter)))
-            .get("/:id", appRoleRouter.wrapAsync(appRoleRouter.getAppRole.bind(appRoleRouter)))
-            .put("/:id", appRoleRouter.wrapAsync(appRoleRouter.updateAppRole.bind(appRoleRouter)))
-            .delete("/:id", appRoleRouter.wrapAsync(appRoleRouter.deleteAppRole.bind(appRoleRouter)));
+            .get("", authenticator(["LIST_ROLES"]), appRoleRouter.wrapAsync(appRoleRouter.getAllAppRoles.bind(appRoleRouter)))
+            .post("", authenticator(["CREATE_ROLES"]), appRoleRouter.wrapAsync(appRoleRouter.createAppRole.bind(appRoleRouter)))
+            .get("/:id", authenticator(["VIEW_ROLES"]), appRoleRouter.wrapAsync(appRoleRouter.getAppRole.bind(appRoleRouter)))
+            .put("/:id", authenticator(["EDIT_ROLES"]), appRoleRouter.wrapAsync(appRoleRouter.updateAppRole.bind(appRoleRouter)))
+            .delete("/:id", authenticator(["DELETE_ROLES"]), appRoleRouter.wrapAsync(appRoleRouter.deleteAppRole.bind(appRoleRouter)));
     }
 
     async getAllAppRoles(req: Request, res: Response) {

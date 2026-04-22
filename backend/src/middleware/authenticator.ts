@@ -8,7 +8,6 @@ import { AppRole } from "../../../shared/kinds";
 admin.initializeApp();
 export function authenticator(requiredPermissionsList: string[]) {
     return async (req: Request, res: Response, next: NextFunction) => {
-        // TODO: check permissions in requiredPermissionsList against permissions in the session and return 403 if the session doesn't have the required permissions.
         const appSession = (req as Request & { appSession?: AppSession }).appSession;
 		if (!appSession) {
 			res.status(401).json({ error: "Unauthorized" });

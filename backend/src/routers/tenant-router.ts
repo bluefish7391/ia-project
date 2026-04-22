@@ -2,16 +2,17 @@ import express, { Request, Response } from "express";
 import { tenantManager } from "../managers/manager-factory";
 import { Tenant } from "../../../shared/kinds";
 import { BaseRouter } from "./base-router";
+import { authenticator } from "../middleware/authenticator";
 
 export class TenantRouter extends BaseRouter {
 	public static buildRouter() {
 		const tenantRouter = new TenantRouter();
 		return express.Router()
-			.get("", tenantRouter.wrapAsync(tenantRouter.getAllTenants.bind(tenantRouter)))
-			.post("", tenantRouter.wrapAsync(tenantRouter.createTenant.bind(tenantRouter)))
-			.get("/:id", tenantRouter.wrapAsync(tenantRouter.getTenant.bind(tenantRouter)))
-			.put("/:id", tenantRouter.wrapAsync(tenantRouter.updateTenant.bind(tenantRouter)))
-			.delete("/:id", tenantRouter.wrapAsync(tenantRouter.deleteTenant.bind(tenantRouter)));
+			.get("", authenticator(["LIST_TENANTS"]), tenantRouter.wrapAsync(tenantRouter.getAllTenants.bind(tenantRouter)))
+			.post("", authenticator(["CREATE_TENANTS"]), tenantRouter.wrapAsync(tenantRouter.createTenant.bind(tenantRouter)))
+			.get("/:id", authenticator(["VIEW_TENANTS"]), tenantRouter.wrapAsync(tenantRouter.getTenant.bind(tenantRouter)))
+			.put("/:id", authenticator(["EDIT_TENANTS"]), tenantRouter.wrapAsync(tenantRouter.updateTenant.bind(tenantRouter)))
+			.delete("/:id", authenticator(["DELETE_TENANTS"]), tenantRouter.wrapAsync(tenantRouter.deleteTenant.bind(tenantRouter)));
 	}
 
 	async getAllTenants(req: Request, res: Response) {

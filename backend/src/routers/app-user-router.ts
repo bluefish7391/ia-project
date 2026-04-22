@@ -4,16 +4,17 @@ import { AppUserDetail, AppUserUpsertPayload } from "../../../shared/kinds";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
 import { BadRequestError } from "../kinds";
+import { authenticator } from "../middleware/authenticator";
 
 export class AppUserRouter extends BaseRouter {
 	public static buildRouter() {
 		const appUserRouter = new AppUserRouter();
 		return express.Router()
-			.get("", appUserRouter.wrapAsync(appUserRouter.getAllAppUsers.bind(appUserRouter)))
-			.post("", appUserRouter.wrapAsync(appUserRouter.createAppUser.bind(appUserRouter)))
-			.get("/:id", appUserRouter.wrapAsync(appUserRouter.getAppUser.bind(appUserRouter)))
-			.put("/:id", appUserRouter.wrapAsync(appUserRouter.updateAppUser.bind(appUserRouter)))
-			.delete("/:id", appUserRouter.wrapAsync(appUserRouter.deleteAppUser.bind(appUserRouter)));
+			.get("", authenticator(["LIST_USERS"]), appUserRouter.wrapAsync(appUserRouter.getAllAppUsers.bind(appUserRouter)))
+			.post("", authenticator(["CREATE_USERS"]), appUserRouter.wrapAsync(appUserRouter.createAppUser.bind(appUserRouter)))
+			.get("/:id", authenticator(["VIEW_USERS"]), appUserRouter.wrapAsync(appUserRouter.getAppUser.bind(appUserRouter)))
+			.put("/:id", authenticator(["EDIT_USERS"]), appUserRouter.wrapAsync(appUserRouter.updateAppUser.bind(appUserRouter)))
+			.delete("/:id", authenticator(["DELETE_USERS"]), appUserRouter.wrapAsync(appUserRouter.deleteAppUser.bind(appUserRouter)));
 	}
 
 	async getAllAppUsers(req: Request, res: Response) {

@@ -3,16 +3,17 @@ import { organizationManager } from "../managers/manager-factory";
 import { Organization } from "../../../shared/kinds";
 import { RequestContext } from "../request-context";
 import { BaseRouter } from "./base-router";
+import { authenticator } from "../middleware/authenticator";
 
 export class OrganizationRouter extends BaseRouter {
 	public static buildRouter() {
 		const organizationRouter = new OrganizationRouter();
 		return express.Router()
-			.get("", organizationRouter.wrapAsync(organizationRouter.getAllOrganizations.bind(organizationRouter)))
-			.post("", organizationRouter.wrapAsync(organizationRouter.createOrganization.bind(organizationRouter)))
-			.get("/:id", organizationRouter.wrapAsync(organizationRouter.getOrganization.bind(organizationRouter)))
-			.put("/:id", organizationRouter.wrapAsync(organizationRouter.updateOrganization.bind(organizationRouter)))
-			.delete("/:id", organizationRouter.wrapAsync(organizationRouter.deleteOrganization.bind(organizationRouter)));
+			.get("", authenticator(["LIST_ORGANIZATIONS"]), organizationRouter.wrapAsync(organizationRouter.getAllOrganizations.bind(organizationRouter)))
+			.post("", authenticator(["CREATE_ORGANIZATIONS"]), organizationRouter.wrapAsync(organizationRouter.createOrganization.bind(organizationRouter)))
+			.get("/:id", authenticator(["VIEW_ORGANIZATIONS"]), organizationRouter.wrapAsync(organizationRouter.getOrganization.bind(organizationRouter)))
+			.put("/:id", authenticator(["EDIT_ORGANIZATIONS"]), organizationRouter.wrapAsync(organizationRouter.updateOrganization.bind(organizationRouter)))
+			.delete("/:id", authenticator(["DELETE_ORGANIZATIONS"]), organizationRouter.wrapAsync(organizationRouter.deleteOrganization.bind(organizationRouter)));
 	}
 
 	async getAllOrganizations(req: Request, res: Response) {

@@ -1,7 +1,8 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { AppRole, AppPermission, AppPermissions } from 'shared/kinds';
+import { AppRole } from 'shared/kinds';
+import { AppPermission, AppPermissions } from 'shared/permissions';
 import { ApiService } from '../../api.service';
 import { AppRoleUpsertPayload } from './role.model';
 import { RoleForm } from './role-form/role-form';

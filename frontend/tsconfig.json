@@ -15,7 +15,8 @@
     "target": "ES2022",
     "module": "preserve",
 	"paths": {
-		"shared/kinds": ["../shared/kinds"]
+		"shared/kinds": ["../shared/kinds"],
+		"shared/permissions": ["../shared/permissions"],
 	}
   },
   "angularCompilerOptions": {

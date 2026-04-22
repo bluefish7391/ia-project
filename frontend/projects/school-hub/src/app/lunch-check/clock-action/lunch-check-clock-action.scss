@@ -26,12 +26,54 @@
 .lca-page {
   min-height: 100vh;
   background: #f5f7fa;
-  padding: 1.5rem 1.5rem 7rem; // bottom padding for sticky bar
+  padding: 1.5rem 1.5rem 7rem; // bottom padding for sticky bar on mobile
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   max-width: 680px;
   margin: 0 auto;
+
+  @media (min-width: 768px) {
+    max-width: 1140px;
+    padding-bottom: 1.5rem; // no sticky bar on desktop
+  }
+}
+
+// ─── Two-column layout ───────────────────────────────────────────────────────
+.lca-layout {
+  display: contents; // flat on mobile — children flow directly in .lca-page
+
+  @media (min-width: 768px) {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  &__left {
+    display: contents;
+
+    @media (min-width: 768px) {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+
+  &__right {
+    display: contents;
+
+    @media (min-width: 768px) {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      flex: 1 1 0;
+      min-width: 0;
+      position: sticky;
+      top: 1.5rem;
+    }
+  }
 }
 
 // ─── Back link ───────────────────────────────────────────────────────────────
@@ -187,9 +229,13 @@
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 0.5rem;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
   }
 
   &__item {
@@ -238,7 +284,7 @@
   border-left: 3px solid #c62828;
 }
 
-// ─── Sticky action bar ───────────────────────────────────────────────────────
+// ─── Action bar ──────────────────────────────────────────────────────────────
 .lca-action-bar {
   position: fixed;
   bottom: 0;
@@ -253,6 +299,16 @@
   border-top: 1px solid #e0e4ef;
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
   z-index: 100;
+
+  @media (min-width: 768px) {
+    position: static;
+    border-top: none;
+    border-radius: 12px;
+    border: 1px solid #e0e4ef;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    padding: 1rem 1.25rem;
+    justify-content: flex-end;
+  }
 
   &__cancel {
     padding: 0.625rem 1.25rem;

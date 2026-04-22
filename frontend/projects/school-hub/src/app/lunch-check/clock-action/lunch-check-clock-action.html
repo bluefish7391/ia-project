@@ -13,73 +13,132 @@
     <p class="lca-header__subtitle">Search for a student, then confirm the action below.</p>
   </header>
 
-  <!-- Search section -->
-  <section class="lca-search" aria-label="Student search">
-    <div class="lca-search__inputs">
-      <div class="lca-search__field">
-        <label class="lca-search__label" for="search-id">School ID</label>
-        <input
-          id="search-id"
-          class="lca-search__input"
-          type="text"
-          [value]="searchSchoolStudentID()"
-          (input)="searchSchoolStudentID.set($any($event.target).value)"
-          placeholder="School ID"
-          autocomplete="off"
+  <!-- Two-column content layout -->
+  <div class="lca-layout">
+
+    <!-- Left column: student selector -->
+    <div class="lca-layout__left">
+
+      <!-- Search section -->
+      <section class="lca-search" aria-label="Student search">
+        <div class="lca-search__inputs">
+          <div class="lca-search__field">
+            <label class="lca-search__label" for="search-id">School ID</label>
+            <input
+              id="search-id"
+              class="lca-search__input"
+              type="text"
+              [value]="searchSchoolStudentID()"
+              (input)="searchSchoolStudentID.set($any($event.target).value)"
+              placeholder="School ID"
+              autocomplete="off"
+            />
+          </div>
+          <div class="lca-search__field">
+            <label class="lca-search__label" for="search-first">First Name</label>
+            <input
+              id="search-first"
+              class="lca-search__input"
+              type="text"
+              [value]="searchFirstName()"
+              (input)="searchFirstName.set($any($event.target).value)"
+              placeholder="First name"
+              autocomplete="off"
+            />
+          </div>
+          <div class="lca-search__field">
+            <label class="lca-search__label" for="search-last">Last Name</label>
+            <input
+              id="search-last"
+              class="lca-search__input"
+              type="text"
+              [value]="searchLastName()"
+              (input)="searchLastName.set($any($event.target).value)"
+              placeholder="Last name"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+
+        @if (searchError()) {
+          <p class="lca-search__error" role="alert">{{ searchError() }}</p>
+        }
+      </section>
+
+      <!-- Results -->
+      <section class="lca-results" aria-label="Search results">
+        <app-student-list
+          [records]="studentResults()"
+          [selectedRecord]="selectedRecord()"
+          [isLoading]="isSearching()"
+          (recordSelected)="onSelectStudent($event)"
         />
-      </div>
-      <div class="lca-search__field">
-        <label class="lca-search__label" for="search-first">First Name</label>
-        <input
-          id="search-first"
-          class="lca-search__input"
-          type="text"
-          [value]="searchFirstName()"
-          (input)="searchFirstName.set($any($event.target).value)"
-          placeholder="First name"
-          autocomplete="off"
-        />
-      </div>
-      <div class="lca-search__field">
-        <label class="lca-search__label" for="search-last">Last Name</label>
-        <input
-          id="search-last"
-          class="lca-search__input"
-          type="text"
-          [value]="searchLastName()"
-          (input)="searchLastName.set($any($event.target).value)"
-          placeholder="Last name"
-          autocomplete="off"
-        />
-      </div>
+      </section>
+
     </div>
 
-    @if (searchError()) {
-      <p class="lca-search__error" role="alert">{{ searchError() }}</p>
-    }
-  </section>
+    <!-- Right column: actions -->
+    <div class="lca-layout__right">
 
-  <!-- Results -->
-  <section class="lca-results" aria-label="Search results">
-    <app-student-list
-      [records]="studentResults()"
-      [selectedRecord]="selectedRecord()"
-      [isLoading]="isSearching()"
-      (recordSelected)="onSelectStudent($event)"
-    />
-  </section>
+      <!-- Status warning -->
+      @if (statusWarning()) {
+        <div class="lca-warning" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+          </svg>
+          {{ statusWarning() }}
+        </div>
+      }
 
-  <!-- Status warning -->
-  @if (statusWarning()) {
-    <div class="lca-warning" role="alert">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
-      </svg>
-      {{ statusWarning() }}
+      <!-- API save error (clock action) -->
+      @if (saveError() && !createFormVisible()) {
+        <p class="lca-save-error" role="alert">{{ saveError() }}</p>
+      }
+
+      <!-- Action bar -->
+      <div class="lca-action-bar">
+        <a routerLink="/lunch-check" class="lca-action-bar__cancel">Cancel</a>
+        <button
+          class="lca-action-bar__confirm"
+          [disabled]="!selectedRecord() || isSaving()"
+          (click)="onConfirm()"
+        >
+          @if (isSaving() && !createFormVisible()) {
+            Saving…
+          } @else {
+            {{ actionLabel() }}
+          }
+        </button>
+      </div>
+
+      <!-- Create New Student section -->
+      <section class="lca-create" aria-label="Create new student">
+        <button class="lca-create__toggle" type="button" (click)="onToggleCreateForm()">
+          @if (showCreateForm()) {
+            ▲ Hide
+          } @else {
+            ▼ Create New Student
+          }
+        </button>
+
+        @if (showCreateForm()) {
+          <div class="lca-create__body">
+            @if (saveError()) {
+              <p class="lca-save-error" role="alert">{{ saveError() }}</p>
+            }
+            <app-create-student
+              [isSaving]="isSaving()"
+              (studentCreated)="onStudentCreated($event)"
+              (cancelled)="onToggleCreateForm()"
+            />
+          </div>
+        }
+      </section>
+
     </div>
-  }
+  </div>
 
-  <!-- Today's history -->
+  <!-- Today's history (full-width, below both columns) -->
   @if (selectedRecord()) {
     <section class="lca-history" aria-label="Today's clock activity">
       <h2 class="lca-history__header">Today's Activity</h2>
@@ -106,49 +165,4 @@
       }
     </section>
   }
-
-  <!-- API save error (clock action) -->
-  @if (saveError() && !createFormVisible()) {
-    <p class="lca-save-error" role="alert">{{ saveError() }}</p>
-  }
-
-  <!-- Sticky action bar -->
-  <div class="lca-action-bar">
-    <a routerLink="/lunch-check" class="lca-action-bar__cancel">Cancel</a>
-    <button
-      class="lca-action-bar__confirm"
-      [disabled]="!selectedRecord() || isSaving()"
-      (click)="onConfirm()"
-    >
-      @if (isSaving() && !createFormVisible()) {
-        Saving…
-      } @else {
-        {{ actionLabel() }}
-      }
-    </button>
-  </div>
-
-  <!-- Create New Student section -->
-  <section class="lca-create" aria-label="Create new student">
-    <button class="lca-create__toggle" type="button" (click)="onToggleCreateForm()">
-      @if (showCreateForm()) {
-        ▲ Hide
-      } @else {
-        ▼ Create New Student
-      }
-    </button>
-
-    @if (showCreateForm()) {
-      <div class="lca-create__body">
-        @if (saveError()) {
-          <p class="lca-save-error" role="alert">{{ saveError() }}</p>
-        }
-        <app-create-student
-          [isSaving]="isSaving()"
-          (studentCreated)="onStudentCreated($event)"
-          (cancelled)="onToggleCreateForm()"
-        />
-      </div>
-    }
-  </section>
 </div>

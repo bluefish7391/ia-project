@@ -80,35 +80,40 @@
     <!-- Right column: actions -->
     <div class="lca-layout__right">
 
-      <!-- Status warning -->
-      @if (statusWarning()) {
-        <div class="lca-warning" role="alert">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
-          </svg>
-          {{ statusWarning() }}
+      <!-- Confirmation group: status · error · action -->
+      <div class="lca-right-group">
+
+        <!-- Status warning -->
+        @if (statusWarning()) {
+          <div class="lca-warning" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+            {{ statusWarning() }}
+          </div>
+        }
+
+        <!-- API save error (clock action) -->
+        @if (saveError() && !createFormVisible()) {
+          <p class="lca-save-error" role="alert">{{ saveError() }}</p>
+        }
+
+        <!-- Action bar -->
+        <div class="lca-action-bar">
+          <a routerLink="/lunch-check" class="lca-action-bar__cancel">Cancel</a>
+          <button
+            class="lca-action-bar__confirm"
+            [disabled]="!selectedRecord() || isSaving()"
+            (click)="onConfirm()"
+          >
+            @if (isSaving() && !createFormVisible()) {
+              Saving…
+            } @else {
+              {{ actionLabel() }}
+            }
+          </button>
         </div>
-      }
 
-      <!-- API save error (clock action) -->
-      @if (saveError() && !createFormVisible()) {
-        <p class="lca-save-error" role="alert">{{ saveError() }}</p>
-      }
-
-      <!-- Action bar -->
-      <div class="lca-action-bar">
-        <a routerLink="/lunch-check" class="lca-action-bar__cancel">Cancel</a>
-        <button
-          class="lca-action-bar__confirm"
-          [disabled]="!selectedRecord() || isSaving()"
-          (click)="onConfirm()"
-        >
-          @if (isSaving() && !createFormVisible()) {
-            Saving…
-          } @else {
-            {{ actionLabel() }}
-          }
-        </button>
       </div>
 
       <!-- Create New Student section -->
@@ -135,34 +140,34 @@
         }
       </section>
 
+      <!-- Today's activity -->
+      @if (selectedRecord()) {
+        <section class="lca-history" aria-label="Today's clock activity">
+          <h2 class="lca-history__header">Today's Activity</h2>
+          @if (todayHistory().length === 0) {
+            <p class="lca-history__empty">No activity recorded today.</p>
+          } @else {
+            <ul class="lca-history__list">
+              @for (event of todayHistory(); track event.time.getTime()) {
+                <li class="lca-history__item lca-history__item--{{ event.type }}">
+                  @if (event.type === 'in') {
+                    <svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+                    </svg>
+                  } @else {
+                    <svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11H8v-2h8v2z"/>
+                    </svg>
+                  }
+                  <span class="lca-history__time">{{ event.label }}</span>
+                  <span class="lca-history__type">{{ event.type === 'in' ? 'Clock in' : 'Clock out' }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
     </div>
   </div>
-
-  <!-- Today's history (full-width, below both columns) -->
-  @if (selectedRecord()) {
-    <section class="lca-history" aria-label="Today's clock activity">
-      <h2 class="lca-history__header">Today's Activity</h2>
-      @if (todayHistory().length === 0) {
-        <p class="lca-history__empty">No activity recorded today.</p>
-      } @else {
-        <ul class="lca-history__list">
-          @for (event of todayHistory(); track event.time.getTime()) {
-            <li class="lca-history__item lca-history__item--{{ event.type }}">
-              @if (event.type === 'in') {
-                <svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
-                </svg>
-              } @else {
-                <svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11H8v-2h8v2z"/>
-                </svg>
-              }
-              <span class="lca-history__time">{{ event.label }}</span>
-              <span class="lca-history__type">{{ event.type === 'in' ? 'Clock in' : 'Clock out' }}</span>
-            </li>
-          }
-        </ul>
-      }
-    </section>
-  }
 </div>

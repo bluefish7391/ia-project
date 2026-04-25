@@ -13,10 +13,10 @@ export class LunchCheckHomeComponent {
 	readonly dialog = inject(MatDialog);
 
 	async openClockInDialog() {
-		const result = await StudentIdReaderComponent.open(this.dialog, { name: "jef", animal: "wetu" });
+		const result = await StudentIdReaderComponent.open(this.dialog, { mode: 'clock-in' });
 		console.log('The dialog was closed (awaited)');
 		if (result) {
-			console.log(`Dialog result (awaited): ${result.name} - ${result.animal}`);
+			console.log(`Dialog result (awaited): ${result.studentID}`);
 		}
 	}
 }

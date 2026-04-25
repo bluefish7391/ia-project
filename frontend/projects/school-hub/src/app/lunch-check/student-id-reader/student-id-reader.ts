@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, model, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, model, viewChild } from '@angular/core';
+import { FormsModule, NgModel } from '@angular/forms';
 import { MatButtonModule, MatIconButton } from '@angular/material/button';
 import {
 	MAT_DIALOG_DATA,
@@ -15,13 +15,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 export interface DialogData {
-	animal: string;
-	name: string;
+	mode: 'clock-in' | 'clock-out';
 }
 
 export interface DialogResult {
-	animal: string;
-	name: string;
+	studentID: string;
 }
 
 @Component({
@@ -43,7 +41,8 @@ export interface DialogResult {
 export class StudentIdReaderComponent {
 	readonly dialogRef = inject(MatDialogRef<StudentIdReaderComponent>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
-	readonly animal = model(this.data.animal);
+	readonly studentID = model("");
+	private readonly studentInputRef = viewChild.required<NgModel>('studentInput');
 
 	static open(dialog: MatDialog, data: DialogData): Promise<DialogResult | undefined> {
 		const dialogRef = dialog.open(StudentIdReaderComponent, {
@@ -54,9 +53,13 @@ export class StudentIdReaderComponent {
 	}
 
 	onOkClick() {
+		if (!this.studentID().trim()) {
+			this.studentInputRef().control.markAsTouched();
+			return;
+		}
+
 		const dialogResult: DialogResult = {
-			animal: this.animal(),
-			name: this.data.name,
+			studentID: this.studentID()
 		};
 		this.dialogRef.close(dialogResult);
 	}

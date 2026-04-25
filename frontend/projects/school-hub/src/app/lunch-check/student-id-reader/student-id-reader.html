@@ -1,6 +1,6 @@
 <div mat-dialog-title class="dialog-header">
 	<div class="header-text">
-		<span class="header-label">Student</span>
+		<span class="header-label">Clock {{ data.mode == 'clock-in' ? 'In' : 'Out' }}</span>
 	</div>
 	<button mat-icon-button mat-dialog-close aria-label="Close dialog">
 		<mat-icon>close</mat-icon>
@@ -8,14 +8,15 @@
 </div>
 
 <mat-dialog-content class="dialog-content">
-	<p class="prompt-text">What's your favorite animal?</p>
+	<p class="prompt-text">Please enter your student ID:</p>
 	<mat-form-field appearance="outline" class="full-width">
-		<mat-label>Favorite Animal</mat-label>
-		<input matInput [(ngModel)]="animal" (keyup.enter)="onOkClick()" cdkFocusInitial/>
+		<mat-label>Student ID</mat-label>
+		<input matInput [(ngModel)]="studentID" #studentInput="ngModel" (keyup.enter)="onOkClick()" required cdkFocusInitial/>
+		<mat-error>Please enter your student ID.</mat-error>
 	</mat-form-field>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
 	<button matButton mat-dialog-close>Cancel</button>
-	<button mat-flat-button (click)="onOkClick()">Confirm</button>
+	<button mat-flat-button (click)="onOkClick()">OK</button>
 </mat-dialog-actions>

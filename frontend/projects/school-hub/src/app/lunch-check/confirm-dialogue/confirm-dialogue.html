@@ -1,0 +1,14 @@
+<div mat-dialog-title class="dialog-header">
+	<div class="header-text">
+		<span class="header-label">Confirmation</span>
+	</div>
+</div>
+
+<mat-dialog-content class="dialog-content">
+	<p class="prompt-text">{{ data.message }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+	<button matButton (click)="dialogRef.close({ userChoice: 'no' })">Cancel</button>
+	<button mat-flat-button (click)="dialogRef.close({ userChoice: 'yes' })">OK</button>
+</mat-dialog-actions>

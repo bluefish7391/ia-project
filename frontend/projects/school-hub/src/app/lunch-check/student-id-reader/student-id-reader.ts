@@ -19,7 +19,7 @@ export interface DialogData {
 }
 
 export interface DialogResult {
-	studentID: string;
+	schoolStudentID: string;
 }
 
 @Component({
@@ -59,7 +59,7 @@ export class StudentIdReaderComponent {
 		}
 
 		const dialogResult: DialogResult = {
-			studentID: this.studentID()
+			schoolStudentID: this.studentID()
 		};
 		this.dialogRef.close(dialogResult);
 	}

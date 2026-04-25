@@ -1,0 +1,35 @@
+<div mat-dialog-title class="dialog-header">
+  <div class="header-text"><span class="header-label">Create Student</span></div>
+</div>
+<mat-dialog-content class="dialog-content">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>School Student ID</mat-label>
+    <input matInput [ngModel]="schoolStudentID()" (ngModelChange)="schoolStudentID.set($event)" [disabled]="isSaving()" />
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>First Name</mat-label>
+    <input matInput [ngModel]="firstName()" (ngModelChange)="firstName.set($event)" [disabled]="isSaving()" cdkFocusInitial />
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Last Name</mat-label>
+    <input matInput [ngModel]="lastName()" (ngModelChange)="lastName.set($event)" [disabled]="isSaving()" />
+  </mat-form-field>
+  <div class="checkbox-row">
+    <mat-checkbox [ngModel]="contractSigned()" (ngModelChange)="contractSigned.set($event)" [disabled]="isSaving()">
+      Virtual contract signed
+    </mat-checkbox>
+  </div>
+  @if (errorMessage()) {
+    <p class="error-text">{{ errorMessage() }}</p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button matButton (click)="onCancel()" [disabled]="isSaving()">Cancel</button>
+  <button mat-flat-button (click)="onSubmit()" [disabled]="isSaving()">
+    @if (isSaving()) {
+      <mat-spinner diameter="18" />
+    } @else {
+      Create Student
+    }
+  </button>
+</mat-dialog-actions>

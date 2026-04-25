@@ -1,0 +1,38 @@
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.25rem;
+
+  &::before {
+    content: unset;
+  }
+
+  .header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+.dialog-content {
+  padding-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  .full-width {
+    width: 100%;
+  }
+
+  .checkbox-row {
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  .error-text {
+    margin: 0 0 0.5rem;
+    color: var(--mat-sys-error);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+}

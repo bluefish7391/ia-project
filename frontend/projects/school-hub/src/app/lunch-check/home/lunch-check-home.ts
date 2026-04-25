@@ -6,6 +6,7 @@ import { LunchCheckService } from '../lunch-check.service';
 import { QueryStudentLunchCheckRequest } from 'shared/kinds';
 import { ConfirmDialogueComponent } from '../confirm-dialogue/confirm-dialogue';
 import { MessageDialogueComponent } from '../message-dialogue/message-dialogue';
+import { CreateStudentDialogueComponent } from '../create-student-dialogue/create-student-dialogue';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
@@ -35,7 +36,21 @@ export class LunchCheckHomeComponent {
 						return;
 					}
 
-					// TODO: Navigate to student creation page with the student ID pre-filled
+					const student = await CreateStudentDialogueComponent.open(this.dialog, { schoolStudentID: result.schoolStudentID });
+					if (!student) {
+						return;
+					}
+
+					this.lunchCheckService
+						.clockStudent(student.id, new Date().toISOString().split('T')[0], mode === 'clock-in')
+						.subscribe({
+							next: () => {
+								this._snackBar.open(`Student ${mode === 'clock-in' ? 'clocked in' : 'clocked out'} successfully`, 'Close', { duration: 3000 });
+							},
+							error: () => {
+								MessageDialogueComponent.open(this.dialog, { mode: 'error', message: `An error occurred while ${mode === 'clock-in' ? 'clocking in' : 'clocking out'} the student. Please try again.` });
+							},
+						});
 				} else if (response.records.length > 1) {
 					MessageDialogueComponent.open(this.dialog, { mode: 'error', message: 'Multiple students found with the provided ID. Please contact support.' });
 				} else {

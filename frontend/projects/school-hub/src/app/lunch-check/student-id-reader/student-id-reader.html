@@ -1,17 +1,21 @@
-<div mat-dialog-title class="title">
-	<h2>Hi {{data.name}}</h2>
-	<button mat-icon-button mat-dialog-close>
+<div mat-dialog-title class="dialog-header">
+	<div class="header-text">
+		<span class="header-label">Student</span>
+	</div>
+	<button mat-icon-button mat-dialog-close aria-label="Close dialog">
 		<mat-icon>close</mat-icon>
 	</button>
 </div>
-<mat-dialog-content>
-	<p>What's your favorite animal?</p>
-	<mat-form-field>
+
+<mat-dialog-content class="dialog-content">
+	<p class="prompt-text">What's your favorite animal?</p>
+	<mat-form-field appearance="outline" class="full-width">
 		<mat-label>Favorite Animal</mat-label>
-		<input matInput [(ngModel)]="animal" />
+		<input matInput [(ngModel)]="animal" (keyup.enter)="onOkClick()" cdkFocusInitial/>
 	</mat-form-field>
 </mat-dialog-content>
-<mat-dialog-actions>
+
+<mat-dialog-actions align="end">
 	<button matButton mat-dialog-close>Cancel</button>
-	<button matButton (click)="onOkClick()" cdkFocusInitial>Ok</button>
+	<button mat-flat-button (click)="onOkClick()">Confirm</button>
 </mat-dialog-actions>

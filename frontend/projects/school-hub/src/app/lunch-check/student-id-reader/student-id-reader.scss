@@ -1,12 +1,31 @@
-
-.title {
+.dialog-header {
 	display: flex;
-	flex-direction: row;
 	align-items: center;
-	gap: 1rem;
 	justify-content: space-between;
+	padding-top: 1.25rem;
+
+	&::before {
+		content: unset;
+	}
+
+	.header-text {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
 }
 
-.title:before {
-	content: unset;
+.dialog-content {
+	padding-top: 0.75rem;
+
+	.prompt-text {
+		margin: 0 0 1rem;
+		color: var(--mat-sys-on-surface-variant);
+		font-size: 0.9rem;
+		line-height: 1.5;
+	}
+
+	.full-width {
+		width: 100%;
+	}
 }

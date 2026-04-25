@@ -4,10 +4,9 @@ import { StudentIdReaderComponent } from '../student-id-reader/student-id-reader
 import { MatDialog } from '@angular/material/dialog';
 import { LunchCheckService } from '../lunch-check.service';
 import { QueryStudentLunchCheckRequest } from 'shared/kinds';
-import { ConfirmDialogueComponent } from '../confirm-dialogue/confirm-dialogue';
-import { MessageDialogueComponent } from '../message-dialogue/message-dialogue';
 import { CreateStudentDialogueComponent } from '../create-student-dialogue/create-student-dialogue';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MessageService } from '../message-service';
 
 @Component({
 	selector: 'app-lunch-check-home',
@@ -18,6 +17,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class LunchCheckHomeComponent {
 	readonly dialog = inject(MatDialog);
 	private readonly lunchCheckService = inject(LunchCheckService);
+	private readonly messageService = inject(MessageService);
 	private _snackBar = inject(MatSnackBar);
 
 	async clockStudentInOrOut(mode: 'clock-in' | 'clock-out') {
@@ -38,21 +38,21 @@ export class LunchCheckHomeComponent {
 				await this.handleSearchResult(response, result.schoolStudentID, mode);
 			},
 			error: () => {
-				MessageDialogueComponent.open(this.dialog, { mode: 'error', message: 'An error occurred while searching for the student. Please try again.' });
+				this.messageService.error('An error occurred while searching for the student. Please try again.');
 			}
 		});
 	}
 
 	private async handleSearchResult(response: any, schoolStudentID: string, mode: 'clock-in' | 'clock-out') {
 		if (response.records.length > 1) {
-			MessageDialogueComponent.open(this.dialog, { mode: 'error', message: 'Multiple students found with the provided ID. Please contact support.' });
+			this.messageService.error('Multiple students found with the provided ID. Please contact support.');
 			return;
 		}
 
 		let studentID: string;
 		if (response.records.length == 0) {
-			const choice = await ConfirmDialogueComponent.open(this.dialog, { message: `No students found with the provided ID. Do you want to create a new student record with that ID and ${mode === 'clock-in' ? 'clock them in' : 'clock them out'}?` });
-			if (choice?.userChoice !== 'yes') {
+			const choice = await this.messageService.confirm(`No students found with the provided ID. Do you want to create a new student record with that ID and ${mode === 'clock-in' ? 'clock them in' : 'clock them out'}?`);
+			if (!choice) {
 				return;
 			}
 
@@ -78,7 +78,7 @@ export class LunchCheckHomeComponent {
 					this._snackBar.open(`Student ${mode === 'clock-in' ? 'clocked in' : 'clocked out'} successfully`, 'Close', { duration: 3000 });
 				},
 				error: () => {
-					MessageDialogueComponent.open(this.dialog, { mode: 'error', message: `An error occurred while ${mode === 'clock-in' ? 'clocking in' : 'clocking out'} the student. Please try again.` });
+					this.messageService.error(`An error occurred while ${mode === 'clock-in' ? 'clocking in' : 'clocking out'} the student. Please try again.`);
 				},
 			});
 	}

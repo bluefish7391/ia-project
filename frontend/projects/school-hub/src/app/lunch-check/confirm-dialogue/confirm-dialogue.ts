@@ -20,7 +20,7 @@ export interface DialogData {
 }
 
 export interface DialogueResult {
-	userChoice: 'yes' | 'no';
+	userChoice: boolean;
 }
 
 @Component({

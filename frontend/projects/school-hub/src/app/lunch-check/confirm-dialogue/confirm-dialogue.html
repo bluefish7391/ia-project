@@ -9,6 +9,6 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-	<button matButton (click)="dialogRef.close({ userChoice: 'no' })">Cancel</button>
-	<button mat-flat-button (click)="dialogRef.close({ userChoice: 'yes' })">OK</button>
+	<button matButton (click)="dialogRef.close({ userChoice: false })">Cancel</button>
+	<button mat-flat-button (click)="dialogRef.close({ userChoice: true })">OK</button>
 </mat-dialog-actions>

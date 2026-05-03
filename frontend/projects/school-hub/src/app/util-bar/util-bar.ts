@@ -23,7 +23,10 @@ export class UtilBar {
   private readonly url = toSignal(
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),
-      map(e => (e as NavigationEnd).urlAfterRedirects),
+      map(e => {
+        this.sidenavService.close();
+        return (e as NavigationEnd).urlAfterRedirects;
+      }),
     ),
     { initialValue: this.router.url },
   );

@@ -5,7 +5,7 @@
 
   <nav class="sidebar__nav">
     <mat-accordion [multi]="true">
-      @for (group of navGroups; track group.label) {
+      @for (group of visibleGroups(); track group.label) {
         <mat-expansion-panel>
           <mat-expansion-panel-header>
             <mat-panel-title>

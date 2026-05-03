@@ -3,6 +3,7 @@ import { AppRole, AppUserSession, Tenant } from "../../../shared/kinds";
 import { appRoleDAO, organizationDAO, securityDAO, tenantDAO } from "../daos/dao-factory";
 import { generateId } from "../idutilities";
 import { BadRequestError, ServerError } from "../kinds";
+import { AppPermissions } from "../../../shared/permissions";
 
 export class SecurityManager {
 	public async getUserTenants(googleToken: string | undefined): Promise<Tenant[]> {
@@ -77,6 +78,6 @@ export class SecurityManager {
 		const userRoles = await appRoleDAO.getUserRolesForAppUser(tenantID, appUserID);
 		const appRoles: AppRole[] = await appRoleDAO.getAppRolesFromUserRoles(tenantID, userRoles.map(r => r.appRoleID));
 		const userPermissions = new Set(appRoles.flatMap(r => r.appPermissions));
-		return Array.from(userPermissions);
+		return Array.from(userPermissions).map(p => AppPermissions[p as keyof typeof AppPermissions].name);
 	}
 }

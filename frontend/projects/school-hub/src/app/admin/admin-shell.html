@@ -1,15 +1,3 @@
-<nav class="admin-nav">
-  <span class="admin-nav__title">Admin</span>
-  <ul class="admin-nav__links">
-    <li><a routerLink="organizations" routerLinkActive="admin-nav__link--active" class="admin-nav__link">Organizations</a></li>
-    <li><a routerLink="tenants" routerLinkActive="admin-nav__link--active" class="admin-nav__link">Tenants</a></li>
-    <li><a routerLink="app-users" routerLinkActive="admin-nav__link--active" class="admin-nav__link">App Users</a></li>
-    <li><a routerLink="students" routerLinkActive="admin-nav__link--active" class="admin-nav__link">Students</a></li>
-    <li><a routerLink="app-roles" routerLinkActive="admin-nav__link--active" class="admin-nav__link">Roles</a></li>
-  </ul>
-  <button class="admin-nav__logout" (click)="logout()">Sign Out</button>
-</nav>
-
 <main class="admin-content">
   <router-outlet />
 </main>

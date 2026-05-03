@@ -1,14 +1,10 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { AuthService } from '../auth/auth.service';
-import { SessionService } from '../auth/session.service';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-sys-admin-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet],
   templateUrl: './sys-admin-shell.html',
   styleUrl: './sys-admin-shell.scss',
 })
-export class SysAdminShellComponent {
-  
-}
+export class SysAdminShellComponent {}

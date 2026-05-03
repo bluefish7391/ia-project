@@ -1,0 +1,11 @@
+<header class="util-bar">
+  <div class="util-bar__left">
+    <button class="util-bar__hamburger" mat-icon-button aria-label="Toggle navigation" (click)="sidenavService.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    @if (sectionTitle()) {
+      <span class="util-bar__title">{{ sectionTitle() }}</span>
+    }
+  </div>
+  <button class="util-bar__logout" (click)="logout()">Sign Out</button>
+</header>

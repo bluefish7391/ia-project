@@ -6,11 +6,3 @@
   --mat-sidenav-container-background-color: transparent;
   --mat-sidenav-container-divider-color: transparent;
 }
-
-/* TODO: TEMPORARY — remove when the navbar toggle button is implemented */
-.sidenav-toggle-fab {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 1000;
-}

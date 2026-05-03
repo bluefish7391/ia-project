@@ -45,6 +45,11 @@
   text-decoration: none;
   background: #fff;
   border: 1px solid #e0e4ef;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   transition:
     transform 120ms ease,

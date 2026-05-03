@@ -1,0 +1,49 @@
+<div mat-dialog-title class="dialog-header">
+	<div class="header-text">
+		<span class="header-label">Warning</span>
+	</div>
+</div>
+
+<mat-dialog-content class="dialog-content">
+	<div class="lca-warning" role="alert">
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+			<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+		</svg>
+		This student is already {{ data.mode === 'clock-in' ? 'clocked in' : 'clocked out' }}. Do you
+		want to continue?
+	</div>
+	<!-- TODO: Add clock in and clock out history for student that day -->
+	<section class="lca-history" aria-label="Today's clock activity">
+		<h2 class="lca-history__header">Today's Activity</h2>
+		@if (todayHistory.length === 0) {
+		<p class="lca-history__empty">No activity recorded today.</p>
+		} @else {
+		<ul class="lca-history__list">
+			@for (event of todayHistory; track event.time.getTime()) {
+			<li class="lca-history__item lca-history__item--{{ event.type }}">
+				@if (event.type === 'in') {
+				<svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+					fill="currentColor" aria-hidden="true">
+					<path
+						d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" />
+				</svg>
+				} @else {
+				<svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+					fill="currentColor" aria-hidden="true">
+					<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11H8v-2h8v2z" />
+				</svg>
+				}
+				<span class="lca-history__time">{{ event.label }}</span>
+				<span class="lca-history__type">{{ event.type === 'in' ? 'Clock in' : 'Clock out' }}</span>
+			</li>
+			}
+		</ul>
+		}
+	</section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+	<button matButton mat-dialog-close>Cancel</button>
+	<button mat-flat-button (click)="proceed()">{{ data.mode === 'clock-in' ? 'Continue Clock In' : 'Continue Clock Out'
+		}}</button>
+</mat-dialog-actions>

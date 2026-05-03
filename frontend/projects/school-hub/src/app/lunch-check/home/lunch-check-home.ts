@@ -1,12 +1,14 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { StudentIdReaderComponent } from '../student-id-reader/student-id-reader';
 import { MatDialog } from '@angular/material/dialog';
 import { LunchCheckService } from '../lunch-check.service';
-import { QueryStudentLunchCheckRequest } from 'shared/kinds';
+import { LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, StudentLunchCheckCompositeRecord } from 'shared/kinds';
 import { CreateStudentDialogueComponent } from '../create-student-dialogue/create-student-dialogue';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MessageService } from '../message-service';
+import { StudentActivityDialogue } from '../student-activity-dialogue/student-activity-dialogue';
+import { getClockStatus } from '../student-list/student-list';
 
 @Component({
 	selector: 'app-lunch-check-home',
@@ -43,7 +45,7 @@ export class LunchCheckHomeComponent {
 		});
 	}
 
-	private async handleSearchResult(response: any, schoolStudentID: string, mode: 'clock-in' | 'clock-out') {
+	private async handleSearchResult(response: QueryStudentLunchCheckResponse, schoolStudentID: string, mode: 'clock-in' | 'clock-out') {
 		if (response.records.length > 1) {
 			this.messageService.error('Multiple students found with the provided ID. Please contact support.');
 			return;
@@ -64,10 +66,27 @@ export class LunchCheckHomeComponent {
 			studentID = student.id;
 			await this.clockStudent(studentID, mode);
 		} else {
+			// Only one record found, proceed with clocking in/out
+			console.log('One student found, checking for odd case');
+			console.log('Student record:', response.records[0]);
+
+			if (this.ifIsOddCase(mode, response.records[0])) {
+				await StudentActivityDialogue.open(this.dialog, {
+					mode: mode,
+					student: response.records[0]
+				});
+				return;
+			}
+
 			const record = response.records[0];
 			studentID = record.student.id;
 			await this.clockStudent(studentID, mode);
 		}
+	}
+
+	private ifIsOddCase(mode: string, record: StudentLunchCheckCompositeRecord): boolean {
+		const status = this.getClockStatus(record.lunchCheckRecords);
+		return (mode === 'clock-in' && status === 'clocked-in') || (mode === 'clock-out' && status !== 'clocked-in');
 	}
 
 	private async clockStudent(studentID: string, mode: 'clock-in' | 'clock-out') {
@@ -81,5 +100,16 @@ export class LunchCheckHomeComponent {
 					this.messageService.error(`An error occurred while ${mode === 'clock-in' ? 'clocking in' : 'clocking out'} the student. Please try again.`);
 				},
 			});
+	}
+
+	private getClockStatus(records: LunchCheckRecord[]): string {
+		if (records.length === 0) return 'not-clocked-in';
+		const sorted = [...records].sort(
+			(a, b) => new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime(),
+		);
+		const latest = sorted[sorted.length - 1];
+		if (latest.checkInTime && !latest.checkOutTime) return 'clocked-in';
+		if (latest.checkInTime && latest.checkOutTime) return 'clocked-out';
+		return 'not-clocked-in';
 	}
 }

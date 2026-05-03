@@ -1,8 +1,18 @@
 <mat-sidenav-container class="app-container">
-  <mat-sidenav mode="side" opened>
+  <mat-sidenav mode="over" [opened]="sidenavOpen()" (closedStart)="sidenavOpen.set(false)">
     <app-sidebar />
   </mat-sidenav>
   <mat-sidenav-content>
     <router-outlet />
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+<!-- TODO: TEMPORARY toggle button — replace with hamburger button in the navbar component -->
+<button
+  mat-fab
+  class="sidenav-toggle-fab"
+  aria-label="Toggle navigation"
+  (click)="toggleSidenav()"
+>
+  <mat-icon>{{ sidenavOpen() ? 'close' : 'menu' }}</mat-icon>
+</button>

@@ -1,6 +1,7 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { initializeApp } from 'firebase/app';
 import { provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
@@ -12,6 +13,7 @@ import { authInterceptor } from './auth/auth.interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideAnimationsAsync(),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(routes),
     provideFirebaseApp(() => initializeApp(environment.firebase)),

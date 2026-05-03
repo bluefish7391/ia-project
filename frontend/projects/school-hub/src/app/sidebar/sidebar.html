@@ -1,0 +1,37 @@
+<div class="sidebar">
+  <div class="sidebar__header">
+    <span class="sidebar__app-name">School Hub</span>
+  </div>
+
+  <nav class="sidebar__nav">
+    <mat-accordion [multi]="true">
+      @for (group of navGroups; track group.label) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon class="sidebar__group-icon">{{ group.icon }}</mat-icon>
+              {{ group.label }}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <mat-nav-list>
+            @for (link of group.links; track link.route) {
+              <a
+                mat-list-item
+                [routerLink]="link.route"
+                routerLinkActive="sidebar__link--active"
+              >{{ link.label }}</a>
+            }
+          </mat-nav-list>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  </nav>
+
+  <div class="sidebar__footer">
+    <button mat-button class="sidebar__logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Sign Out
+    </button>
+  </div>
+</div>

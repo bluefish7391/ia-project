@@ -1,6 +1,6 @@
 import { getAuth } from "firebase-admin/auth";
-import { AppUserSession, Tenant } from "../../../shared/kinds";
-import { organizationDAO, securityDAO, tenantDAO } from "../daos/dao-factory";
+import { AppRole, AppUserSession, Tenant } from "../../../shared/kinds";
+import { appRoleDAO, organizationDAO, securityDAO, tenantDAO } from "../daos/dao-factory";
 import { generateId } from "../idutilities";
 import { BadRequestError, ServerError } from "../kinds";
 
@@ -57,6 +57,7 @@ export class SecurityManager {
 
 		const tenant = await tenantDAO.getTenant(tenantID);
 		const organization = await organizationDAO.getOrganization(tenantID, appUser.organizationID);
+		const permissions = await this.getPermisionsForUser(tenantID, appUser.id);
 		const appUserSession: AppUserSession = {
 			sessionID: generateId() + generateId() + generateId(),
 			tenantID,
@@ -64,9 +65,18 @@ export class SecurityManager {
 			tenantName: tenant ? tenant.name : "",
 			organizationID: appUser.organizationID,
 			organizationName: organization ? organization.name : "",
+			permissions,
 		};
+
 		console.log("createAppSession: appUserSession=", appUserSession);
 		await securityDAO.createAppSession(appUserSession);
 		return appUserSession;
+	}
+
+	private async getPermisionsForUser(tenantID: string, appUserID: string): Promise<string[]> {
+		const userRoles = await appRoleDAO.getUserRolesForAppUser(tenantID, appUserID);
+		const appRoles: AppRole[] = await appRoleDAO.getAppRolesFromUserRoles(tenantID, userRoles.map(r => r.appRoleID));
+		const userPermissions = new Set(appRoles.flatMap(r => r.appPermissions));
+		return Array.from(userPermissions);
 	}
 }

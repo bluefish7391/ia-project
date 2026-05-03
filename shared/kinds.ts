@@ -116,6 +116,7 @@ export interface AppUserSession {
 	tenantName: string;
 	organizationID: string;
 	organizationName: string;
+	permissions: string[]; // List of permissions the user has in this session, derived from their roles
 }
 
 export interface AppRole {

@@ -30,10 +30,22 @@ const NAV_GROUPS: NavGroup[] = [
 				label: 'Organizations', route: '/admin/organizations',
 				requiredPermissions: [AppPermissions.LIST_ORGANIZATIONS.name, AppPermissions.VIEW_ORGANIZATIONS.name]
 			},
-			{ label: 'Tenants', route: '/admin/tenants' },
-			{ label: 'App Users', route: '/admin/app-users' },
-			{ label: 'Students', route: '/admin/students' },
-			{ label: 'Roles', route: '/admin/app-roles' },
+			{ 
+				label: 'Tenants', route: '/admin/tenants',
+				requiredPermissions: [AppPermissions.LIST_TENANTS.name, AppPermissions.VIEW_TENANTS.name] 
+			},
+			{ 
+				label: 'App Users', route: '/admin/app-users',
+				requiredPermissions: [AppPermissions.LIST_USERS.name, AppPermissions.VIEW_USERS.name]
+			},
+			{ 
+				label: 'Students', route: '/admin/students',
+				requiredPermissions: [AppPermissions.LIST_STUDENTS.name, AppPermissions.VIEW_STUDENTS.name]
+			},
+			{ 
+				label: 'Roles', route: '/admin/app-roles',
+				requiredPermissions: [AppPermissions.LIST_ROLES.name, AppPermissions.VIEW_ROLES.name]
+			},
 			{ label: 'Todo List', route: '/admin/todo-list' },
 		],
 	},

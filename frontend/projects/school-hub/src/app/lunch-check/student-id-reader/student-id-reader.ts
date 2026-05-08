@@ -15,7 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 export interface DialogData {
-	mode: 'clock-in' | 'clock-out';
+	mode: 'clock-in' | 'clock-out' | 'view-records';
 }
 
 export interface DialogResult {
@@ -43,6 +43,17 @@ export class StudentIdReaderComponent {
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 	readonly studentID = model("");
 	private readonly studentInputRef = viewChild.required<NgModel>('studentInput');
+	protected readonly headerText: string;
+
+	constructor() {
+		this.headerText = (() => {
+			switch (this.data.mode) {
+				case 'clock-in': return 'Clock In';
+				case 'clock-out': return 'Clock Out';
+				case 'view-records': return 'View Records';
+			}
+		})();
+	}
 
 	static open(dialog: MatDialog, data: DialogData): Promise<DialogResult | undefined> {
 		const dialogRef = dialog.open(StudentIdReaderComponent, {

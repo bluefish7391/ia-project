@@ -1,12 +1,12 @@
 <div mat-dialog-title class="dialog-header">
 	<div class="header-text">
-		<span class="header-label">{{ headerText }}</span>
+		<span class="header-label">Student Activity</span>
 	</div>
 </div>
 
 <mat-dialog-content class="dialog-content">
-	<section class="lca-history" aria-label="Today's clock activity">
-		<h2 class="lca-history__header">Today's Activity</h2>
+	<h2 class="lca-history__header">{{ headerText }}</h2>
+	<section class="lca-history" aria-label="Student activity">
 		@if (todayHistory.length === 0) {
 		<p class="lca-history__empty">No activity recorded today.</p>
 		} @else {

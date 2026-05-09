@@ -87,7 +87,7 @@ export class LunchCheckClockActionComponent {
 		// TODO: fix bug where this filter doesn't get all records, it gets none
 		console.log("Selected record:", record);
 		const request: GetStudentLunchCheckInAndOutHistoryRequest = {
-			schoolStudentID: record.student.schoolStudentID,
+			studentID: record.student.id,
 			startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().split('T')[0], // Default to last 7 days
 			endDate: new Date().toISOString().split('T')[0]
 		};

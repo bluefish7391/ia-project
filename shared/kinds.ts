@@ -95,7 +95,7 @@ export interface QueryStudentLunchCheckRequest {
 }
 
 export interface GetStudentLunchCheckInAndOutHistoryRequest {
-	schoolStudentID: string; // Refers to Student.schoolStudentID
+	studentID: string; // Refers to Student.id
 	startDate?: string; // ISO date string (e.g., "2024-01-01")
 	endDate?: string; // ISO date string (e.g., "2024-01-01")
 	pageNumber?: number;

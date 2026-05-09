@@ -34,8 +34,8 @@ export class LunchCheckRouter extends BaseRouter {
 
 	async getStudentLunchCheckInAndOutHistory(req: Request, res: Response) {
 		const body = req.body as GetStudentLunchCheckInAndOutHistoryRequest;
-		if (!body.schoolStudentID) {
-			this.sendBadRequestError(res, { error: "schoolStudentID is required." });
+		if (!body.studentID) {
+			this.sendBadRequestError(res, { error: "studentID is required." });
 			return;
 		}
 		const history = await lunchCheckManager.getStudentLunchCheckInAndOutHistory(new RequestContext(req), body);

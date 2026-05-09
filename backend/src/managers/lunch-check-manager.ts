@@ -147,8 +147,8 @@ export class LunchCheckManager {
 			throw new BadRequestError("Invalid endDate format. Expected ISO date string.");
 		}
 
-		const student = await studentDAO.getStudentBySchoolID(tenantID, data.schoolStudentID);
-		console.log("getStudentLunchCheckInAndOutHistory: tenantID=", tenantID, "schoolStudentID=", data.schoolStudentID, "student=", student);
+		const student = await studentDAO.getStudent(tenantID, data.studentID);
+		console.log("getStudentLunchCheckInAndOutHistory: tenantID=", tenantID, "studentID=", data.studentID, "student=", student);
 		if (!student) {
 			throw new BadRequestError("No student with that id.");
 		}

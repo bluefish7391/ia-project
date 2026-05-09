@@ -13,9 +13,10 @@ import { LunchCheckService } from '../lunch-check.service';
 import { CreateStudentComponent, CreateStudentFormData } from '../create-student/create-student';
 import { StudentListComponent, getClockStatus } from '../student-list/student-list';
 import { StudentIdReaderComponent } from '../student-id-reader/student-id-reader';
-import { StudentActivityDialogue } from '../student-activity-dialogue/student-activity-dialogue';
+import { StudentActivityWarningDialogue } from '../student-activity-warning-dialogue/student-activity-warning-dialogue';
 import { MatDialog } from '@angular/material/dialog';
 import { MessageService } from '../message-service';
+import { StudentActivityViewDialogue } from '../student-activity-view-dialogue.ts/student-activity-view-dialogue';
 
 @Component({
 	selector: 'app-lunch-check-clock-action',
@@ -108,8 +109,7 @@ export class LunchCheckClockActionComponent {
 			lunchCheckRecords: response.records
 		};
 
-		await StudentActivityDialogue.open(this.dialog, {
-			mode: 'view-records',
+		await StudentActivityViewDialogue.open(this.dialog, {
 			student: compositeRecord
 		});
 	}

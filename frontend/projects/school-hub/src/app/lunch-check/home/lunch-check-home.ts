@@ -6,7 +6,7 @@ import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOu
 import { CreateStudentDialogueComponent } from '../create-student-dialogue/create-student-dialogue';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MessageService } from '../message-service';
-import { StudentActivityDialogue } from '../student-activity-dialogue/student-activity-dialogue';
+import { StudentActivityWarningDialogue } from '../student-activity-warning-dialogue/student-activity-warning-dialogue';
 import { Router } from '@angular/router';
 
 @Component({
@@ -70,7 +70,7 @@ export class LunchCheckHomeComponent {
 			console.log('Student record:', response.records[0]);
 
 			if (this.ifIsOddCase(mode, response.records[0])) {
-				await StudentActivityDialogue.open(this.dialog, {
+				await StudentActivityWarningDialogue.open(this.dialog, {
 					mode: mode,
 					student: response.records[0]
 				});

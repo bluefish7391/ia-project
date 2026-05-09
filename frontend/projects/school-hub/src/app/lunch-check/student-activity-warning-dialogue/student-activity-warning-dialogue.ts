@@ -16,7 +16,7 @@ import { MatInputModule } from '@angular/material/input';
 import { StudentLunchCheckCompositeRecord } from 'shared/kinds';
 
 export interface DialogData {
-	mode: 'clock-in' | 'clock-out' | 'view-records';
+	mode: 'clock-in' | 'clock-out';
 	student: StudentLunchCheckCompositeRecord;
 }
 
@@ -37,37 +37,12 @@ interface DialogConfig {
 	proceedButtonText: string;
 }
 
-const DIALOGUE_CONFIGS: Record<DialogData['mode'], DialogConfig> = {
-	'clock-in': {
-		headerText: 'Warning',
-		alertText: 'This student is already clocked in. Do you want to continue?',
-		closeButtonText: 'Cancel',
-		proceedButtonText: 'Continue clock in',
-	},
-	'clock-out': {
-		headerText: 'Warning',
-		alertText: 'This student is already clocked out. Do you want to continue?',
-		closeButtonText: 'Cancel',
-		proceedButtonText: 'Continue clock out',
-	},
-	'view-records': {
-		headerText: '',  // set dynamically below
-		alertText: '',
-		closeButtonText: 'Close',
-		proceedButtonText: '',
-	},
-};
-
 function formatTimeWithoutDate(d: Date): string {
 	return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
-function formatTimeWithDate(d: Date): string {
-	return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
-}
-
 @Component({
-	selector: 'student-activity-dialogue',
+	selector: 'student-activity-warning-dialogue',
 	imports: [
 		MatFormFieldModule,
 		MatInputModule,
@@ -79,35 +54,27 @@ function formatTimeWithDate(d: Date): string {
 		MatDialogClose,
 		MatIconModule,
 	],
-	templateUrl: './student-activity-dialogue.html',
-	styleUrl: './student-activity-dialogue.scss',
+	templateUrl: './student-activity-warning-dialogue.html',
+	styleUrl: './student-activity-warning-dialogue.scss',
 })
-export class StudentActivityDialogue {
-	readonly dialogRef = inject(MatDialogRef<StudentActivityDialogue>);
+export class StudentActivityWarningDialogue {
+	readonly dialogRef = inject(MatDialogRef<StudentActivityWarningDialogue>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 	protected readonly mode;
-	protected readonly dialogConfig: DialogConfig;
 	protected todayHistory: ClockEvent[] = [];
 
 	constructor() {
-		console.log('Initializing StudentActivityDialogue with data:', this.data);
+		console.log('Initializing StudentActivityWarningDialogue with data:', this.data);
 		this.mode = this.data.mode;
 
-		// Set text on dialog based on mode and student data
-		this.dialogConfig = { ...DIALOGUE_CONFIGS[this.mode] };
-		if (this.mode === 'view-records') {
-			this.dialogConfig.headerText = `Viewing Records for ${this.data.student.student.firstName} ${this.data.student.student.lastName}`;
-		}
-
-		const formatTime: (d: Date) => string = this.mode === 'view-records' ? formatTimeWithDate : formatTimeWithoutDate;
 		for (const r of this.data.student.lunchCheckRecords) {
 			if (r.checkInTime) {
 				const t = new Date(r.checkInTime);
-				this.todayHistory.push({ type: 'in', time: t, label: formatTime(t) });
+				this.todayHistory.push({ type: 'in', time: t, label: formatTimeWithoutDate(t) });
 			}
 			if (r.checkOutTime) {
 				const t = new Date(r.checkOutTime);
-				this.todayHistory.push({ type: 'out', time: t, label: formatTime(t) });
+				this.todayHistory.push({ type: 'out', time: t, label: formatTimeWithoutDate(t) });
 			}
 		}
 		this.todayHistory.sort((a: ClockEvent, b: ClockEvent) => b.time.getTime() - a.time.getTime());
@@ -115,7 +82,7 @@ export class StudentActivityDialogue {
 	}
 
 	static open(dialog: MatDialog, data: DialogData): Promise<DialogueResult | undefined> {
-		const dialogRef = dialog.open(StudentActivityDialogue, {
+		const dialogRef = dialog.open(StudentActivityWarningDialogue, {
 			data: data,
 		});
 
@@ -123,6 +90,6 @@ export class StudentActivityDialogue {
 	}
 
 	protected proceed() {
-
+		
 	}
 }

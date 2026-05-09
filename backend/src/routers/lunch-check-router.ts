@@ -11,7 +11,7 @@ export class LunchCheckRouter extends BaseRouter {
 		return express.Router()
 			.post("/student-lunch-check-records", authenticator(["VIEW_LUNCH_CHECK_RECORDS"]), lunchCheckRouter.wrapAsync(lunchCheckRouter.getAllStudentLunchCheckRecords.bind(lunchCheckRouter)))
 			.put("/student-lunch-check-record", authenticator(["MANAGE_LUNCH_CHECK_RECORDS"]), lunchCheckRouter.wrapAsync(lunchCheckRouter.saveStudentLunchCheck.bind(lunchCheckRouter)))
-			.get("/student-lunch-check-in-and-out-history", authenticator(["VIEW_LUNCH_CHECK_RECORDS"]), lunchCheckRouter.wrapAsync(lunchCheckRouter.getStudentLunchCheckInAndOutHistory.bind(lunchCheckRouter)))
+			.post("/student-lunch-check-in-and-out-history", authenticator(["VIEW_LUNCH_CHECK_RECORDS"]), lunchCheckRouter.wrapAsync(lunchCheckRouter.getStudentLunchCheckInAndOutHistory.bind(lunchCheckRouter)))
 			.post("/student-lunch-check", authenticator(["MANAGE_LUNCH_CHECK_RECORDS"]), lunchCheckRouter.wrapAsync(lunchCheckRouter.saveStudentLunchCheckConfig.bind(lunchCheckRouter)));
 	}
 

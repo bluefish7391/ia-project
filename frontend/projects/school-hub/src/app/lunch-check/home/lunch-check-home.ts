@@ -1,18 +1,16 @@
 import { Component, computed, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { StudentIdReaderComponent } from '../student-id-reader/student-id-reader';
 import { MatDialog } from '@angular/material/dialog';
 import { LunchCheckService } from '../lunch-check.service';
-import { LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, StudentLunchCheckCompositeRecord } from 'shared/kinds';
+import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, StudentLunchCheckCompositeRecord } from 'shared/kinds';
 import { CreateStudentDialogueComponent } from '../create-student-dialogue/create-student-dialogue';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MessageService } from '../message-service';
 import { StudentActivityDialogue } from '../student-activity-dialogue/student-activity-dialogue';
-import { getClockStatus } from '../student-list/student-list';
 
 @Component({
 	selector: 'app-lunch-check-home',
-	imports: [RouterLink],
+	imports: [],
 	templateUrl: './lunch-check-home.html',
 	styleUrl: './lunch-check-home.scss',
 })
@@ -67,7 +65,6 @@ export class LunchCheckHomeComponent {
 			await this.clockStudent(studentID, mode);
 		} else {
 			// Only one record found, proceed with clocking in/out
-			console.log('One student found, checking for odd case');
 			console.log('Student record:', response.records[0]);
 
 			if (this.ifIsOddCase(mode, response.records[0])) {
@@ -111,5 +108,44 @@ export class LunchCheckHomeComponent {
 		if (latest.checkInTime && !latest.checkOutTime) return 'clocked-in';
 		if (latest.checkInTime && latest.checkOutTime) return 'clocked-out';
 		return 'not-clocked-in';
+	}
+
+	protected async viewRecords() {
+		const dialogResult = await StudentIdReaderComponent.open(this.dialog, { mode: 'view-records' });
+		if (!dialogResult) {
+			return;
+		}
+
+		// TODO: fix bug where this filter doesn't get all records, it gets none
+		const request: GetStudentLunchCheckInAndOutHistoryRequest = {
+			studentID: dialogResult.schoolStudentID,
+			startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().split('T')[0], // Default to last 7 days
+			endDate: new Date().toISOString().split('T')[0]
+		};
+
+		this.lunchCheckService.getStudentLunchCheckInAndOutHistory(request).subscribe({
+			next: async response => await this.handleViewRecordsSearchResult(response),
+			error: () => {
+				this.messageService.error('An error occurred while searching for the student. Please try again.');
+			}
+		});
+	}
+
+	private async handleViewRecordsSearchResult(response: GetStudentLunchCheckInAndOutHistoryResponse) {
+		const compositeRecord: StudentLunchCheckCompositeRecord = {
+			student: {
+				id: response.records[0].studentID,
+				tenantID: '', 
+				schoolStudentID: '', 
+				firstName: 'test', 
+				lastName: 'ing rock', 
+			},
+			lunchCheckRecords: response.records
+		};
+
+		await StudentActivityDialogue.open(this.dialog, {
+			mode: 'view-records',
+			student: compositeRecord
+		});
 	}
 }

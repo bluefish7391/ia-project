@@ -17,11 +17,6 @@ export class LunchCheckRouter extends BaseRouter {
 
 	async getAllStudentLunchCheckRecords(req: Request, res: Response) {
 		const filterOptions = req.body as QueryStudentLunchCheckRequest;
-		if (!filterOptions.lunchDate) {
-			this.sendBadRequestError(res, { error: "lunchDate is required." });
-			return;
-		}
-
 		const students = await lunchCheckManager.getAllStudents(new RequestContext(req), filterOptions);
 		this.sendSuccess(res, students);
 	}
@@ -39,8 +34,8 @@ export class LunchCheckRouter extends BaseRouter {
 
 	async getStudentLunchCheckInAndOutHistory(req: Request, res: Response) {
 		const body = req.body as GetStudentLunchCheckInAndOutHistoryRequest;
-		if (!body.studentID) {
-			this.sendBadRequestError(res, { error: "studentID is required." });
+		if (!body.schoolStudentID) {
+			this.sendBadRequestError(res, { error: "schoolStudentID is required." });
 			return;
 		}
 		const history = await lunchCheckManager.getStudentLunchCheckInAndOutHistory(new RequestContext(req), body);

@@ -10,9 +10,7 @@
       @for (record of records(); track record.student.id) {
         <li
           class="sl-card"
-          [class.sl-card--selected]="isSelected(record)"
           role="option"
-          [attr.aria-selected]="isSelected(record)"
           (click)="select(record)"
           (keydown.enter)="select(record)"
           (keydown.space)="select(record)"

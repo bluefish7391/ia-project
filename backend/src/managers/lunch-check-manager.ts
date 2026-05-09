@@ -8,7 +8,7 @@ export class LunchCheckManager {
 	async getAllStudents(requestContext: RequestContext, filterOptions: QueryStudentLunchCheckRequest): Promise<QueryStudentLunchCheckResponse> {
 		const tenantID = requestContext.getCurrentTenantID();
 		// Validate lunchDate format
-		if (!this.isValidISODateString(filterOptions.lunchDate)) {
+		if (filterOptions.lunchDate && !this.isValidISODateString(filterOptions.lunchDate)) {
 			throw new Error("Invalid lunchDate format. Expected ISO date string.");
 		}
 
@@ -49,7 +49,12 @@ export class LunchCheckManager {
 
 		students = students.slice(startIndex, endIndex);
 
-		const lunchCheckRecords: LunchCheckRecord[] = await lunchCheckDAO.getLunchCheckRecordsByDate(tenantID, filterOptions.lunchDate);
+		let lunchCheckRecords: LunchCheckRecord[] = [];
+		if (filterOptions.lunchDate) {
+			lunchCheckRecords = await lunchCheckDAO.getLunchCheckRecordsByDate(tenantID, filterOptions.lunchDate);
+		} else {
+			lunchCheckRecords = await lunchCheckDAO.getLunchCheckRecords(tenantID);
+		}
 		const studentLunchChecks: StudentLunchCheck[] = await lunchCheckDAO.getStudentLunchChecksForStudents(tenantID);
 
 		const studentLunchCheckMap = new Map<string, StudentLunchCheck>();
@@ -142,8 +147,8 @@ export class LunchCheckManager {
 			throw new BadRequestError("Invalid endDate format. Expected ISO date string.");
 		}
 
-		const student = await studentDAO.getStudentBySchoolID(tenantID, data.studentID);
-		console.log("getStudentLunchCheckInAndOutHistory: tenantID=", tenantID, "studentID=", data.studentID, "student=", student);
+		const student = await studentDAO.getStudentBySchoolID(tenantID, data.schoolStudentID);
+		console.log("getStudentLunchCheckInAndOutHistory: tenantID=", tenantID, "schoolStudentID=", data.schoolStudentID, "student=", student);
 		if (!student) {
 			throw new BadRequestError("No student with that id.");
 		}

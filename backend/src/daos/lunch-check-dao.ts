@@ -13,6 +13,13 @@ export class LunchCheckDAO {
 		return data[0] as LunchCheckRecord[];
 	}
 
+	async getLunchCheckRecords(tenantID: string): Promise<LunchCheckRecord[]> {
+		const query = datastore.createQuery(LunchCheckDAO.LUNCH_CHECK_RECORD_KIND)
+			.filter("tenantID", "=", tenantID);
+		const data = await query.run();
+		return data[0] as LunchCheckRecord[];
+	}
+
 	async getStudentLunchChecksForStudents(tenantID: string): Promise<StudentLunchCheck[]> {
 		const query = datastore.createQuery(LunchCheckDAO.STUDENT_LUNCH_CHECK_KIND)
 			.filter("tenantID", "=", tenantID);

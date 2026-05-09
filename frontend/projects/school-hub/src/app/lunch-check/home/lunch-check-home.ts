@@ -7,6 +7,7 @@ import { CreateStudentDialogueComponent } from '../create-student-dialogue/creat
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MessageService } from '../message-service';
 import { StudentActivityDialogue } from '../student-activity-dialogue/student-activity-dialogue';
+import { Router } from '@angular/router';
 
 @Component({
 	selector: 'app-lunch-check-home',
@@ -19,6 +20,7 @@ export class LunchCheckHomeComponent {
 	private readonly lunchCheckService = inject(LunchCheckService);
 	private readonly messageService = inject(MessageService);
 	private _snackBar = inject(MatSnackBar);
+	private readonly router = inject(Router);
 
 	async clockStudentInOrOut(mode: 'clock-in' | 'clock-out') {
 		const result = await StudentIdReaderComponent.open(this.dialog, { mode: mode });
@@ -109,43 +111,8 @@ export class LunchCheckHomeComponent {
 		if (latest.checkInTime && latest.checkOutTime) return 'clocked-out';
 		return 'not-clocked-in';
 	}
-
-	protected async viewRecords() {
-		const dialogResult = await StudentIdReaderComponent.open(this.dialog, { mode: 'view-records' });
-		if (!dialogResult) {
-			return;
-		}
-
-		// TODO: fix bug where this filter doesn't get all records, it gets none
-		const request: GetStudentLunchCheckInAndOutHistoryRequest = {
-			studentID: dialogResult.schoolStudentID,
-			startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().split('T')[0], // Default to last 7 days
-			endDate: new Date().toISOString().split('T')[0]
-		};
-
-		this.lunchCheckService.getStudentLunchCheckInAndOutHistory(request).subscribe({
-			next: async response => await this.handleViewRecordsSearchResult(response),
-			error: () => {
-				this.messageService.error('An error occurred while searching for the student. Please try again.');
-			}
-		});
-	}
-
-	private async handleViewRecordsSearchResult(response: GetStudentLunchCheckInAndOutHistoryResponse) {
-		const compositeRecord: StudentLunchCheckCompositeRecord = {
-			student: {
-				id: response.records[0].studentID,
-				tenantID: '', 
-				schoolStudentID: '', 
-				firstName: 'test', 
-				lastName: 'ing rock', 
-			},
-			lunchCheckRecords: response.records
-		};
-
-		await StudentActivityDialogue.open(this.dialog, {
-			mode: 'view-records',
-			student: compositeRecord
-		});
+	
+	protected async report() {
+		await this.router.navigate(['/lunch-check/clock-in']);
 	}
 }

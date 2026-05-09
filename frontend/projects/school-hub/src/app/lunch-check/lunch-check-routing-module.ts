@@ -13,21 +13,9 @@ const routes: Routes = [
           import('./home/lunch-check-home').then((m) => m.LunchCheckHomeComponent),
       },
       {
-        path: 'clock-in',
-        data: { checkingIn: true },
+        path: 'view-records',
         loadComponent: () =>
-          import('./clock-action/lunch-check-clock-action').then((m) => m.LunchCheckClockActionComponent),
-      },
-      {
-        path: 'clock-out',
-        data: { checkingIn: false },
-        loadComponent: () =>
-          import('./clock-action/lunch-check-clock-action').then((m) => m.LunchCheckClockActionComponent),
-      },
-      {
-        path: 'records',
-        loadComponent: () =>
-          import('./home/lunch-check-home').then((m) => m.LunchCheckHomeComponent),
+          import('./view-records/view-records').then((m) => m.ViewRecordsComponent),
       },
     ],
   },

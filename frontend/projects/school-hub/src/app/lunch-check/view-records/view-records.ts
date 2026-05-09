@@ -19,12 +19,12 @@ import { MessageService } from '../message-service';
 import { StudentActivityViewDialogue } from '../student-activity-view-dialogue.ts/student-activity-view-dialogue';
 
 @Component({
-	selector: 'app-lunch-check-clock-action',
+	selector: 'app-view-records',
 	imports: [RouterLink, StudentListComponent],
-	templateUrl: './lunch-check-clock-action.html',
-	styleUrl: './lunch-check-clock-action.scss',
+	templateUrl: './view-records.html',
+	styleUrl: './view-records.scss',
 })
-export class LunchCheckClockActionComponent {
+export class ViewRecordsComponent {
 	private readonly dialog = inject(MatDialog);
 	private readonly messageService = inject(MessageService);
 	private readonly lunchCheckService = inject(LunchCheckService);

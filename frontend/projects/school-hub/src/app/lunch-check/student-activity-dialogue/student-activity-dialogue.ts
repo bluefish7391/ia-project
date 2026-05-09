@@ -10,7 +10,7 @@ import {
 	MatDialogRef,
 	MatDialogTitle,
 } from '@angular/material/dialog';
-import {MatIconModule} from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { StudentLunchCheckCompositeRecord } from 'shared/kinds';
@@ -30,8 +30,40 @@ interface ClockEvent {
 	label: string;
 }
 
-function formatTime(d: Date): string {
+interface DialogConfig {
+	headerText: string;
+	alertText: string;
+	closeButtonText: string;
+	proceedButtonText: string;
+}
+
+const DIALOGUE_CONFIGS: Record<DialogData['mode'], DialogConfig> = {
+	'clock-in': {
+		headerText: 'Warning',
+		alertText: 'This student is already clocked in. Do you want to continue?',
+		closeButtonText: 'Cancel',
+		proceedButtonText: 'Continue clock in',
+	},
+	'clock-out': {
+		headerText: 'Warning',
+		alertText: 'This student is already clocked out. Do you want to continue?',
+		closeButtonText: 'Cancel',
+		proceedButtonText: 'Continue clock out',
+	},
+	'view-records': {
+		headerText: '',  // set dynamically below
+		alertText: '',
+		closeButtonText: 'Close',
+		proceedButtonText: '',
+	},
+};
+
+function formatTimeWithoutDate(d: Date): string {
 	return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+function formatTimeWithDate(d: Date): string {
+	return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
 @Component({
@@ -54,35 +86,20 @@ export class StudentActivityDialogue {
 	readonly dialogRef = inject(MatDialogRef<StudentActivityDialogue>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 	protected readonly mode;
-	protected readonly headerText: string;
-	protected readonly alertText: string;
-	protected readonly closeButtonText: string;
-	protected readonly proceedButtonText: string;
+	protected readonly dialogConfig: DialogConfig;
 	protected todayHistory: ClockEvent[] = [];
 
 	constructor() {
 		console.log('Initializing StudentActivityDialogue with data:', this.data);
 		this.mode = this.data.mode;
-		switch (this.mode) {
-			case 'clock-in':
-				this.headerText = 'Warning';
-				this.alertText = 'This student is already clocked in. Do you want to continue?';
-				this.closeButtonText = 'Cancel';
-				this.proceedButtonText = 'Continue clock in';
-				break;
-			case 'clock-out':
-				this.headerText = 'Warning';
-				this.alertText = 'This student is already clocked out. Do you want to continue?';
-				this.closeButtonText = 'Cancel';
-				this.proceedButtonText = 'Continue clock out';
-				break;
-			case 'view-records':
-				this.headerText = `Viewing Records for ${this.data.student.student.firstName} ${this.data.student.student.lastName}`;
-				this.alertText = '';
-				this.closeButtonText = 'Close';
-				this.proceedButtonText = '';
-				break;
+
+		// Set text on dialog based on mode and student data
+		this.dialogConfig = { ...DIALOGUE_CONFIGS[this.mode] };
+		if (this.mode === 'view-records') {
+			this.dialogConfig.headerText = `Viewing Records for ${this.data.student.student.firstName} ${this.data.student.student.lastName}`;
 		}
+
+		const formatTime: (d: Date) => string = this.mode === 'view-records' ? formatTimeWithDate : formatTimeWithoutDate;
 		for (const r of this.data.student.lunchCheckRecords) {
 			if (r.checkInTime) {
 				const t = new Date(r.checkInTime);

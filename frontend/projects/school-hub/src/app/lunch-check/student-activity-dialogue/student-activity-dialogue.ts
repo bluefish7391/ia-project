@@ -16,7 +16,7 @@ import { MatInputModule } from '@angular/material/input';
 import { StudentLunchCheckCompositeRecord } from 'shared/kinds';
 
 export interface DialogData {
-	mode: 'clock-in' | 'clock-out';
+	mode: 'clock-in' | 'clock-out' | 'view-records';
 	student: StudentLunchCheckCompositeRecord;
 }
 
@@ -53,10 +53,36 @@ function formatTime(d: Date): string {
 export class StudentActivityDialogue {
 	readonly dialogRef = inject(MatDialogRef<StudentActivityDialogue>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
+	protected readonly mode;
+	protected readonly headerText: string;
+	protected readonly alertText: string;
+	protected readonly closeButtonText: string;
+	protected readonly proceedButtonText: string;
 	protected todayHistory: ClockEvent[] = [];
 
 	constructor() {
 		console.log('Initializing StudentActivityDialogue with data:', this.data);
+		this.mode = this.data.mode;
+		switch (this.mode) {
+			case 'clock-in':
+				this.headerText = 'Warning';
+				this.alertText = 'This student is already clocked in. Do you want to continue?';
+				this.closeButtonText = 'Cancel';
+				this.proceedButtonText = 'Continue clock in';
+				break;
+			case 'clock-out':
+				this.headerText = 'Warning';
+				this.alertText = 'This student is already clocked out. Do you want to continue?';
+				this.closeButtonText = 'Cancel';
+				this.proceedButtonText = 'Continue clock out';
+				break;
+			case 'view-records':
+				this.headerText = `Viewing Records for ${this.data.student.student.firstName} ${this.data.student.student.lastName}`;
+				this.alertText = '';
+				this.closeButtonText = 'Close';
+				this.proceedButtonText = '';
+				break;
+		}
 		for (const r of this.data.student.lunchCheckRecords) {
 			if (r.checkInTime) {
 				const t = new Date(r.checkInTime);

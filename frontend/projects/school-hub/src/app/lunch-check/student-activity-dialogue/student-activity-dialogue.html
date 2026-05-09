@@ -1,17 +1,18 @@
 <div mat-dialog-title class="dialog-header">
 	<div class="header-text">
-		<span class="header-label">Warning</span>
+		<span class="header-label">{{ headerText }}</span>
 	</div>
 </div>
 
 <mat-dialog-content class="dialog-content">
+	@if (alertText) {
 	<div class="lca-warning" role="alert">
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
 			<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
 		</svg>
-		This student is already {{ data.mode === 'clock-in' ? 'clocked in' : 'clocked out' }}. Do you
-		want to continue?
+		{{ alertText }}
 	</div>
+	}
 	<!-- TODO: Add clock in and clock out history for student that day -->
 	<section class="lca-history" aria-label="Today's clock activity">
 		<h2 class="lca-history__header">Today's Activity</h2>
@@ -43,7 +44,8 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-	<button matButton mat-dialog-close>Cancel</button>
-	<button mat-flat-button (click)="proceed()">{{ data.mode === 'clock-in' ? 'Continue Clock In' : 'Continue Clock Out'
-		}}</button>
+	<button matButton mat-dialog-close>{{ closeButtonText }}</button>
+	@if (proceedButtonText) {
+	<button mat-flat-button (click)="proceed()">{{ proceedButtonText }}</button>
+	}
 </mat-dialog-actions>

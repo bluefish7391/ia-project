@@ -1,61 +1,66 @@
-<div class="lc-home">
-  <header class="lc-home__header">
-    <h1 class="lc-home__title">Lunch Check</h1>
-    <p class="lc-home__subtitle">Track which students leave and return for off-campus lunch</p>
-  </header>
+<div class="container">
+	<div class="lc-home">
+		<header class="lc-home__header">
+			<h1 class="lc-home__title">Lunch Check</h1>
+			<p class="lc-home__subtitle">Track which students leave and return for off-campus lunch</p>
+		</header>
 
-  <div class="lc-home__actions">
-    <button (click)="clockStudentInOrOut('clock-in')" class="lc-action-card lc-action-card--clock-in">
-      <div class="lc-action-card__icon" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8Z"/>
-          <path d="M16.59 7.58 10 14.17l-2.59-2.58L6 13l4 4 8-8z"/>
-        </svg>
-      </div>
-      <div class="lc-action-card__body">
-        <span class="lc-action-card__label">Clock In Student</span>
-        <span class="lc-action-card__description">Record a student returning from lunch</span>
-      </div>
-      <div class="lc-action-card__arrow" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
-        </svg>
-      </div>
-    </button>
+		<div class="lc-home__actions">
+			<button (click)="clockStudentInOrOut('clock-in')" class="lc-action-card lc-action-card--clock-in">
+				<div class="lc-action-card__icon" aria-hidden="true">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8Z" />
+						<path d="M16.59 7.58 10 14.17l-2.59-2.58L6 13l4 4 8-8z" />
+					</svg>
+				</div>
+				<div class="lc-action-card__body">
+					<span class="lc-action-card__label">Clock In Student</span>
+					<span class="lc-action-card__description">Record a student returning from lunch</span>
+				</div>
+				<div class="lc-action-card__arrow" aria-hidden="true">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+					</svg>
+				</div>
+			</button>
 
-    <button (click)="clockStudentInOrOut('clock-out')" class="lc-action-card lc-action-card--clock-out">
-      <div class="lc-action-card__icon" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8Z"/>
-          <path d="M17 11H9.41l2.3-2.29-1.42-1.42L6 11.71l.71.71 3.59 3.58 1.41-1.41L9.41 13H17z"/>
-        </svg>
-      </div>
-      <div class="lc-action-card__body">
-        <span class="lc-action-card__label">Clock Out Student</span>
-        <span class="lc-action-card__description">Record a student leaving for lunch</span>
-      </div>
-      <div class="lc-action-card__arrow" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
-        </svg>
-      </div>
-    </button>
+			<button (click)="clockStudentInOrOut('clock-out')" class="lc-action-card lc-action-card--clock-out">
+				<div class="lc-action-card__icon" aria-hidden="true">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8Z" />
+						<path d="M17 11H9.41l2.3-2.29-1.42-1.42L6 11.71l.71.71 3.59 3.58 1.41-1.41L9.41 13H17z" />
+					</svg>
+				</div>
+				<div class="lc-action-card__body">
+					<span class="lc-action-card__label">Clock Out Student</span>
+					<span class="lc-action-card__description">Record a student leaving for lunch</span>
+				</div>
+				<div class="lc-action-card__arrow" aria-hidden="true">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+					</svg>
+				</div>
+			</button>
 
-    <button (click)="report()" class="lc-action-card lc-action-card--records">
-      <div class="lc-action-card__icon" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 16H5V5h14ZM7 7h10v2H7Zm0 4h10v2H7Zm0 4h7v2H7z"/>
-        </svg>
-      </div>
-      <div class="lc-action-card__body">
-        <span class="lc-action-card__label">View Records</span>
-        <span class="lc-action-card__description">Browse and search previous lunch records</span>
-      </div>
-      <div class="lc-action-card__arrow" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
-        </svg>
-      </div>
-    </button>
-  </div>
+			<button (click)="report()" class="lc-action-card lc-action-card--records">
+				<div class="lc-action-card__icon" aria-hidden="true">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+						<path
+							d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 16H5V5h14ZM7 7h10v2H7Zm0 4h10v2H7Zm0 4h7v2H7z" />
+					</svg>
+				</div>
+				<div class="lc-action-card__body">
+					<span class="lc-action-card__label">View Records</span>
+					<span class="lc-action-card__description">Browse and search previous lunch records</span>
+				</div>
+				<div class="lc-action-card__arrow" aria-hidden="true">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+					</svg>
+				</div>
+			</button>
+		</div>
+	</div>
+
+
 </div>

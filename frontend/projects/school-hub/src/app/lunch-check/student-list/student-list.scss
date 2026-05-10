@@ -1,4 +1,11 @@
+.component-container {
+	height: 100%;
+	overflow: hidden;
+}
+
 .sl-container {
+	height: 100%;
+	overflow: auto;
   width: 100%;
 }
 
@@ -38,8 +45,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  max-height: 380px;
-  overflow-y: auto;
 }
 
 .sl-card {

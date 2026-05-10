@@ -4,6 +4,7 @@
 :host {
 	height: 100%;
 	overflow: hidden;
+	display: block;
 	--lca-accent: #1a237e;
 	--lca-accent-light: #e8eaf6;
 	--lca-accent-btn: #1a237e;
@@ -12,9 +13,12 @@
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 .lca-page {
-	padding: 1.5rem 1.5rem 5.5rem; // bottom padding for sticky bar on mobile
+	height: 100%;
+	overflow: hidden;
+	padding: 1.5rem 1.5rem 1.5rem; // bottom padding for sticky bar on mobile
 	display: flex;
 	flex-direction: column;
+	box-sizing: border-box;
 	gap: 1rem;
 	max-width: 680px;
 	margin: 0 auto;
@@ -27,7 +31,8 @@
 
 // ─── Two-column layout ───────────────────────────────────────────────────────
 .lca-layout {
-	display: contents; // flat on mobile — children flow directly in .lca-page
+	flex: 1 1 auto;
+	overflow: hidden;
 
 	@media (min-width: 768px) {
 		display: flex;
@@ -36,7 +41,11 @@
 	}
 
 	&__left {
-		display: contents;
+		height: 100%;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 
 		@media (min-width: 768px) {
 			display: flex;
@@ -143,6 +152,8 @@
 
 // ─── Results ─────────────────────────────────────────────────────────────────
 .lca-results {
+	flex: 1 1 auto;
+	overflow: hidden;
 	background: #fff;
 	border-radius: 12px;
 	border: 1px solid #e0e4ef;

@@ -69,12 +69,14 @@ export class LunchCheckHomeComponent {
 			// Only one record found, proceed with clocking in/out
 			console.log('Student record:', response.records[0]);
 
-			if (this.ifIsOddCase(mode, response.records[0])) {
-				await StudentActivityWarningDialogue.open(this.dialog, {
+			if (this.isOddCase(mode, response.records[0])) {
+				const result = await StudentActivityWarningDialogue.open(this.dialog, {
 					mode: mode,
 					student: response.records[0]
 				});
-				return;
+				if (!result || !result.userChoice) {
+					return;
+				}
 			}
 
 			const record = response.records[0];
@@ -83,7 +85,7 @@ export class LunchCheckHomeComponent {
 		}
 	}
 
-	private ifIsOddCase(mode: string, record: StudentLunchCheckCompositeRecord): boolean {
+	private isOddCase(mode: string, record: StudentLunchCheckCompositeRecord): boolean {
 		const status = this.getClockStatus(record.lunchCheckRecords);
 		return (mode === 'clock-in' && status === 'clocked-in') || (mode === 'clock-out' && status !== 'clocked-in');
 	}

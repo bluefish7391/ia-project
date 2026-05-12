@@ -30,13 +30,6 @@ interface ClockEvent {
 	label: string;
 }
 
-interface DialogConfig {
-	headerText: string;
-	alertText: string;
-	closeButtonText: string;
-	proceedButtonText: string;
-}
-
 function formatTimeWithoutDate(d: Date): string {
 	return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
@@ -90,6 +83,6 @@ export class StudentActivityWarningDialogue {
 	}
 
 	protected proceed() {
-		
+		this.dialogRef.close({ userChoice: true });
 	}
 }

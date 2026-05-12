@@ -113,6 +113,6 @@ export class LunchCheckHomeComponent {
 	}
 	
 	protected async report() {
-		await this.router.navigate(['/lunch-check/view-records']);
+		await this.router.navigate(['/lunch-check/report']);
 	}
 }

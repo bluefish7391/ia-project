@@ -1,6 +1,7 @@
-import { Component, inject, model, viewChild } from '@angular/core';
+import { Component, inject, model, signal, viewChild } from '@angular/core';
 import { FormsModule, NgModel } from '@angular/forms';
 import { MatButtonModule, MatIconButton } from '@angular/material/button';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import {
 	MAT_DIALOG_DATA,
 	MatDialog,
@@ -20,7 +21,7 @@ export interface DialogData {
 }
 
 export interface DialogueResult {
-	userChoice: boolean;
+	contractCompleted: boolean;
 }
 
 interface ClockEvent {
@@ -34,29 +35,31 @@ function formatTimeWithDate(d: Date): string {
 }
 
 @Component({
-	selector: 'student-activity-view-dialogue',
+	selector: 'student-activity-info-dialogue',
 	imports: [
 		MatFormFieldModule,
 		MatInputModule,
 		FormsModule,
 		MatButtonModule,
+		MatSlideToggleModule,
 		MatDialogTitle,
 		MatDialogContent,
 		MatDialogActions,
 		MatDialogClose,
 		MatIconModule,
 	],
-	templateUrl: './student-activity-view-dialogue.html',
-	styleUrl: './student-activity-view-dialogue.scss',
+	templateUrl: './student-activity-info-dialogue.html',
+	styleUrl: './student-activity-info-dialogue.scss',
 })
-export class StudentActivityViewDialogue {
-	readonly dialogRef = inject(MatDialogRef<StudentActivityViewDialogue>);
+export class StudentActivityInfoDialogue {
+	protected readonly contractCompleted = signal(false);
+	readonly dialogRef = inject(MatDialogRef<StudentActivityInfoDialogue>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 	protected todayHistory: ClockEvent[] = [];
 	protected headerText: string = '';
 
 	constructor() {
-		console.log('Initializing StudentActivityDialogue with data:', this.data);
+		console.log('Initializing StudentActivityInfoDialogue with data:', this.data);
 		this.headerText = `Viewing Records for ${this.data.student.student.firstName} ${this.data.student.student.lastName}`;
 
 		for (const r of this.data.student.lunchCheckRecords) {
@@ -74,10 +77,15 @@ export class StudentActivityViewDialogue {
 	}
 
 	static open(dialog: MatDialog, data: DialogData): Promise<DialogueResult | undefined> {
-		const dialogRef = dialog.open(StudentActivityViewDialogue, {
+		const dialogRef = dialog.open(StudentActivityInfoDialogue, {
 			data: data,
 		});
 
 		return dialogRef.afterClosed().toPromise();
+	}
+
+	protected close(): void {
+		const result: DialogueResult = { contractCompleted: this.contractCompleted() };
+		this.dialogRef.close(result);
 	}
 }

@@ -2,16 +2,25 @@
 	<div class="header-text">
 		<span class="header-label">Student Activity</span>
 	</div>
+	<div class="date-range">
+		<input type="date" [value]="targetDate()" (change)="targetDate.set($any($event.target).value)" aria-label="Select date" />
+		<button mat-icon-button (click)="setDate()" aria-label="Set date">
+			<mat-icon>check</mat-icon>
+		</button>
+		<button mat-icon-button (click)="resetDateFilter()" aria-label="Reset to today">
+			<mat-icon>today</mat-icon>
+		</button>
+	</div>
 </div>
 
 <mat-dialog-content class="dialog-content">
 	<h2 class="lca-history__header">{{ headerText }}</h2>
 	<section class="lca-history" aria-label="Student activity">
-		@if (todayHistory.length === 0) {
+		@if (displayHistory.length === 0) {
 		<p class="lca-history__empty">No activity recorded today.</p>
 		} @else {
 		<ul class="lca-history__list">
-			@for (event of todayHistory; track event.time.getTime()) {
+			@for (event of displayHistory; track event.time.getTime()) {
 			<li class="lca-history__item lca-history__item--{{ event.type }}">
 				@if (event.type === 'in') {
 				<svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"

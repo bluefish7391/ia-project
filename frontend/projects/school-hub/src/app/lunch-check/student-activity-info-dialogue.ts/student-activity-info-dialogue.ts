@@ -45,7 +45,6 @@ function formatTimeWithDate(d: Date): string {
 		MatDialogTitle,
 		MatDialogContent,
 		MatDialogActions,
-		MatDialogClose,
 		MatIconModule,
 	],
 	templateUrl: './student-activity-info-dialogue.html',
@@ -55,8 +54,10 @@ export class StudentActivityInfoDialogue {
 	protected readonly contractCompleted = signal(false);
 	readonly dialogRef = inject(MatDialogRef<StudentActivityInfoDialogue>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
-	protected todayHistory: ClockEvent[] = [];
+	protected completeHistory: ClockEvent[] = [];
+	protected displayHistory: ClockEvent[] = [];
 	protected headerText: string = '';
+	protected readonly targetDate = signal('');
 
 	constructor() {
 		console.log('Initializing StudentActivityInfoDialogue with data:', this.data);
@@ -65,15 +66,16 @@ export class StudentActivityInfoDialogue {
 		for (const r of this.data.student.lunchCheckRecords) {
 			if (r.checkInTime) {
 				const t = new Date(r.checkInTime);
-				this.todayHistory.push({ type: 'in', time: t, label: formatTimeWithDate(t) });
+				this.completeHistory.push({ type: 'in', time: t, label: formatTimeWithDate(t) });
 			}
 			if (r.checkOutTime) {
 				const t = new Date(r.checkOutTime);
-				this.todayHistory.push({ type: 'out', time: t, label: formatTimeWithDate(t) });
+				this.completeHistory.push({ type: 'out', time: t, label: formatTimeWithDate(t) });
 			}
 		}
-		this.todayHistory.sort((a: ClockEvent, b: ClockEvent) => b.time.getTime() - a.time.getTime());
-		console.log('Processed today history:', this.todayHistory);
+		this.completeHistory.sort((a: ClockEvent, b: ClockEvent) => b.time.getTime() - a.time.getTime());
+		this.displayHistory = [...this.completeHistory];
+		console.log('Processed today history:', this.completeHistory);
 	}
 
 	static open(dialog: MatDialog, data: DialogData): Promise<DialogueResult | undefined> {
@@ -87,5 +89,36 @@ export class StudentActivityInfoDialogue {
 	protected close(): void {
 		const result: DialogueResult = { contractCompleted: this.contractCompleted() };
 		this.dialogRef.close(result);
+	}
+
+	protected setDate(): void {
+		const filterValue = this.targetDate();
+		console.log('Setting date filter with value:', filterValue);
+
+		if (!filterValue) {
+			this.displayHistory = [...this.completeHistory];
+			return;
+		}
+
+		const selectedDate = this.convertDateFromDashToSlashFormat(filterValue);
+		console.log('Setting date to:', selectedDate);
+
+		this.displayHistory = this.completeHistory.filter((event) => {
+			const eventDate = new Date(event.time).toLocaleDateString('en-US');
+			console.log(`Comparing event date ${eventDate} with selected date ${selectedDate}`);
+			return eventDate === selectedDate;
+		});
+	}
+
+	protected resetDateFilter(): void {
+		this.targetDate.set('');
+		this.displayHistory = [...this.completeHistory];
+	}
+
+	private convertDateFromDashToSlashFormat(dashDate: string): string {
+		const [year, month, day] = dashDate.split('-').map(Number);
+		const slashDate = new Date(year, month - 1, day);
+
+		return slashDate.toLocaleDateString('en-US');
 	}
 }

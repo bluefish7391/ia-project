@@ -89,7 +89,7 @@ export class ReportComponent {
 		console.log("Selected record:", record);
 		const request: GetStudentLunchCheckInAndOutHistoryRequest = {
 			studentID: record.student.id,
-			startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().split('T')[0], // Default to last 7 days
+			startDate: new Date(1).toISOString().split('T')[0], // All time records
 			endDate: new Date().toISOString().split('T')[0]
 		};
 

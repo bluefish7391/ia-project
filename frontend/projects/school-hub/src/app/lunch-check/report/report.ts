@@ -8,7 +8,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, switchMap, catchError, of, startWith } from 'rxjs';
-import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckResponse, Student, StudentLunchCheckCompositeRecord } from '../../../../../../../shared/kinds';
+import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckResponse, SaveStudentLunchCheckConfigRequest, Student, StudentLunchCheckCompositeRecord } from '../../../../../../../shared/kinds';
 import { LunchCheckService } from '../lunch-check.service';
 import { CreateStudentComponent, CreateStudentFormData } from '../create-student/create-student';
 import { StudentListComponent, getClockStatus } from '../student-list/student-list';
@@ -109,12 +109,23 @@ export class ReportComponent {
 			lunchCheckRecords: response.records
 		};
 
-		const result = await StudentActivityInfoDialogue.open(this.dialog, {
-			student: compositeRecord
-		});
+		const result = await StudentActivityInfoDialogue.open(this.dialog, { student: compositeRecord });
+		if (!result) {
+			return;
+		}
 
-		if (result) {
-			console.log('Dialogue result:', result);
+		if (result.isSaving) {
+			this.lunchCheckService.saveStudentLunchCheckConfig({
+				studentID: student.id,
+				contractSigned: result.contractCompleted ?? false
+			} satisfies SaveStudentLunchCheckConfigRequest).subscribe({
+				next: () => {
+					this.messageService.info('Changes saved successfully.');
+					// Update list
+				},
+				error: () => this.messageService.error('An error occurred while saving the student lunch check configuration. Please try again.')
+			});
+
 		}
 	}
 }

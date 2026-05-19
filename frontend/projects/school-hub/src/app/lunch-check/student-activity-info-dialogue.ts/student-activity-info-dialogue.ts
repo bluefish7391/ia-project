@@ -21,7 +21,8 @@ export interface DialogData {
 }
 
 export interface DialogueResult {
-	contractCompleted: boolean;
+	isSaving: boolean;
+	contractCompleted?: boolean;
 }
 
 interface ClockEvent {
@@ -87,7 +88,9 @@ export class StudentActivityInfoDialogue {
 	}
 
 	protected close(): void {
-		const result: DialogueResult = { contractCompleted: this.contractCompleted() };
+		const result: DialogueResult = { 
+			isSaving: false,
+		};
 		this.dialogRef.close(result);
 	}
 
@@ -120,5 +123,17 @@ export class StudentActivityInfoDialogue {
 		const slashDate = new Date(year, month - 1, day);
 
 		return slashDate.toLocaleDateString('en-US');
+	}
+
+	protected save(): void {
+		const result: DialogueResult = {
+			isSaving: true,
+			contractCompleted: this.contractCompleted(),
+		};
+		this.dialogRef.close(result);
+	}
+
+	protected hasChanges(): boolean {
+		return this.contractCompleted() !== this.data.student.studentLunchCheck?.contractSigned;
 	}
 }

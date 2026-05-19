@@ -47,5 +47,6 @@
 	<mat-slide-toggle [checked]="contractCompleted()" (change)="contractCompleted.set($event.checked)" class="contract-toggle">
 		Off-campus lunch contract completed
 	</mat-slide-toggle>
-	<button matButton (click)="close()">Close</button>
+	<button mat-button color="primary" (click)="save()" [disabled]="!hasChanges()">Save</button>
+	<button mat-button (click)="close()">Close</button>
 </mat-dialog-actions>

@@ -131,3 +131,34 @@
 		font-size: 0.875rem;
 	}
 }
+
+.filters {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+
+	.date-range {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+
+		input[type="date"] {
+			padding: 0.25rem 0.5rem;
+			border: 1px solid #e0e4ef;
+			border-radius: 4px;
+			font-size: 0.875rem;
+		}
+
+		button {
+			padding: 0.25rem;
+			border: none;
+			background: none;
+			cursor: pointer;
+
+			mat-icon {
+				font-size: 1.25rem;
+				color: #5c6370;
+			}
+		}
+	}
+}

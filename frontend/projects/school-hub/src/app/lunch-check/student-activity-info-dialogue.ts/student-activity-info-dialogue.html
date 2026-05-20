@@ -2,8 +2,17 @@
 	<div class="header-text">
 		<span class="header-label">Student Activity</span>
 	</div>
+</div>
+
+<div class="filters">
 	<div class="date-range">
-		<input type="date" [value]="targetDate()" (change)="targetDate.set($any($event.target).value)" aria-label="Select date" />
+		<!-- Date inputs for filtering activity history, leave end blank to examine just one date -->
+		Start Date:
+		<input type="date" [value]="startDate()" (change)="startDate.set($any($event.target).value)"
+			aria-label="Select start date" />
+		End Date:
+		<input type="date" [value]="endDate()" (change)="endDate.set($any($event.target).value)"
+			aria-label="Select end date" />
 		<button mat-icon-button (click)="setDate()" aria-label="Set date">
 			<mat-icon>check</mat-icon>
 		</button>
@@ -11,6 +20,12 @@
 			<mat-icon>today</mat-icon>
 		</button>
 	</div>
+
+	<!-- <div class="pagination">
+		<mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
+			aria-label="Select page" (page)="onPageChange($event)">
+		</mat-paginator>
+	</div> -->
 </div>
 
 <mat-dialog-content class="dialog-content">
@@ -44,7 +59,8 @@
 </mat-dialog-content>
 
 <mat-dialog-actions class="dialog-actions">
-	<mat-slide-toggle [checked]="contractCompleted()" (change)="contractCompleted.set($event.checked)" class="contract-toggle">
+	<mat-slide-toggle [checked]="contractCompleted()" (change)="contractCompleted.set($event.checked)"
+		class="contract-toggle">
 		Off-campus lunch contract completed
 	</mat-slide-toggle>
 	<button mat-button color="primary" (click)="save()" [disabled]="!hasChanges()">Save</button>

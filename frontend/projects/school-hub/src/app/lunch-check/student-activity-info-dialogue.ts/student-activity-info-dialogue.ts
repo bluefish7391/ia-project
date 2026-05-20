@@ -114,11 +114,9 @@ export class StudentActivityInfoDialogue {
 
 		if (!endDateValue) {
 			const selectedDate = this.convertDateFromDashToSlashFormat(startDateValue);
-			console.log('Setting date to:', selectedDate);
 
 			this.displayHistory.set(this.completeHistory().filter((event) => {
 				const eventDate = new Date(event.time).toLocaleDateString('en-US');
-				console.log(`Comparing event date ${eventDate} with selected date ${selectedDate}`);
 				return eventDate === selectedDate;
 			}));
 		} else {
@@ -136,7 +134,7 @@ export class StudentActivityInfoDialogue {
 	protected resetDateFilter(): void {
 		this.startDate.set('');
 		this.endDate.set('');
-		this.displayHistory.set([...this.completeHistory()]);
+		this.updateVisibleItems();
 	}
 
 	private convertDateFromDashToSlashFormat(dashDate: string): string {

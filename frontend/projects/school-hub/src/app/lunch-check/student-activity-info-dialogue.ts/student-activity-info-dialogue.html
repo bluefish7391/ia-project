@@ -21,21 +21,21 @@
 		</button>
 	</div>
 
-	<!-- <div class="pagination">
-		<mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
+	<div class="pagination">
+		<mat-paginator [length]="totalItems()" [pageSize]="pageSize()" [pageSizeOptions]="pageSizeOptions"
 			aria-label="Select page" (page)="onPageChange($event)">
 		</mat-paginator>
-	</div> -->
+	</div>
 </div>
 
 <mat-dialog-content class="dialog-content">
 	<h2 class="lca-history__header">{{ headerText }}</h2>
 	<section class="lca-history" aria-label="Student activity">
-		@if (displayHistory.length === 0) {
+		@if (displayHistory().length === 0) {
 		<p class="lca-history__empty">No activity recorded today.</p>
 		} @else {
 		<ul class="lca-history__list">
-			@for (event of displayHistory; track event.time.getTime()) {
+			@for (event of displayHistory(); track event.time.getTime()) {
 			<li class="lca-history__item lca-history__item--{{ event.type }}">
 				@if (event.type === 'in') {
 				<svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"

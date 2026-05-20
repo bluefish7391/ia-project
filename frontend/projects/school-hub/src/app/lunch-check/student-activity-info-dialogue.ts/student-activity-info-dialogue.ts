@@ -1,4 +1,4 @@
-import { Component, inject, model, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, model, signal, viewChild } from '@angular/core';
 import { FormsModule, NgModel } from '@angular/forms';
 import { MatButtonModule, MatIconButton } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -57,12 +57,12 @@ export class StudentActivityInfoDialogue {
 	protected readonly contractCompleted = signal(false);
 	readonly dialogRef = inject(MatDialogRef<StudentActivityInfoDialogue>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
-	protected completeHistory: ClockEvent[] = [];
-	protected displayHistory: ClockEvent[] = [];
+	protected completeHistory = signal<ClockEvent[]>([]);
+	protected displayHistory = signal<ClockEvent[]>([]);
 	protected headerText: string = '';
 	protected readonly startDate = signal('');
 	protected readonly endDate = signal('');
-	protected readonly totalItems = signal(this.completeHistory.length);
+	protected readonly totalItems = computed(() => this.completeHistory().length);
 	protected readonly pageSize = signal(5);
 	protected readonly currentPage = signal(0);
 	protected readonly pageSizeOptions = [5, 10, 25, 50];
@@ -74,16 +74,17 @@ export class StudentActivityInfoDialogue {
 		for (const r of this.data.student.lunchCheckRecords) {
 			if (r.checkInTime) {
 				const t = new Date(r.checkInTime);
-				this.completeHistory.push({ type: 'in', time: t, label: formatTimeWithDate(t) });
+				this.completeHistory.update((history) => [...history, { type: 'in', time: t, label: formatTimeWithDate(t) }]);
 			}
 			if (r.checkOutTime) {
 				const t = new Date(r.checkOutTime);
-				this.completeHistory.push({ type: 'out', time: t, label: formatTimeWithDate(t) });
+				this.completeHistory.update((history) => [...history, { type: 'out', time: t, label: formatTimeWithDate(t) }]);
 			}
 		}
-		this.completeHistory.sort((a: ClockEvent, b: ClockEvent) => b.time.getTime() - a.time.getTime());
-		this.displayHistory = [...this.completeHistory];
-		console.log('Processed today history:', this.completeHistory);
+
+		this.completeHistory.update((history) => history.sort((a: ClockEvent, b: ClockEvent) => b.time.getTime() - a.time.getTime()));
+		this.updateVisibleItems();
+		console.log('Processed today history:', this.completeHistory());
 	}
 
 	static open(dialog: MatDialog, data: DialogData): Promise<DialogueResult | undefined> {
@@ -107,7 +108,7 @@ export class StudentActivityInfoDialogue {
 		console.log(`Setting date filter with values: ${startDateValue}, ${endDateValue}`);
 
 		if (!startDateValue) {
-			this.displayHistory = [...this.completeHistory];
+			this.displayHistory.set([...this.completeHistory()]);
 			return;
 		}
 
@@ -115,27 +116,27 @@ export class StudentActivityInfoDialogue {
 			const selectedDate = this.convertDateFromDashToSlashFormat(startDateValue);
 			console.log('Setting date to:', selectedDate);
 
-			this.displayHistory = this.completeHistory.filter((event) => {
+			this.displayHistory.set(this.completeHistory().filter((event) => {
 				const eventDate = new Date(event.time).toLocaleDateString('en-US');
 				console.log(`Comparing event date ${eventDate} with selected date ${selectedDate}`);
 				return eventDate === selectedDate;
-			});
+			}));
 		} else {
 			const start = new Date(startDateValue);
 			const end = new Date(endDateValue);
 			end.setHours(23, 59, 59, 999); // Include the entire end date
 
-			this.displayHistory = this.completeHistory.filter((event) => {
+			this.displayHistory.set(this.completeHistory().filter((event) => {
 				const eventTime = new Date(event.time).getTime();
 				return eventTime >= start.getTime() && eventTime <= end.getTime();
-			});
+			}));
 		}
 	}
 
 	protected resetDateFilter(): void {
 		this.startDate.set('');
 		this.endDate.set('');
-		this.displayHistory = [...this.completeHistory];
+		this.displayHistory.set([...this.completeHistory()]);
 	}
 
 	private convertDateFromDashToSlashFormat(dashDate: string): string {
@@ -163,10 +164,9 @@ export class StudentActivityInfoDialogue {
 		this.updateVisibleItems();
 	}
 
-	// 5. Slice the master array based on the current page and size
 	private updateVisibleItems() {
 		const startIndex = this.currentPage() * this.pageSize();
 		const endIndex = startIndex + this.pageSize();
-		this.displayHistory = this.completeHistory.slice(startIndex, endIndex);
+		this.displayHistory.set(this.completeHistory().slice(startIndex, endIndex));
 	}
 }

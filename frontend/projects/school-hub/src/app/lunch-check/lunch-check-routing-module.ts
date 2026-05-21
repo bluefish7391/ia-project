@@ -13,9 +13,9 @@ const routes: Routes = [
           import('./home/lunch-check-home').then((m) => m.LunchCheckHomeComponent),
       },
       {
-        path: 'report',
+        path: 'details',
         loadComponent: () =>
-          import('./report/report').then((m) => m.ReportComponent),
+          import('./details/details').then((m) => m.DetailsComponent),
       },
     ],
   },

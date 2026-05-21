@@ -114,7 +114,7 @@ export class LunchCheckHomeComponent {
 		return 'not-clocked-in';
 	}
 	
-	protected async report() {
-		await this.router.navigate(['/lunch-check/report']);
+	protected async details() {
+		await this.router.navigate(['/lunch-check/details']);
 	}
 }

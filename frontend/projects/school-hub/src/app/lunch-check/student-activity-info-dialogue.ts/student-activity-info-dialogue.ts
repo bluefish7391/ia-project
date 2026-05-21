@@ -105,8 +105,7 @@ export class StudentActivityInfoDialogue {
 			this.currentPage.set(0);
 		});
 
-		console.log('Initializing StudentActivityInfoDialogue with data:', this.data);
-		this.headerText = `Viewing Records for ${this.data.student.student.firstName} ${this.data.student.student.lastName}`;
+		this.headerText = `Viewing lunch check details for ${this.data.student.student.firstName} ${this.data.student.student.lastName}`;
 
 		for (const r of this.data.student.lunchCheckRecords) {
 			if (r.checkInTime) {
@@ -120,7 +119,6 @@ export class StudentActivityInfoDialogue {
 		}
 
 		this.completeHistory.update((history) => history.sort((a: ClockEvent, b: ClockEvent) => b.time.getTime() - a.time.getTime()));
-		console.log('Processed today history:', this.completeHistory());
 	}
 
 	static open(dialog: MatDialog, data: DialogData): Promise<DialogueResult | undefined> {

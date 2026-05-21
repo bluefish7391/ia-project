@@ -40,7 +40,7 @@ function formatTimeWithDate(d: Date): string {
 }
 
 @Component({
-	selector: 'student-activity-info-dialogue',
+	selector: 'student-details-dialogue',
 	providers: [provideNativeDateAdapter()],
 	imports: [
 		MatFormFieldModule,
@@ -56,12 +56,12 @@ function formatTimeWithDate(d: Date): string {
 		MatDatepickerModule,
 		ReactiveFormsModule,
 	],
-	templateUrl: './student-activity-info-dialogue.html',
-	styleUrl: './student-activity-info-dialogue.scss',
+	templateUrl: './student-details-dialogue.html',
+	styleUrl: './student-details-dialogue.scss',
 })
-export class StudentActivityInfoDialogue {
+export class StudentDetailsDialogue {
 	protected readonly contractCompleted = signal(false);
-	readonly dialogRef = inject(MatDialogRef<StudentActivityInfoDialogue>);
+	readonly dialogRef = inject(MatDialogRef<StudentDetailsDialogue>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 	protected completeHistory = signal<ClockEvent[]>([]);
 	protected headerText: string = '';
@@ -121,8 +121,8 @@ export class StudentActivityInfoDialogue {
 		this.completeHistory.update((history) => history.sort((a: ClockEvent, b: ClockEvent) => b.time.getTime() - a.time.getTime()));
 	}
 
-	static open(dialog: MatDialog, data: DialogData): Promise<DialogueResult | undefined> {
-		const dialogRef = dialog.open(StudentActivityInfoDialogue, {
+	public static open(dialog: MatDialog, data: DialogData): Promise<DialogueResult | undefined> {
+		const dialogRef = dialog.open(StudentDetailsDialogue, {
 			data: data,
 		});
 

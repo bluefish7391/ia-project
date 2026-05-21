@@ -16,7 +16,7 @@ import { StudentIdReaderComponent } from '../student-id-reader/student-id-reader
 import { StudentActivityWarningDialogue } from '../student-activity-warning-dialogue/student-activity-warning-dialogue';
 import { MatDialog } from '@angular/material/dialog';
 import { MessageService } from '../message-service';
-import { StudentActivityInfoDialogue } from '../student-activity-info-dialogue.ts/student-activity-info-dialogue';
+import { StudentDetailsDialogue } from '../student-details-dialogue.ts/student-details-dialogue';
 
 @Component({
 	selector: 'app-details',
@@ -109,7 +109,7 @@ export class DetailsComponent {
 			lunchCheckRecords: response.records
 		};
 
-		const result = await StudentActivityInfoDialogue.open(this.dialog, { student: compositeRecord });
+		const result = await StudentDetailsDialogue.open(this.dialog, { student: compositeRecord });
 		if (!result) {
 			return;
 		}

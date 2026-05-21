@@ -5,7 +5,7 @@ import {
 	inject,
 	signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, switchMap, catchError, of, startWith } from 'rxjs';
 import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckResponse, SaveStudentLunchCheckConfigRequest, Student, StudentLunchCheck, StudentLunchCheckCompositeRecord } from '../../../../../../../shared/kinds';
@@ -44,7 +44,12 @@ export class DetailsComponent {
 		lunchDate?: string;
 	}>();
 
-	protected readonly results = toSignal(
+	protected readonly results = signal<QueryStudentLunchCheckResponse>({ records: [], totalRecords: 0, pageNumber: 0, pageSize: 10 });
+
+	protected readonly studentResults = computed(() => this.results().records);
+	protected readonly today = new Date().toISOString().split('T')[0];
+
+	constructor() {
 		this.searchTrigger$.pipe(
 			debounceTime(400),
 			distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
@@ -58,14 +63,9 @@ export class DetailsComponent {
 					}),
 				);
 			}),
-		),
-		{ initialValue: { records: [], totalRecords: 0, pageNumber: 0, pageSize: 10 } },
-	);
+			takeUntilDestroyed(),
+		).subscribe((response) => this.results.set(response));
 
-	protected readonly studentResults = computed(() => this.results().records);
-	protected readonly today = new Date().toISOString().split('T')[0];
-
-	constructor() {
 		// Watch search signals and push to subject
 		effect(() => {
 			this.searchTrigger$.next({
@@ -113,6 +113,23 @@ export class DetailsComponent {
 		const result = await StudentDetailsDialogue.open(this.dialog, { student: compositeRecord });
 		if (!result) {
 			return;
+		}
+
+		if (result.contractCompleted !== undefined &&
+			result.contractCompleted !== (compositeRecord.studentLunchCheck?.contractSigned ?? false)) {
+			this.results.update((current) => ({
+				...current,
+				records: current.records.map((r) =>
+					r.student.id === compositeRecord.student.id
+						? {
+							...r,
+							studentLunchCheck: r.studentLunchCheck
+								? { ...r.studentLunchCheck, contractSigned: result.contractCompleted! }
+								: { studentID: r.student.id, tenantID: r.student.tenantID, contractSigned: result.contractCompleted! },
+						}
+						: r,
+				),
+			}));
 		}
 	}
 }

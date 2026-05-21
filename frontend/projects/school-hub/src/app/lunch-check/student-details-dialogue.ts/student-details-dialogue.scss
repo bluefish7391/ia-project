@@ -2,7 +2,7 @@
 .dialog-header {
 	display: flex;
 	align-items: center;
-	padding-top: 0.75rem;
+	padding-top: 1rem;
 
 	&::before {
 		content: unset;
@@ -15,7 +15,7 @@
 	}
 
 	&__title {
-		font-size: 1.25rem;
+		font-size: 1.5rem;
 		font-weight: 600;
 		color: var(--mat-sys-on-surface);
 		line-height: 1.3;

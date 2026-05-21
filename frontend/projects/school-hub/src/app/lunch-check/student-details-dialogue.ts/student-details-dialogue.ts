@@ -14,18 +14,21 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { StudentLunchCheckCompositeRecord } from 'shared/kinds';
+import { SaveStudentLunchCheckConfigRequest, StudentLunchCheckCompositeRecord } from 'shared/kinds';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { ConfirmDialogueComponent } from '../confirm-dialogue/confirm-dialogue';
+import { LunchCheckService } from '../lunch-check.service';
+import { MessageService } from '../message-service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface DialogData {
 	student: StudentLunchCheckCompositeRecord;
 }
 
 export interface DialogueResult {
-	isSaving: boolean;
 	contractCompleted?: boolean;
 }
 
@@ -60,10 +63,14 @@ function formatTimeWithDate(d: Date): string {
 	styleUrl: './student-details-dialogue.scss',
 })
 export class StudentDetailsDialogue {
-	protected readonly contractCompleted = signal(false);
+	private readonly matSnackBar = inject(MatSnackBar);
+	private readonly dialog = inject(MatDialog);
+	private readonly messageService = inject(MessageService);
+	private readonly lunchCheckService = inject(LunchCheckService);
 	readonly dialogRef = inject(MatDialogRef<StudentDetailsDialogue>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
-	protected completeHistory = signal<ClockEvent[]>([]);
+	protected readonly contractCompleted = signal(false);
+	protected readonly completeHistory = signal<ClockEvent[]>([]);
 	protected headerText: string = '';
 
 	protected readonly range = new FormGroup({
@@ -106,8 +113,6 @@ export class StudentDetailsDialogue {
 		return this.filteredHistory().slice(page * size, (page + 1) * size);
 	});
 
-	protected readonly showContractStatus = signal(false);
-
 	constructor() {
 		effect(() => {
 			this.rangeValue();
@@ -118,7 +123,6 @@ export class StudentDetailsDialogue {
 		this.setupCompleteHistory();
 
 		this.contractCompleted.set(this.data.student.studentLunchCheck?.contractSigned ?? false);
-		this.showContractStatus.set(this.contractCompleted());
 		console.log("data: ", this.data);
 	}
 
@@ -141,13 +145,12 @@ export class StudentDetailsDialogue {
 		const dialogRef = dialog.open(StudentDetailsDialogue, {
 			data: data,
 		});
-
 		return dialogRef.afterClosed().toPromise();
 	}
 
 	protected close(): void {
 		const result: DialogueResult = {
-			isSaving: false,
+			contractCompleted: this.contractCompleted(),
 		};
 		this.dialogRef.close(result);
 	}
@@ -156,20 +159,32 @@ export class StudentDetailsDialogue {
 		this.range.reset();
 	}
 
-	protected save(): void {
-		const result: DialogueResult = {
-			isSaving: true,
-			contractCompleted: this.contractCompleted(),
-		};
-		this.dialogRef.close(result);
-	}
-
-	protected hasChanges(): boolean {
-		return this.contractCompleted() !== this.data.student.studentLunchCheck?.contractSigned;
-	}
-
 	onPageChange(event: PageEvent) {
 		this.currentPage.set(event.pageIndex);
 		this.pageSize.set(event.pageSize);
+	}
+
+	protected async onDisplayContractStatusChange(newValue: boolean): Promise<void> {
+		await ConfirmDialogueComponent.open(this.dialog, {
+			message: `Are you sure you want to set the contract status to ${newValue ? 'signed' : 'unsigned'}?`
+		}).then((result) => {
+			if (result && result.userChoice) {
+				this.lunchCheckService.saveStudentLunchCheckConfig({
+					studentID: this.data.student.student.id,
+					contractSigned: newValue
+				} satisfies SaveStudentLunchCheckConfigRequest).subscribe({
+					next: () => {
+						this.matSnackBar.open('Changes saved successfully.', 'Close', { duration: 3000 });
+						this.contractCompleted.set(newValue);
+					},
+					error: () => {
+						this.matSnackBar.open('An error occurred while saving the student lunch check configuration. Please try again.', 'Close', { duration: 3000 });
+						this.contractCompleted.set(!newValue);
+					}
+				});
+			} else {
+				this.contractCompleted.set(!newValue);
+			}
+		});
 	}
 }

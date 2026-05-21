@@ -17,10 +17,10 @@
 			<mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
 			<mat-date-range-picker #picker></mat-date-range-picker>
 			@if (range.controls.start.hasError('matStartDateInvalid')) {
-				<mat-error>Invalid start date</mat-error>
+			<mat-error>Invalid start date</mat-error>
 			}
 			@if (range.controls.end.hasError('matEndDateInvalid')) {
-				<mat-error>Invalid end date</mat-error>
+			<mat-error>Invalid end date</mat-error>
 			}
 		</mat-form-field>
 		<button (click)="resetDateFilter()" mat-icon-button aria-label="Reset date filter">
@@ -30,27 +30,28 @@
 
 	<section class="lca-history" aria-label="Student activity">
 		@if (displayHistory().length === 0) {
-			<p class="lca-history__empty">No activity found. Try adjusting the date range.</p>
+		<p class="lca-history__empty">No activity found. Try adjusting the date range.</p>
 		} @else {
-			<ul class="lca-history__list">
-				@for (event of displayHistory(); track event.time.getTime()) {
-					<li class="lca-history__item lca-history__item--{{ event.type }}">
-						@if (event.type === 'in') {
-							<svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-								fill="currentColor" aria-hidden="true">
-								<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" />
-							</svg>
-						} @else {
-							<svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-								fill="currentColor" aria-hidden="true">
-								<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11H8v-2h8v2z" />
-							</svg>
-						}
-						<span class="lca-history__time">{{ event.label }}</span>
-						<span class="lca-history__type">{{ event.type === 'in' ? 'Clock in' : 'Clock out' }}</span>
-					</li>
+		<ul class="lca-history__list">
+			@for (event of displayHistory(); track event.time.getTime()) {
+			<li class="lca-history__item lca-history__item--{{ event.type }}">
+				@if (event.type === 'in') {
+				<svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+					fill="currentColor" aria-hidden="true">
+					<path
+						d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" />
+				</svg>
+				} @else {
+				<svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+					fill="currentColor" aria-hidden="true">
+					<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11H8v-2h8v2z" />
+				</svg>
 				}
-			</ul>
+				<span class="lca-history__time">{{ event.label }}</span>
+				<span class="lca-history__type">{{ event.type === 'in' ? 'Clock in' : 'Clock out' }}</span>
+			</li>
+			}
+		</ul>
 		}
 	</section>
 </mat-dialog-content>
@@ -60,8 +61,9 @@
 		[pageSizeOptions]="pageSizeOptions" aria-label="Select page" (page)="onPageChange($event)">
 	</mat-paginator>
 	<div class="dialog-actions__buttons">
-		<mat-slide-toggle [ngModel]="showContractStatus()" color="primary" aria-label="Toggle contract status display">
-			Show contract status
+		<mat-slide-toggle [ngModel]="contractCompleted()" (ngModelChange)="onDisplayContractStatusChange($event)"
+			color="primary" aria-label="Toggle contract status display">
+			Off campus lunch contract {{ contractCompleted() ? 'signed' : 'unsigned' }}
 		</mat-slide-toggle>
 		<button mat-button (click)="close()">Close</button>
 	</div>

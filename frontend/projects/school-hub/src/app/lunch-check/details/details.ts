@@ -114,19 +114,5 @@ export class DetailsComponent {
 		if (!result) {
 			return;
 		}
-
-		if (result.isSaving) {
-			this.lunchCheckService.saveStudentLunchCheckConfig({
-				studentID: studentLunchCheckCompositeRecord.student.id,
-				contractSigned: result.contractCompleted ?? false
-			} satisfies SaveStudentLunchCheckConfigRequest).subscribe({
-				next: () => {
-					this.messageService.info('Changes saved successfully.');
-					// Update list
-				},
-				error: () => this.messageService.error('An error occurred while saving the student lunch check configuration. Please try again.')
-			});
-
-		}
 	}
 }

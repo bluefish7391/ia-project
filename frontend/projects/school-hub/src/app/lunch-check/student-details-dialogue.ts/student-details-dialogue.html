@@ -59,5 +59,16 @@
 	<mat-paginator [length]="totalItems()" [pageSize]="pageSize()" [pageIndex]="currentPage()"
 		[pageSizeOptions]="pageSizeOptions" aria-label="Select page" (page)="onPageChange($event)">
 	</mat-paginator>
-	<button mat-button (click)="close()">Close</button>
+	<div class="dialog-actions__buttons">
+		<div class="dialog-actions__contract">
+			<span class="dialog-actions__contract-status"
+				[class.dialog-actions__contract-status--complete]="contractCompleted()">
+				{{ contractCompleted() ? 'Contract complete' : 'Contract incomplete' }}
+			</span>
+			<button mat-stroked-button (click)="save()">
+				Mark {{ contractCompleted() ? 'incomplete' : 'complete' }}
+			</button>
+		</div>
+		<button mat-button (click)="close()">Close</button>
+	</div>
 </mat-dialog-actions>

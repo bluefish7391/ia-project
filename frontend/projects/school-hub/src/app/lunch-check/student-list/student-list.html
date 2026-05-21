@@ -19,18 +19,7 @@
 					@if (record.studentLunchCheck?.contractSigned) {
 					<span class="sl-badge sl-badge--contract">Contract Signed</span>
 					} @else {
-					<span class="sl-badge sl-badge--no-contract">No Contract</span>
-					}
-					@switch (getClockStatus(record.lunchCheckRecords)) {
-					@case ('clocked-in') {
-					<span class="sl-badge sl-badge--clocked-in">Clocked In</span>
-					}
-					@case ('clocked-out') {
-					<span class="sl-badge sl-badge--clocked-out">Clocked Out</span>
-					}
-					@default {
-					<span class="sl-badge sl-badge--not-clocked-in">Not Clocked In</span>
-					}
+					<span class="sl-badge sl-badge--no-contract">No Signed Contract</span>
 					}
 				</div>
 			</li>

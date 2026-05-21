@@ -1,5 +1,5 @@
-import { Component, computed, inject, model, signal, viewChild } from '@angular/core';
-import { FormsModule, NgModel } from '@angular/forms';
+import { Component, computed, effect, inject, model, signal, viewChild } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule, MatIconButton } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import {
@@ -16,6 +16,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { StudentLunchCheckCompositeRecord } from 'shared/kinds';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 export interface DialogData {
 	student: StudentLunchCheckCompositeRecord;
@@ -38,6 +41,7 @@ function formatTimeWithDate(d: Date): string {
 
 @Component({
 	selector: 'student-activity-info-dialogue',
+	providers: [provideNativeDateAdapter()],
 	imports: [
 		MatFormFieldModule,
 		MatInputModule,
@@ -49,6 +53,8 @@ function formatTimeWithDate(d: Date): string {
 		MatDialogActions,
 		MatIconModule,
 		MatPaginatorModule,
+		MatDatepickerModule,
+		ReactiveFormsModule,
 	],
 	templateUrl: './student-activity-info-dialogue.html',
 	styleUrl: './student-activity-info-dialogue.scss',
@@ -58,16 +64,47 @@ export class StudentActivityInfoDialogue {
 	readonly dialogRef = inject(MatDialogRef<StudentActivityInfoDialogue>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 	protected completeHistory = signal<ClockEvent[]>([]);
-	protected displayHistory = signal<ClockEvent[]>([]);
 	protected headerText: string = '';
-	protected readonly startDate = signal('');
-	protected readonly endDate = signal('');
-	protected readonly totalItems = computed(() => this.completeHistory().length);
+
+	protected readonly range = new FormGroup({
+		start: new FormControl<Date | null>(null),
+		end: new FormControl<Date | null>(null),
+	});
+	protected readonly rangeValue = toSignal(this.range.valueChanges, {
+		initialValue: { start: null, end: null }
+	});
+
+	protected readonly filteredHistory = computed(() => {
+		const { start, end } = this.rangeValue();
+		if (!start) return this.completeHistory();
+
+		const startTime = new Date(start).getTime();
+		const endDate = end ? new Date(end) : null;
+		if (endDate) endDate.setHours(23, 59, 59, 999);
+
+		return this.completeHistory().filter((event) => {
+			const t = event.time.getTime();
+			return t >= startTime && (!endDate || t <= endDate.getTime());
+		});
+	});
+
 	protected readonly pageSize = signal(5);
 	protected readonly currentPage = signal(0);
 	protected readonly pageSizeOptions = [5, 10, 25, 50];
 
+	protected readonly totalItems = computed(() => this.filteredHistory().length);
+	protected readonly displayHistory = computed(() => {
+		const page = this.currentPage();
+		const size = this.pageSize();
+		return this.filteredHistory().slice(page * size, (page + 1) * size);
+	});
+
 	constructor() {
+		effect(() => {
+			this.rangeValue();
+			this.currentPage.set(0);
+		});
+
 		console.log('Initializing StudentActivityInfoDialogue with data:', this.data);
 		this.headerText = `Viewing Records for ${this.data.student.student.firstName} ${this.data.student.student.lastName}`;
 
@@ -83,7 +120,6 @@ export class StudentActivityInfoDialogue {
 		}
 
 		this.completeHistory.update((history) => history.sort((a: ClockEvent, b: ClockEvent) => b.time.getTime() - a.time.getTime()));
-		this.updateVisibleItems();
 		console.log('Processed today history:', this.completeHistory());
 	}
 
@@ -102,46 +138,8 @@ export class StudentActivityInfoDialogue {
 		this.dialogRef.close(result);
 	}
 
-	protected setDate(): void {
-		const startDateValue = this.startDate();
-		const endDateValue = this.endDate();
-		console.log(`Setting date filter with values: ${startDateValue}, ${endDateValue}`);
-
-		if (!startDateValue) {
-			this.displayHistory.set([...this.completeHistory()]);
-			return;
-		}
-
-		if (!endDateValue) {
-			const selectedDate = this.convertDateFromDashToSlashFormat(startDateValue);
-
-			this.displayHistory.set(this.completeHistory().filter((event) => {
-				const eventDate = new Date(event.time).toLocaleDateString('en-US');
-				return eventDate === selectedDate;
-			}));
-		} else {
-			const start = new Date(startDateValue);
-			const end = new Date(endDateValue);
-			end.setHours(23, 59, 59, 999); // Include the entire end date
-
-			this.displayHistory.set(this.completeHistory().filter((event) => {
-				const eventTime = new Date(event.time).getTime();
-				return eventTime >= start.getTime() && eventTime <= end.getTime();
-			}));
-		}
-	}
-
 	protected resetDateFilter(): void {
-		this.startDate.set('');
-		this.endDate.set('');
-		this.updateVisibleItems();
-	}
-
-	private convertDateFromDashToSlashFormat(dashDate: string): string {
-		const [year, month, day] = dashDate.split('-').map(Number);
-		const slashDate = new Date(year, month - 1, day);
-
-		return slashDate.toLocaleDateString('en-US');
+		this.range.reset();
 	}
 
 	protected save(): void {
@@ -159,12 +157,5 @@ export class StudentActivityInfoDialogue {
 	onPageChange(event: PageEvent) {
 		this.currentPage.set(event.pageIndex);
 		this.pageSize.set(event.pageSize);
-		this.updateVisibleItems();
-	}
-
-	private updateVisibleItems() {
-		const startIndex = this.currentPage() * this.pageSize();
-		const endIndex = startIndex + this.pageSize();
-		this.displayHistory.set(this.completeHistory().slice(startIndex, endIndex));
 	}
 }

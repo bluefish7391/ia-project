@@ -6,24 +6,31 @@
 
 <div class="filters">
 	<div class="date-range">
-		<!-- Date inputs for filtering activity history, leave end blank to examine just one date -->
-		Start Date:
-		<input type="date" [value]="startDate()" (change)="startDate.set($any($event.target).value)"
-			aria-label="Select start date" />
-		End Date:
-		<input type="date" [value]="endDate()" (change)="endDate.set($any($event.target).value)"
-			aria-label="Select end date" />
-		<button mat-icon-button (click)="setDate()" aria-label="Set date">
-			<mat-icon>check</mat-icon>
-		</button>
-		<button mat-icon-button (click)="resetDateFilter()" aria-label="Reset to today">
-			<mat-icon>today</mat-icon>
+		<mat-form-field appearance="fill">
+			<mat-label>Enter a date range</mat-label>
+			<mat-date-range-input [formGroup]="range" [rangePicker]="picker">
+				<input matStartDate formControlName="start" placeholder="Start date">
+				<input matEndDate formControlName="end" placeholder="End date">
+			</mat-date-range-input>
+			<mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+			<mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+			<mat-date-range-picker #picker></mat-date-range-picker>
+
+			@if (range.controls.start.hasError('matStartDateInvalid')) {
+			<mat-error>Invalid start date</mat-error>
+			}
+			@if (range.controls.end.hasError('matEndDateInvalid')) {
+			<mat-error>Invalid end date</mat-error>
+			}
+		</mat-form-field>
+		<button (click)="resetDateFilter()" mat-icon-button aria-label="Reset date filter" class="reset-button">
+			<mat-icon>close</mat-icon>
 		</button>
 	</div>
 
 	<div class="pagination">
-		<mat-paginator [length]="totalItems()" [pageSize]="pageSize()" [pageSizeOptions]="pageSizeOptions"
-			aria-label="Select page" (page)="onPageChange($event)">
+		<mat-paginator [length]="totalItems()" [pageSize]="pageSize()" [pageIndex]="currentPage()"
+			[pageSizeOptions]="pageSizeOptions" aria-label="Select page" (page)="onPageChange($event)">
 		</mat-paginator>
 	</div>
 </div>

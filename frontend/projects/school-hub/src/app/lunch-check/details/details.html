@@ -1,79 +1,79 @@
 <div class="lca-page">
-  <!-- Back link -->
-  <a routerLink="/lunch-check" class="lca-back">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M15.41 16.59 10.83 12l4.58-4.59L14 6l-6 6 6 6z"/>
-    </svg>
-    Lunch Check
-  </a>
+	<!-- Back link -->
+	<a routerLink="/lunch-check" class="lca-back">
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+			<path d="M15.41 16.59 10.83 12l4.58-4.59L14 6l-6 6 6 6z" />
+		</svg>
+		Lunch Check
+	</a>
 
-  <!-- Header -->
-  <header class="lca-header">
-    <h1 class="lca-header__title">Student Lunch Check Report</h1>
-    <p class="lca-header__subtitle">Search for students to see their full activity.</p>
-  </header>
+	<!-- Header -->
+	<header class="lca-header">
+		<h1 class="lca-header__title">Student Lunch Check Report</h1>
+		<p class="lca-header__subtitle">Search for students to see their full activity.</p>
+	</header>
 
-  <!-- Two-column content layout -->
-  <div class="lca-layout">
+	<!-- Two-row content layout -->
+	<div class="lca-layout">
+		<div class="lca-layout__top">
+			<div class="filter-bar">
+				<mat-form-field appearance="fill" class="date-range-field">
+					<mat-label>Date range</mat-label>
+					<mat-date-range-input [formGroup]="range" [rangePicker]="picker">
+						<input matStartDate formControlName="start" placeholder="Start date">
+						<input matEndDate formControlName="end" placeholder="End date">
+					</mat-date-range-input>
+					<mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+					<mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+					<mat-date-range-picker #picker></mat-date-range-picker>
+					@if (range.controls.start.hasError('matStartDateInvalid')) {
+					<mat-error>Invalid start date</mat-error>
+					}
+					@if (range.controls.end.hasError('matEndDateInvalid')) {
+					<mat-error>Invalid end date</mat-error>
+					}
+				</mat-form-field>
+				<button (click)="resetDateFilter()" mat-icon-button aria-label="Reset date filter">
+					<mat-icon>close</mat-icon>
+				</button>
+			</div>
+		</div>
 
-    <!-- Left column: student selector -->
-    <div class="lca-layout__left">
+		<div class="lca-layout__bottom">
+			<!-- Search section -->
+			<section class="lca-search" aria-label="Student search">
+				<div class="lca-search__inputs">
+					<div class="lca-search__field">
+						<label class="lca-search__label" for="search-id">Student ID</label>
+						<input id="search-id" class="lca-search__input" type="text" [value]="searchSchoolStudentID()"
+							(input)="searchSchoolStudentID.set($any($event.target).value)" placeholder="Student ID"
+							autocomplete="off" />
+					</div>
+					<div class="lca-search__field">
+						<label class="lca-search__label" for="search-first">First Name</label>
+						<input id="search-first" class="lca-search__input" type="text" [value]="searchFirstName()"
+							(input)="searchFirstName.set($any($event.target).value)" placeholder="First name"
+							autocomplete="off" />
+					</div>
+					<div class="lca-search__field">
+						<label class="lca-search__label" for="search-last">Last Name</label>
+						<input id="search-last" class="lca-search__input" type="text" [value]="searchLastName()"
+							(input)="searchLastName.set($any($event.target).value)" placeholder="Last name"
+							autocomplete="off" />
+					</div>
+				</div>
 
-      <!-- Search section -->
-      <section class="lca-search" aria-label="Student search">
-        <div class="lca-search__inputs">
-          <div class="lca-search__field">
-            <label class="lca-search__label" for="search-id">Student ID</label>
-            <input
-              id="search-id"
-              class="lca-search__input"
-              type="text"
-              [value]="searchSchoolStudentID()"
-              (input)="searchSchoolStudentID.set($any($event.target).value)"
-              placeholder="Student ID"
-              autocomplete="off"
-            />
-          </div>
-          <div class="lca-search__field">
-            <label class="lca-search__label" for="search-first">First Name</label>
-            <input
-              id="search-first"
-              class="lca-search__input"
-              type="text"
-              [value]="searchFirstName()"
-              (input)="searchFirstName.set($any($event.target).value)"
-              placeholder="First name"
-              autocomplete="off"
-            />
-          </div>
-          <div class="lca-search__field">
-            <label class="lca-search__label" for="search-last">Last Name</label>
-            <input
-              id="search-last"
-              class="lca-search__input"
-              type="text"
-              [value]="searchLastName()"
-              (input)="searchLastName.set($any($event.target).value)"
-              placeholder="Last name"
-              autocomplete="off"
-            />
-          </div>
-        </div>
+				@if (searchError()) {
+				<p class="lca-search__error" role="alert">{{ searchError() }}</p>
+				}
+			</section>
 
-        @if (searchError()) {
-          <p class="lca-search__error" role="alert">{{ searchError() }}</p>
-        }
-      </section>
+			<!-- Results -->
+			<section class="lca-results" aria-label="Search results">
+				<app-student-list [records]="studentResults()" [isLoading]="isSearching()"
+					(recordSelected)="onSelectStudent($event)" />
+			</section>
 
-      <!-- Results -->
-      <section class="lca-results" aria-label="Search results">
-        <app-student-list
-          [records]="studentResults()"
-          [isLoading]="isSearching()"
-          (recordSelected)="onSelectStudent($event)"
-        />
-      </section>
-
-    </div>
-  </div>
+		</div>
+	</div>
 </div>

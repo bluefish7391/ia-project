@@ -5,7 +5,7 @@ import {
 	inject,
 	signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, switchMap, catchError, of, startWith } from 'rxjs';
 import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckResponse, SaveStudentLunchCheckConfigRequest, Student, StudentLunchCheck, StudentLunchCheckCompositeRecord } from '../../../../../../../shared/kinds';
@@ -17,10 +17,18 @@ import { StudentActivityWarningDialogue } from '../student-activity-warning-dial
 import { MatDialog } from '@angular/material/dialog';
 import { MessageService } from '../message-service';
 import { StudentDetailsDialogue } from '../student-details-dialogue.ts/student-details-dialogue';
+import { MatIcon } from '@angular/material/icon';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDatepickerModule, MatDatepickerToggle } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 @Component({
 	selector: 'app-details',
-	imports: [RouterLink, StudentListComponent],
+	providers: [provideNativeDateAdapter()],
+	imports: [RouterLink, StudentListComponent, MatIcon, 
+		MatDatepickerModule, MatFormFieldModule, MatInputModule, ReactiveFormsModule],
 	templateUrl: './details.html',
 	styleUrl: './details.scss',
 })
@@ -28,6 +36,15 @@ export class DetailsComponent {
 	private readonly dialog = inject(MatDialog);
 	private readonly messageService = inject(MessageService);
 	private readonly lunchCheckService = inject(LunchCheckService);
+
+	// ─── Date range filter ─────────────────────────────────────────────────────
+	protected readonly range = new FormGroup({
+		start: new FormControl<Date | null>(new Date()),
+		end: new FormControl<Date | null>(new Date()),
+	});
+	protected readonly rangeValue = toSignal(this.range.valueChanges, {
+		initialValue: { start: new Date(), end: new Date() }
+	});
 
 	// ─── Search state ────────────────────────────────────────────────────────
 	protected readonly searchSchoolStudentID = signal('');
@@ -131,5 +148,9 @@ export class DetailsComponent {
 				),
 			}));
 		}
+	}
+
+	protected resetDateFilter(): void {
+		this.range.reset();
 	}
 }

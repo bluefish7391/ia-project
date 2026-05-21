@@ -29,7 +29,7 @@
 	}
 }
 
-// ─── Two-column layout ───────────────────────────────────────────────────────
+// ─── Two-row layout ───────────────────────────────────────────────────────
 .lca-layout {
 	flex: 1 1 auto;
 	overflow: hidden;
@@ -40,7 +40,11 @@
 		gap: 1.5rem;
 	}
 
-	&__left {
+	// &__top {
+
+	// }
+
+	&__bottom {
 		height: 100%;
 		overflow: hidden;
 		display: flex;

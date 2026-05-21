@@ -30,7 +30,7 @@
 
 	<section class="lca-history" aria-label="Student activity">
 		@if (displayHistory().length === 0) {
-			<p class="lca-history__empty">No activity found.</p>
+			<p class="lca-history__empty">No activity found. Try adjusting the date range.</p>
 		} @else {
 			<ul class="lca-history__list">
 				@for (event of displayHistory(); track event.time.getTime()) {

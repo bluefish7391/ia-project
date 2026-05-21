@@ -67,24 +67,31 @@ export class StudentDetailsDialogue {
 	protected headerText: string = '';
 
 	protected readonly range = new FormGroup({
-		start: new FormControl<Date | null>(null),
-		end: new FormControl<Date | null>(null),
+		start: new FormControl<Date | null>(new Date()),
+		end: new FormControl<Date | null>(new Date()),
 	});
 	protected readonly rangeValue = toSignal(this.range.valueChanges, {
-		initialValue: { start: null, end: null }
+		initialValue: { start: new Date(), end: new Date() }
 	});
 
 	protected readonly filteredHistory = computed(() => {
 		const { start, end } = this.rangeValue();
+		console.log(`start: ${start}, end: ${end}`);
 		if (!start) return this.completeHistory();
 
 		const startTime = new Date(start).getTime();
-		const endDate = end ? new Date(end) : null;
-		if (endDate) endDate.setHours(23, 59, 59, 999);
+
+		if (end) {
+			const endTime = new Date(end).getTime();
+			return this.completeHistory().filter((event) => {
+				const t = event.time.getTime();
+				return t >= startTime && t <= endTime;
+			});
+		}
 
 		return this.completeHistory().filter((event) => {
 			const t = event.time.getTime();
-			return t >= startTime && (!endDate || t <= endDate.getTime());
+			return t >= startTime;
 		});
 	});
 
@@ -106,7 +113,10 @@ export class StudentDetailsDialogue {
 		});
 
 		this.headerText = `Viewing lunch check details for ${this.data.student.student.firstName} ${this.data.student.student.lastName}`;
+		this.setupCompleteHistory();
+	}
 
+	private setupCompleteHistory(): void {
 		for (const r of this.data.student.lunchCheckRecords) {
 			if (r.checkInTime) {
 				const t = new Date(r.checkInTime);

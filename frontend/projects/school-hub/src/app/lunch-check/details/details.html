@@ -23,14 +23,14 @@
       <section class="lca-search" aria-label="Student search">
         <div class="lca-search__inputs">
           <div class="lca-search__field">
-            <label class="lca-search__label" for="search-id">School ID</label>
+            <label class="lca-search__label" for="search-id">Student ID</label>
             <input
               id="search-id"
               class="lca-search__input"
               type="text"
               [value]="searchSchoolStudentID()"
               (input)="searchSchoolStudentID.set($any($event.target).value)"
-              placeholder="School ID"
+              placeholder="Student ID"
               autocomplete="off"
             />
           </div>

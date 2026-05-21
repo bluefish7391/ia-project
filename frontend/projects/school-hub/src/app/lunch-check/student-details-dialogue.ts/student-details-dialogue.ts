@@ -106,6 +106,8 @@ export class StudentDetailsDialogue {
 		return this.filteredHistory().slice(page * size, (page + 1) * size);
 	});
 
+	protected readonly showContractStatus = signal(false);
+
 	constructor() {
 		effect(() => {
 			this.rangeValue();
@@ -114,6 +116,10 @@ export class StudentDetailsDialogue {
 
 		this.headerText = `Viewing lunch check details for ${this.data.student.student.firstName} ${this.data.student.student.lastName}`;
 		this.setupCompleteHistory();
+
+		this.contractCompleted.set(this.data.student.studentLunchCheck?.contractSigned ?? false);
+		this.showContractStatus.set(this.contractCompleted());
+		console.log("data: ", this.data);
 	}
 
 	private setupCompleteHistory(): void {

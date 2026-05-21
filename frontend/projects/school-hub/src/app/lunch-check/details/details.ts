@@ -8,7 +8,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, switchMap, catchError, of, startWith } from 'rxjs';
-import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckResponse, SaveStudentLunchCheckConfigRequest, Student, StudentLunchCheckCompositeRecord } from '../../../../../../../shared/kinds';
+import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckResponse, SaveStudentLunchCheckConfigRequest, Student, StudentLunchCheck, StudentLunchCheckCompositeRecord } from '../../../../../../../shared/kinds';
 import { LunchCheckService } from '../lunch-check.service';
 import { CreateStudentComponent, CreateStudentFormData } from '../create-student/create-student';
 import { StudentListComponent, getClockStatus } from '../student-list/student-list';
@@ -84,29 +84,30 @@ export class DetailsComponent {
 	}
 
 	// ─── Handlers ────────────────────────────────────────────────────────────
-	protected async onSelectStudent(record: StudentLunchCheckCompositeRecord): Promise<void> {
-		// TODO: fix bug where this filter doesn't get all records, it gets none
-		console.log("Selected record:", record);
+	protected async onSelectStudent(studentLunchCheckCompositeRecord: StudentLunchCheckCompositeRecord): Promise<void> {
+		console.log("Selected record:", studentLunchCheckCompositeRecord);
 		const request: GetStudentLunchCheckInAndOutHistoryRequest = {
-			studentID: record.student.id,
+			studentID: studentLunchCheckCompositeRecord.student.id,
 			startDate: new Date(1).toISOString().split('T')[0], // All time records
 			endDate: new Date().toISOString().split('T')[0]
 		};
 
 		this.lunchCheckService.getStudentLunchCheckInAndOutHistory(request).subscribe({
-			next: async response => await this.handleViewRecordsSearchResult(response, record.student),
+			next: async (lunchCheckHistory) => {
+				await this.handleViewRecordsSearchResult(lunchCheckHistory, studentLunchCheckCompositeRecord)
+			},
 			error: () => {
 				this.messageService.error('An error occurred while searching for the student. Please try again.');
 			}
 		});
 	}
 
-	private async handleViewRecordsSearchResult(response: GetStudentLunchCheckInAndOutHistoryResponse, student: Student) {
-		console.log('Search result for student history:', response);
-
+	private async handleViewRecordsSearchResult(getStudentLunchCheckInAndOutHistoryResponse: GetStudentLunchCheckInAndOutHistoryResponse, studentLunchCheckCompositeRecord: StudentLunchCheckCompositeRecord) {
+		console.log('Search result for student history:', getStudentLunchCheckInAndOutHistoryResponse);
 		const compositeRecord: StudentLunchCheckCompositeRecord = {
-			student,
-			lunchCheckRecords: response.records
+			student: studentLunchCheckCompositeRecord.student,
+			studentLunchCheck: studentLunchCheckCompositeRecord.studentLunchCheck,
+			lunchCheckRecords: getStudentLunchCheckInAndOutHistoryResponse.records
 		};
 
 		const result = await StudentDetailsDialogue.open(this.dialog, { student: compositeRecord });
@@ -116,7 +117,7 @@ export class DetailsComponent {
 
 		if (result.isSaving) {
 			this.lunchCheckService.saveStudentLunchCheckConfig({
-				studentID: student.id,
+				studentID: studentLunchCheckCompositeRecord.student.id,
 				contractSigned: result.contractCompleted ?? false
 			} satisfies SaveStudentLunchCheckConfigRequest).subscribe({
 				next: () => {

@@ -1,4 +1,4 @@
-import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, SaveStudentLunchCheckConfigRequest, SaveStudentLunchCheckConfigResponse, SaveStudentLunchCheckRequest, SaveStudentLunchCheckResponse, Student, StudentLunchCheck, StudentLunchCheckCompositeRecord } from "../../../shared/kinds";
+import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, QueryStudentLunchCheckWithContractsResponse, SaveStudentLunchCheckConfigRequest, SaveStudentLunchCheckConfigResponse, SaveStudentLunchCheckRequest, SaveStudentLunchCheckResponse, Student, StudentLunchCheck, StudentLunchCheckCompositeRecord } from "../../../shared/kinds";
 import { lunchCheckDAO, studentDAO } from "../daos/dao-factory";
 import { generateId } from "../idutilities";
 import { BadRequestError } from "../kinds";
@@ -16,7 +16,7 @@ export class LunchCheckManager {
 		}
 
 		let students = await this.getStudentsMatchingSearchCriteria(tenantID, filter);
-		
+
 		const pageNumber = filter.pageNumber && filter.pageNumber > 0 ? filter.pageNumber : 0;
 		const pageSize = filter.pageSize && filter.pageSize > 0 ? Math.min(filter.pageSize, 100) : 10;
 		let startIndex = pageNumber * pageSize;
@@ -61,13 +61,13 @@ export class LunchCheckManager {
 	private async getStudentsMatchingSearchCriteria(tenantID: string, filter: QueryStudentLunchCheckRequest): Promise<Student[]> {
 		// Get all students for the tenant and then filter based on search criteria
 		let studentsMatchingSearchCriteria = await studentDAO.getAllStudents(tenantID);
-		if (filter.schoolStudentID) 
+		if (filter.schoolStudentID)
 			studentsMatchingSearchCriteria = studentsMatchingSearchCriteria.filter(student => student.schoolStudentID.indexOf(filter.schoolStudentID!) != -1);
-		if (filter.firstName) 
+		if (filter.firstName)
 			studentsMatchingSearchCriteria = studentsMatchingSearchCriteria.filter(student => student.firstName.indexOf(filter.firstName!) != -1);
-		if (filter.lastName) 
+		if (filter.lastName)
 			studentsMatchingSearchCriteria = studentsMatchingSearchCriteria.filter(student => student.lastName.indexOf(filter.lastName!) != -1);
-		
+
 		const startDate = filter.startDate ? new Date(filter.startDate) : null;
 		const endDate = filter.endDate ? new Date(filter.endDate) : null;
 		const dateFilterResults = await Promise.all(studentsMatchingSearchCriteria.map(async student => {
@@ -82,6 +82,52 @@ export class LunchCheckManager {
 		studentsMatchingSearchCriteria = studentsMatchingSearchCriteria.filter((_, i) => dateFilterResults[i]);
 
 		return studentsMatchingSearchCriteria;
+	}
+
+	public async getStudentsWithLunchContracts(requestContext: RequestContext, filter: QueryStudentLunchCheckRequest): Promise<QueryStudentLunchCheckWithContractsResponse> {
+		const tenantID = requestContext.getCurrentTenantID();
+		const students = await this.getStudentsMatchingSearchCriteria2(tenantID, filter);
+		const lunchChecks = await lunchCheckDAO.getStudentLunchChecksForStudents(tenantID);
+
+		const response = {
+			rows: students.map(student => {
+				const lunchCheck = lunchChecks.find(check => check.studentID === student.id);
+				return {
+					student,
+					contractSigned: lunchCheck ? lunchCheck.contractSigned : false,
+				};
+			})
+		} satisfies QueryStudentLunchCheckWithContractsResponse;
+
+		return response;
+	}
+
+	private async getStudentsMatchingSearchCriteria2(tenantID: string, filter: QueryStudentLunchCheckRequest): Promise<Student[]> {
+		const studentIDsSet = new Set<string>();
+		const records = await lunchCheckDAO.getLunchCheckRecords(tenantID);
+		records.forEach(record => {
+			studentIDsSet.add(record.studentID);
+		});
+
+		const studentIDs = Array.from(studentIDsSet);
+		const studentObjects = await studentDAO.getStudentsByIDs(studentIDs);
+
+		const result = studentObjects.filter(student => {
+			if (filter.schoolStudentID && student.schoolStudentID.indexOf(filter.schoolStudentID) == -1) {
+				return false;
+			}
+			if (filter.firstName && student.firstName.indexOf(filter.firstName) == -1) {
+				return false;
+			}
+			if (filter.lastName && student.lastName.indexOf(filter.lastName) == -1) {
+				return false;
+			}
+			return true;
+		});
+
+		console.log("getStudentsMatchingSearchCriteria2: tenantID=", tenantID, "filter=", filter, "result=", result);
+
+		return result;
 	}
 
 	async saveStudentLunchCheck(requestContext: RequestContext, data: SaveStudentLunchCheckRequest): Promise<SaveStudentLunchCheckResponse> {

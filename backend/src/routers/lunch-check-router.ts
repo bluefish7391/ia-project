@@ -10,6 +10,7 @@ export class LunchCheckRouter extends BaseRouter {
 		const lunchCheckRouter = new LunchCheckRouter();
 		return express.Router()
 			.post("/student-lunch-check-records", authenticator(["VIEW_LUNCH_CHECK_RECORDS"]), lunchCheckRouter.wrapAsync(lunchCheckRouter.getAllStudentLunchCheckRecords.bind(lunchCheckRouter)))
+			.post('/students-with-lunch-contracts', authenticator(["VIEW_LUNCH_CHECK_RECORDS"]), lunchCheckRouter.wrapAsync(lunchCheckRouter.getStudentsWithLunchContracts.bind(lunchCheckRouter)))
 			.put("/student-lunch-check-record", authenticator(["MANAGE_LUNCH_CHECK_RECORDS"]), lunchCheckRouter.wrapAsync(lunchCheckRouter.saveStudentLunchCheck.bind(lunchCheckRouter)))
 			.post("/student-lunch-check-in-and-out-history", authenticator(["VIEW_LUNCH_CHECK_RECORDS"]), lunchCheckRouter.wrapAsync(lunchCheckRouter.getStudentLunchCheckInAndOutHistory.bind(lunchCheckRouter)))
 			.post("/student-lunch-check", authenticator(["MANAGE_LUNCH_CHECK_RECORDS"]), lunchCheckRouter.wrapAsync(lunchCheckRouter.saveStudentLunchCheckConfig.bind(lunchCheckRouter)));
@@ -19,6 +20,12 @@ export class LunchCheckRouter extends BaseRouter {
 		const filterOptions = req.body as QueryStudentLunchCheckRequest;
 		const students = await lunchCheckManager.getAllStudents(new RequestContext(req), filterOptions);
 		this.sendSuccess(res, students);
+	}
+
+	async getStudentsWithLunchContracts(req: Request, res: Response) {
+		const filterOptions = req.body as QueryStudentLunchCheckRequest;
+		const studentsWithContracts = await lunchCheckManager.getStudentsWithLunchContracts(new RequestContext(req), filterOptions);
+		this.sendSuccess(res, studentsWithContracts);
 	}
 
 	async saveStudentLunchCheck(req: Request, res: Response) {

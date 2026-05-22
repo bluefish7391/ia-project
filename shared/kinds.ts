@@ -68,11 +68,30 @@ export interface StudentLunchCheckCompositeRecord {
 	lunchCheckRecords: LunchCheckRecord[];
 }
 
+export interface QueryStudentLunchCheckRequest {
+	schoolStudentID?: string; // Refers to Student.schoolStudentID
+	firstName?: string;
+	lastName?: string;
+	startDate?: string; // ISO date string (e.g., "2024-01-01")
+	endDate?: string; // ISO date string (e.g., "2024-01-01")
+	pageNumber?: number;
+	pageSize?: number;
+}
+
 export interface QueryStudentLunchCheckResponse {
 	records: StudentLunchCheckCompositeRecord[];
 	totalRecords: number;
 	pageNumber: number; // Real page number being returned based on the number of records and page size, this may differ from the requested page number if the requested page number is out of range
 	pageSize: number; // Real page size being returned based on the number of records and page size, this may differ from the requested page size if the requested page size is out of range
+}
+
+export interface QueryStudentLunchCheckWithContractsResponse {
+	rows: StudentWithContractStatus[];
+}
+
+export interface StudentWithContractStatus {
+	student: Student;
+	contractSigned: boolean;
 }
 
 export interface SaveStudentLunchCheckRequest {
@@ -83,16 +102,6 @@ export interface SaveStudentLunchCheckRequest {
 
 export interface SaveStudentLunchCheckResponse {
 	lunchCheckRecord: LunchCheckRecord; // Record that just got saved
-}
-
-export interface QueryStudentLunchCheckRequest {
-	schoolStudentID?: string; // Refers to Student.schoolStudentID
-	firstName?: string;
-	lastName?: string;
-	startDate?: string; // ISO date string (e.g., "2024-01-01")
-	endDate?: string; // ISO date string (e.g., "2024-01-01")
-	pageNumber?: number;
-	pageSize?: number;
 }
 
 export interface GetStudentLunchCheckInAndOutHistoryRequest {

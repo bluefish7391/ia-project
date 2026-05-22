@@ -1,39 +1,24 @@
-import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, SaveStudentLunchCheckConfigRequest, SaveStudentLunchCheckConfigResponse, SaveStudentLunchCheckRequest, SaveStudentLunchCheckResponse, StudentLunchCheck, StudentLunchCheckCompositeRecord } from "../../../shared/kinds";
+import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckRequest, QueryStudentLunchCheckResponse, SaveStudentLunchCheckConfigRequest, SaveStudentLunchCheckConfigResponse, SaveStudentLunchCheckRequest, SaveStudentLunchCheckResponse, Student, StudentLunchCheck, StudentLunchCheckCompositeRecord } from "../../../shared/kinds";
 import { lunchCheckDAO, studentDAO } from "../daos/dao-factory";
 import { generateId } from "../idutilities";
 import { BadRequestError } from "../kinds";
 import { RequestContext } from "../request-context";
 
 export class LunchCheckManager {
-	async getAllStudents(requestContext: RequestContext, filterOptions: QueryStudentLunchCheckRequest): Promise<QueryStudentLunchCheckResponse> {
+	async getAllStudents(requestContext: RequestContext, filter: QueryStudentLunchCheckRequest): Promise<QueryStudentLunchCheckResponse> {
 		const tenantID = requestContext.getCurrentTenantID();
 		// Validate lunchDate format
-		if (filterOptions.lunchDate && !this.isValidISODateString(filterOptions.lunchDate)) {
-			throw new Error("Invalid lunchDate format. Expected ISO date string.");
+		if (
+			filter.startDate && !this.isValidISODateString(filter.startDate) ||
+			filter.endDate && !this.isValidISODateString(filter.endDate)
+		) {
+			throw new Error("Invalid date format. Expected ISO date string.");
 		}
 
-		let students = await studentDAO.getAllStudents(tenantID);
-
-		if (filterOptions.schoolStudentID) {
-			students = students.filter(student => {
-				return student.schoolStudentID.indexOf(filterOptions.schoolStudentID!) != -1;
-			});
-		}
-
-		if (filterOptions.firstName) {
-			students = students.filter(student => {
-				return student.firstName.indexOf(filterOptions.firstName!) != -1;
-			});
-		}
-
-		if (filterOptions.lastName) {
-			students = students.filter(student => {
-				return student.lastName.indexOf(filterOptions.lastName!) != -1;
-			});
-		}
-
-		const pageNumber = filterOptions.pageNumber && filterOptions.pageNumber > 0 ? filterOptions.pageNumber : 0;
-		const pageSize = filterOptions.pageSize && filterOptions.pageSize > 0 ? Math.min(filterOptions.pageSize, 100) : 10;
+		let students = await this.getStudentsMatchingSearchCriteria(tenantID, filter);
+		
+		const pageNumber = filter.pageNumber && filter.pageNumber > 0 ? filter.pageNumber : 0;
+		const pageSize = filter.pageSize && filter.pageSize > 0 ? Math.min(filter.pageSize, 100) : 10;
 		let startIndex = pageNumber * pageSize;
 		let endIndex = startIndex + pageSize;
 		let realPageNumberReturned = pageNumber;
@@ -49,12 +34,7 @@ export class LunchCheckManager {
 
 		students = students.slice(startIndex, endIndex);
 
-		let lunchCheckRecords: LunchCheckRecord[] = [];
-		if (filterOptions.lunchDate) {
-			lunchCheckRecords = await lunchCheckDAO.getLunchCheckRecordsByDate(tenantID, filterOptions.lunchDate);
-		} else {
-			lunchCheckRecords = await lunchCheckDAO.getLunchCheckRecords(tenantID);
-		}
+		let lunchCheckRecords: LunchCheckRecord[] = await lunchCheckDAO.getLunchCheckRecords(tenantID);
 		const studentLunchChecks: StudentLunchCheck[] = await lunchCheckDAO.getStudentLunchChecksForStudents(tenantID);
 
 		const studentLunchCheckMap = new Map<string, StudentLunchCheck>();
@@ -76,6 +56,32 @@ export class LunchCheckManager {
 			return { student, studentLunchCheck, lunchCheckRecords: recordsForStudent } satisfies StudentLunchCheckCompositeRecord;
 		});
 		return { records, totalRecords: students.length, pageNumber: realPageNumberReturned, pageSize } satisfies QueryStudentLunchCheckResponse;
+	}
+
+	private async getStudentsMatchingSearchCriteria(tenantID: string, filter: QueryStudentLunchCheckRequest): Promise<Student[]> {
+		// Get all students for the tenant and then filter based on search criteria
+		let studentsMatchingSearchCriteria = await studentDAO.getAllStudents(tenantID);
+		if (filter.schoolStudentID) 
+			studentsMatchingSearchCriteria = studentsMatchingSearchCriteria.filter(student => student.schoolStudentID.indexOf(filter.schoolStudentID!) != -1);
+		if (filter.firstName) 
+			studentsMatchingSearchCriteria = studentsMatchingSearchCriteria.filter(student => student.firstName.indexOf(filter.firstName!) != -1);
+		if (filter.lastName) 
+			studentsMatchingSearchCriteria = studentsMatchingSearchCriteria.filter(student => student.lastName.indexOf(filter.lastName!) != -1);
+		
+		const startDate = filter.startDate ? new Date(filter.startDate) : null;
+		const endDate = filter.endDate ? new Date(filter.endDate) : null;
+		studentsMatchingSearchCriteria = studentsMatchingSearchCriteria.filter(async student => {
+			// If startDate or endDate is not provided, consider it as matching the criteria
+			if (!startDate && !endDate) return true;
+
+			const lunchCheckRecordsForStudent = await lunchCheckDAO.getLunchCheckRecordsByStudent(tenantID, student.id);
+			return (lunchCheckRecordsForStudent.some(record => {
+				const lunchDate = new Date(record.lunchDate);
+				return (!startDate || lunchDate >= startDate) && (!endDate || lunchDate <= endDate);
+			}));
+		});
+
+		return studentsMatchingSearchCriteria;
 	}
 
 	async saveStudentLunchCheck(requestContext: RequestContext, data: SaveStudentLunchCheckRequest): Promise<SaveStudentLunchCheckResponse> {

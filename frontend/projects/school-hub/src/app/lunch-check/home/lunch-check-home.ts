@@ -32,7 +32,6 @@ export class LunchCheckHomeComponent {
 		console.log(`Dialog result (awaited): ${result.schoolStudentID}`);
 		const filters: QueryStudentLunchCheckRequest = {
 			schoolStudentID: result.schoolStudentID,
-			lunchDate: new Date().toISOString().split('T')[0]
 		};
 
 		this.lunchCheckService.searchStudents(filters).subscribe({

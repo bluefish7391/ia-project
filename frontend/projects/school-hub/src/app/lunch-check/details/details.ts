@@ -38,12 +38,22 @@ export class DetailsComponent {
 	private readonly lunchCheckService = inject(LunchCheckService);
 
 	// ─── Date range filter ─────────────────────────────────────────────────────
+	protected readonly longAgo = '2000-01-01';
+	protected readonly today = new Date().toISOString().split('T')[0];
 	protected readonly range = new FormGroup({
 		start: new FormControl<Date | null>(new Date()),
 		end: new FormControl<Date | null>(new Date()),
 	});
 	protected readonly rangeValue = toSignal(this.range.valueChanges, {
 		initialValue: { start: new Date(), end: new Date() }
+	});
+	private readonly startDate = computed(() => {
+		const start = this.rangeValue().start;
+		return start ? start.toISOString().split('T')[0] : '';
+	});
+	private readonly endDate = computed(() => {
+		const end = this.rangeValue().end;
+		return end ? end.toISOString().split('T')[0] : '';
 	});
 
 	// ─── Search state ────────────────────────────────────────────────────────
@@ -58,13 +68,12 @@ export class DetailsComponent {
 		schoolStudentID: string;
 		firstName: string;
 		lastName: string;
-		lunchDate?: string;
+		startDate: string;
+		endDate: string;
 	}>();
 
 	protected readonly results = signal<QueryStudentLunchCheckResponse>({ records: [], totalRecords: 0, pageNumber: 0, pageSize: 10 });
-
 	protected readonly studentResults = computed(() => this.results().records);
-	protected readonly today = new Date().toISOString().split('T')[0];
 
 	constructor() {
 		this.searchTrigger$.pipe(
@@ -89,7 +98,8 @@ export class DetailsComponent {
 				schoolStudentID: this.searchSchoolStudentID(),
 				firstName: this.searchFirstName(),
 				lastName: this.searchLastName(),
-				lunchDate: undefined,
+				startDate: this.startDate(),
+				endDate: this.endDate(),
 			});
 		});
 
@@ -105,8 +115,8 @@ export class DetailsComponent {
 		console.log("Selected record:", studentLunchCheckCompositeRecord);
 		const request: GetStudentLunchCheckInAndOutHistoryRequest = {
 			studentID: studentLunchCheckCompositeRecord.student.id,
-			startDate: new Date(1).toISOString().split('T')[0], // All time records
-			endDate: new Date().toISOString().split('T')[0]
+			startDate: this.longAgo, // All time records
+			endDate: this.today
 		};
 
 		this.lunchCheckService.getStudentLunchCheckInAndOutHistory(request).subscribe({

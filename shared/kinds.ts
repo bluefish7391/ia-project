@@ -89,7 +89,8 @@ export interface QueryStudentLunchCheckRequest {
 	schoolStudentID?: string; // Refers to Student.schoolStudentID
 	firstName?: string;
 	lastName?: string;
-	lunchDate?: string; // ISO date string (e.g., "2024-01-01")
+	startDate?: string; // ISO date string (e.g., "2024-01-01")
+	endDate?: string; // ISO date string (e.g., "2024-01-01")
 	pageNumber?: number;
 	pageSize?: number;
 }

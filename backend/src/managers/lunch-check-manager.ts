@@ -70,16 +70,16 @@ export class LunchCheckManager {
 		
 		const startDate = filter.startDate ? new Date(filter.startDate) : null;
 		const endDate = filter.endDate ? new Date(filter.endDate) : null;
-		studentsMatchingSearchCriteria = studentsMatchingSearchCriteria.filter(async student => {
-			// If startDate or endDate is not provided, consider it as matching the criteria
+		const dateFilterResults = await Promise.all(studentsMatchingSearchCriteria.map(async student => {
 			if (!startDate && !endDate) return true;
 
 			const lunchCheckRecordsForStudent = await lunchCheckDAO.getLunchCheckRecordsByStudent(tenantID, student.id);
-			return (lunchCheckRecordsForStudent.some(record => {
+			return lunchCheckRecordsForStudent.some(record => {
 				const lunchDate = new Date(record.lunchDate);
 				return (!startDate || lunchDate >= startDate) && (!endDate || lunchDate <= endDate);
-			}));
-		});
+			});
+		}));
+		studentsMatchingSearchCriteria = studentsMatchingSearchCriteria.filter((_, i) => dateFilterResults[i]);
 
 		return studentsMatchingSearchCriteria;
 	}

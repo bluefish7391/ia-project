@@ -5,6 +5,7 @@ import {
 	GetStudentLunchCheckInAndOutHistoryResponse,
 	QueryStudentLunchCheckRequest,
 	QueryStudentLunchCheckResponse,
+	QueryStudentLunchCheckWithContractsResponse,
 	SaveStudentLunchCheckConfigRequest,
 	SaveStudentLunchCheckConfigResponse,
 	SaveStudentLunchCheckRequest,
@@ -36,5 +37,9 @@ export class LunchCheckService {
 
 	getStudentLunchCheckInAndOutHistory(request: GetStudentLunchCheckInAndOutHistoryRequest): Observable<GetStudentLunchCheckInAndOutHistoryResponse> {
 		return this.api.post<GetStudentLunchCheckInAndOutHistoryResponse>('lunch-check/student-lunch-check-in-and-out-history', request);
+	}
+
+	getStudentsWithLunchContracts(filters: QueryStudentLunchCheckRequest): Observable<QueryStudentLunchCheckWithContractsResponse> {
+		return this.api.post<QueryStudentLunchCheckWithContractsResponse>('lunch-check/students-with-lunch-contracts', filters);
 	}
 }

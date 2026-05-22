@@ -16,7 +16,7 @@
 					<span class="sl-card__id">ID: {{ record.student.schoolStudentID }}</span>
 				</div>
 				<div class="sl-card__badges">
-					@if (record.studentLunchCheck?.contractSigned) {
+					@if (record.contractSigned) {
 					<span class="sl-badge sl-badge--contract">Contract Signed</span>
 					} @else {
 					<span class="sl-badge sl-badge--no-contract">No Signed Contract</span>

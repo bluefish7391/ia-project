@@ -6,14 +6,11 @@ import {
 	signal,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, switchMap, catchError, of, startWith } from 'rxjs';
-import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckResponse, SaveStudentLunchCheckConfigRequest, Student, StudentLunchCheck, StudentLunchCheckCompositeRecord } from '../../../../../../../shared/kinds';
+import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckResponse, QueryStudentLunchCheckWithContractsResponse, SaveStudentLunchCheckConfigRequest, Student, StudentLunchCheck, StudentLunchCheckCompositeRecord, StudentWithContractStatus } from '../../../../../../../shared/kinds';
 import { LunchCheckService } from '../lunch-check.service';
-import { CreateStudentComponent, CreateStudentFormData } from '../create-student/create-student';
-import { StudentListComponent, getClockStatus } from '../student-list/student-list';
-import { StudentIdReaderComponent } from '../student-id-reader/student-id-reader';
-import { StudentActivityWarningDialogue } from '../student-activity-warning-dialogue/student-activity-warning-dialogue';
+import { StudentListComponent } from '../student-list/student-list';
 import { MatDialog } from '@angular/material/dialog';
 import { MessageService } from '../message-service';
 import { StudentDetailsDialogue } from '../student-details-dialogue.ts/student-details-dialogue';
@@ -73,8 +70,8 @@ export class DetailsComponent {
 		endDate: string;
 	}>();
 
-	protected readonly results = signal<QueryStudentLunchCheckResponse>({ records: [], totalRecords: 0, pageNumber: 0, pageSize: 10 });
-	protected readonly studentResults = computed(() => this.results().records);
+	protected readonly results = signal<QueryStudentLunchCheckWithContractsResponse>({ rows: [] });
+	protected readonly studentResults = computed(() => this.results().rows);
 
 	constructor() {
 		this.searchTrigger$.pipe(
@@ -83,10 +80,10 @@ export class DetailsComponent {
 			switchMap((filters) => {
 				this.isSearching.set(true);
 				this.searchError.set(null);
-				return this.lunchCheckService.searchStudents(filters).pipe(
+				return this.lunchCheckService.getStudentsWithLunchContracts(filters).pipe(
 					catchError(() => {
 						this.searchError.set('Failed to search students. Please try again.');
-						return of({ records: [], totalRecords: 0, pageNumber: 0, pageSize: 10 });
+						return of({ rows: [] } satisfies QueryStudentLunchCheckWithContractsResponse);
 					}),
 				);
 			}),
@@ -116,17 +113,16 @@ export class DetailsComponent {
 	}
 
 	// ─── Handlers ────────────────────────────────────────────────────────────
-	protected async onSelectStudent(studentLunchCheckCompositeRecord: StudentLunchCheckCompositeRecord): Promise<void> {
-		console.log("Selected record:", studentLunchCheckCompositeRecord);
+	protected async onSelectStudent(studentWithContractStatus: StudentWithContractStatus): Promise<void> {
 		const request: GetStudentLunchCheckInAndOutHistoryRequest = {
-			studentID: studentLunchCheckCompositeRecord.student.id,
+			studentID: studentWithContractStatus.student.id,
 			startDate: this.longAgo, // All time records
 			endDate: this.today
 		};
 
 		this.lunchCheckService.getStudentLunchCheckInAndOutHistory(request).subscribe({
 			next: async (lunchCheckHistory) => {
-				await this.handleViewRecordsSearchResult(lunchCheckHistory, studentLunchCheckCompositeRecord)
+				await this.handleViewRecordsSearchResult(studentWithContractStatus, lunchCheckHistory);
 			},
 			error: () => {
 				this.messageService.error('An error occurred while searching for the student. Please try again.');
@@ -134,12 +130,16 @@ export class DetailsComponent {
 		});
 	}
 
-	private async handleViewRecordsSearchResult(getStudentLunchCheckInAndOutHistoryResponse: GetStudentLunchCheckInAndOutHistoryResponse, studentLunchCheckCompositeRecord: StudentLunchCheckCompositeRecord) {
-		console.log('Search result for student history:', getStudentLunchCheckInAndOutHistoryResponse);
+	private async handleViewRecordsSearchResult(studentWithContractStatus: StudentWithContractStatus, lunchCheckHistory: GetStudentLunchCheckInAndOutHistoryResponse) {
+		console.log('Search result for student history:', lunchCheckHistory);
 		const compositeRecord: StudentLunchCheckCompositeRecord = {
-			student: studentLunchCheckCompositeRecord.student,
-			studentLunchCheck: studentLunchCheckCompositeRecord.studentLunchCheck,
-			lunchCheckRecords: getStudentLunchCheckInAndOutHistoryResponse.records
+			student: studentWithContractStatus.student,
+			studentLunchCheck: { 
+				studentID: studentWithContractStatus.student.id,
+				tenantID: '', // This field is not used in the details view, so we can leave it empty
+				contractSigned: studentWithContractStatus.contractSigned 
+			},
+			lunchCheckRecords: lunchCheckHistory.records
 		};
 
 		const result = await StudentDetailsDialogue.open(this.dialog, { student: compositeRecord });
@@ -151,13 +151,11 @@ export class DetailsComponent {
 			result.contractCompleted !== (compositeRecord.studentLunchCheck?.contractSigned ?? false)) {
 			this.results.update((current) => ({
 				...current,
-				records: current.records.map((r) =>
+				rows: current.rows.map((r) =>
 					r.student.id === compositeRecord.student.id
 						? {
 							...r,
-							studentLunchCheck: r.studentLunchCheck
-								? { ...r.studentLunchCheck, contractSigned: result.contractCompleted! }
-								: { studentID: r.student.id, tenantID: r.student.tenantID, contractSigned: result.contractCompleted! },
+							contractSigned: result.contractCompleted!
 						}
 						: r,
 				),

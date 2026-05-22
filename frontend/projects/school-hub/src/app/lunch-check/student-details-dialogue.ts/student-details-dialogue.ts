@@ -144,6 +144,7 @@ export class StudentDetailsDialogue {
 	public static open(dialog: MatDialog, data: DialogData): Promise<DialogueResult | undefined> {
 		const dialogRef = dialog.open(StudentDetailsDialogue, {
 			data: data,
+			autoFocus: false
 		});
 		return dialogRef.afterClosed().toPromise();
 	}

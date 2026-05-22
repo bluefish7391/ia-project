@@ -3,6 +3,9 @@
 		<span class="dialog-header__title">Student Lunch Check Details</span>
 		<span class="dialog-header__subtitle">{{ headerText }}</span>
 	</div>
+	<button mat-icon-button class="dialog-header__close" (click)="close()" aria-label="Close dialog">
+		<mat-icon>close</mat-icon>
+	</button>
 </div>
 
 <mat-dialog-content class="dialog-content">
@@ -22,10 +25,8 @@
 			@if (range.controls.end.hasError('matEndDateInvalid')) {
 			<mat-error>Invalid end date</mat-error>
 			}
+			<mat-icon matSuffix (click)="resetDateFilter()">close</mat-icon>
 		</mat-form-field>
-		<button (click)="resetDateFilter()" mat-icon-button aria-label="Reset date filter">
-			<mat-icon>close</mat-icon>
-		</button>
 	</div>
 
 	<section class="lca-history" aria-label="Student activity">
@@ -36,16 +37,18 @@
 			@for (event of displayHistory(); track event.time.getTime()) {
 			<li class="lca-history__item lca-history__item--{{ event.type }}">
 				@if (event.type === 'in') {
-				<svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-					fill="currentColor" aria-hidden="true">
-					<path
-						d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" />
-				</svg>
+				<div class="lca-history__icon" aria-hidden="true">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+						<path
+							d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" />
+					</svg>
+				</div>
 				} @else {
-				<svg class="lca-history__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-					fill="currentColor" aria-hidden="true">
-					<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11H8v-2h8v2z" />
-				</svg>
+				<div class="lca-history__icon" aria-hidden="true">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4 11H8v-2h8v2z" />
+					</svg>
+				</div>
 				}
 				<span class="lca-history__time">{{ event.label }}</span>
 				<span class="lca-history__type">{{ event.type === 'in' ? 'Clock in' : 'Clock out' }}</span>
@@ -56,15 +59,16 @@
 	</section>
 </mat-dialog-content>
 
-<mat-dialog-actions class="dialog-actions">
-	<mat-paginator [length]="totalItems()" [pageSize]="pageSize()" [pageIndex]="currentPage()"
-		[pageSizeOptions]="pageSizeOptions" aria-label="Select page" (page)="onPageChange($event)">
-	</mat-paginator>
-	<div class="dialog-actions__buttons">
-		<mat-slide-toggle [ngModel]="contractCompleted()" (ngModelChange)="onDisplayContractStatusChange($event)"
-			color="primary" aria-label="Toggle contract status display">
-			Off campus lunch contract {{ contractCompleted() ? 'signed' : 'unsigned' }}
-		</mat-slide-toggle>
-		<button mat-button (click)="close()">Close</button>
+<mat-dialog-actions>
+	<div>
+		<mat-paginator [length]="totalItems()" [pageSize]="pageSize()" [pageIndex]="currentPage()"
+			[pageSizeOptions]="pageSizeOptions" aria-label="Select page" (page)="onPageChange($event)">
+		</mat-paginator>
+		<div>
+			<mat-slide-toggle [ngModel]="contractCompleted()" (ngModelChange)="onDisplayContractStatusChange($event)"
+				color="primary" aria-label="Toggle contract status display">
+				Off campus lunch contract {{ contractCompleted() ? 'signed' : 'unsigned' }}
+			</mat-slide-toggle>
+		</div>
 	</div>
 </mat-dialog-actions>

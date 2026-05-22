@@ -10,8 +10,13 @@
 
 	<!-- Header -->
 	<header class="lca-header">
-		<h1 class="lca-header__title">Student Lunch Check Report</h1>
-		<p class="lca-header__subtitle">Search for students to see their full activity.</p>
+		<div>
+			<h1 class="lca-header__title">Student Lunch Check Report</h1>
+			<p class="lca-header__subtitle">Search for students to see their full activity.</p>
+		</div>
+		<div>
+			<button class="lca-header__action">Add Student</button>
+		</div>
 	</header>
 
 	<!-- Two-column layout -->
@@ -29,18 +34,19 @@
 						<input matStartDate formControlName="start" placeholder="Start date">
 						<input matEndDate formControlName="end" placeholder="End date">
 					</mat-date-range-input>
-				<mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-				<button matIconSuffix class="lca-date-clear-btn" (click)="resetDateFilter()" type="button" aria-label="Reset date filter">
-					<mat-icon>close</mat-icon>
-				</button>
-				<mat-date-range-picker #picker></mat-date-range-picker>
-				@if (range.controls.start.hasError('matStartDateInvalid')) {
+					<mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+					<button matIconSuffix class="lca-date-clear-btn" (click)="resetDateFilter()" type="button"
+						aria-label="Reset date filter">
+						<mat-icon>close</mat-icon>
+					</button>
+					<mat-date-range-picker #picker></mat-date-range-picker>
+					@if (range.controls.start.hasError('matStartDateInvalid')) {
 					<mat-error>Invalid start date</mat-error>
-				}
-				@if (range.controls.end.hasError('matEndDateInvalid')) {
+					}
+					@if (range.controls.end.hasError('matEndDateInvalid')) {
 					<mat-error>Invalid end date</mat-error>
-				}
-			</mat-form-field>
+					}
+				</mat-form-field>
 			</div>
 
 			<!-- Student filters -->
@@ -48,26 +54,20 @@
 				<p class="lca-filter-group__label">Student Filters</p>
 				<div class="lca-field">
 					<label class="lca-field__label" for="search-id">Student ID</label>
-					<input id="search-id" class="lca-field__input" type="text"
-						[value]="searchSchoolStudentID()"
-						(input)="searchSchoolStudentID.set($any($event.target).value)"
-						placeholder="e.g. 10042"
+					<input id="search-id" class="lca-field__input" type="text" [value]="searchSchoolStudentID()"
+						(input)="searchSchoolStudentID.set($any($event.target).value)" placeholder="e.g. 10042"
 						autocomplete="off" />
 				</div>
 				<div class="lca-field">
 					<label class="lca-field__label" for="search-first">First Name</label>
-					<input id="search-first" class="lca-field__input" type="text"
-						[value]="searchFirstName()"
-						(input)="searchFirstName.set($any($event.target).value)"
-						placeholder="First name"
+					<input id="search-first" class="lca-field__input" type="text" [value]="searchFirstName()"
+						(input)="searchFirstName.set($any($event.target).value)" placeholder="First name"
 						autocomplete="off" />
 				</div>
 				<div class="lca-field">
 					<label class="lca-field__label" for="search-last">Last Name</label>
-					<input id="search-last" class="lca-field__input" type="text"
-						[value]="searchLastName()"
-						(input)="searchLastName.set($any($event.target).value)"
-						placeholder="Last name"
+					<input id="search-last" class="lca-field__input" type="text" [value]="searchLastName()"
+						(input)="searchLastName.set($any($event.target).value)" placeholder="Last name"
 						autocomplete="off" />
 				</div>
 			</div>
@@ -84,7 +84,7 @@
 			</div>
 
 			@if (searchError()) {
-				<p class="lca-results__error" role="alert">{{ searchError() }}</p>
+			<p class="lca-results__error" role="alert">{{ searchError() }}</p>
 			}
 
 			<div class="lca-results__list">

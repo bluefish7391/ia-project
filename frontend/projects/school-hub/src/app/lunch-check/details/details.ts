@@ -23,6 +23,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule, MatDatepickerToggle } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { CreateStudentDialogueComponent } from '../create-student-dialogue/create-student-dialogue';
 
 @Component({
 	selector: 'app-details',
@@ -108,6 +109,10 @@ export class DetailsComponent {
 			this.results();
 			this.isSearching.set(false);
 		});
+	}
+
+	protected async addStudent(): Promise<void> {
+		await CreateStudentDialogueComponent.open(this.dialog, { schoolStudentID: '' });
 	}
 
 	// ─── Handlers ────────────────────────────────────────────────────────────

@@ -1,10 +1,15 @@
 <div mat-dialog-title class="dialog-header">
 	<div class="header-text"><span class="header-label">Create Student</span></div>
+	<button mat-icon-button class="dialog-header__close" aria-label="Close dialog" (click)="onCancel()"
+		[disabled]="isSaving()">
+		<mat-icon>close</mat-icon>
+	</button>
 </div>
 <mat-dialog-content class="dialog-content">
 	<mat-form-field appearance="outline" class="full-width">
 		<mat-label>Student ID</mat-label>
-		<input matInput [ngModel]="schoolStudentID()" (ngModelChange)="schoolStudentID.set($event)"[disabled]="isSaving()" />
+		<input matInput [ngModel]="schoolStudentID()" (ngModelChange)="schoolStudentID.set($event)"
+			[disabled]="isSaving()" />
 	</mat-form-field>
 	<mat-form-field appearance="outline" class="full-width">
 		<mat-label>First Name</mat-label>
@@ -15,8 +20,8 @@
 		<input matInput [ngModel]="lastName()" (ngModelChange)="lastName.set($event)" [disabled]="isSaving()" />
 	</mat-form-field>
 	<div class="slide-toggle-row">
-		<mat-slide-toggle [ngModel]="contractCompleted()" (ngModelChange)="contractCompleted.set($event)" [disabled]="isSaving()"
-			color="primary" aria-label="Toggle contract status display">
+		<mat-slide-toggle [ngModel]="contractCompleted()" (ngModelChange)="contractCompleted.set($event)"
+			[disabled]="isSaving()" color="primary" aria-label="Toggle contract status display">
 			Off campus lunch contract {{ contractCompleted() ? 'signed' : 'unsigned' }}
 		</mat-slide-toggle>
 	</div>
@@ -25,7 +30,6 @@
 	}
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-	<button matButton (click)="onCancel()" [disabled]="isSaving()">Cancel</button>
 	<button mat-flat-button (click)="onSubmit()" [disabled]="isSaving()">
 		@if (isSaving()) {
 		<mat-spinner diameter="18" />

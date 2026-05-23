@@ -95,6 +95,70 @@ A web-based inventory management tool for the school IT department. The primary 
 
 ---
 
+## UI/UX Design
+
+The interface prioritizes speed for the most common action: checking items in and out. All high-frequency forms are designed to be completable entirely via keyboard without touching the mouse.
+
+### Checkout Form (`checkout-form.component`)
+
+The checkout form is the most-used screen and is optimized for a fast, sequential keyboard flow:
+
+1. **Asset Tag field** — auto-focused on component load. The user types or scans the asset tag.
+2. After a valid tag is entered, the item's name, condition, and current status appear inline below the field as a confirmation badge. If the item is already checked out, an error is shown immediately and focus stays on the asset tag field.
+3. **Enter** moves focus to the **Assignee Type** selector (Student / Staff / Classroom).
+4. **Enter** from Assignee Type moves focus to the **Assignee search field**, which is a live typeahead backed by the student roster (if "Student") or a free-text input (if "Staff" or "Classroom").
+5. If Assignee Type is "Student": **Enter** on a selected student moves focus to the **Permitting Teacher search field** — a live typeahead backed by the staff roster.
+6. **Enter** from the permitting teacher selection moves focus to the **Expected Return Date** field.
+7. **Enter** from the date field submits the form.
+
+Additional checkout form behaviors:
+- If the asset tag resolves to an item that is already checked out, the form offers a shortcut to jump directly to the **check-in flow** for that item.
+- Submitting shows a brief success toast and resets the form, returning focus to the Asset Tag field — ready for the next transaction.
+- All search/typeahead dropdowns can be navigated with arrow keys and confirmed with Enter; Escape dismisses without clearing the typed value.
+
+### Check-In Form
+
+- Accessible from the checkout form shortcut (when a checked-out item is scanned) or from the item detail page.
+- Asset tag field is auto-focused.
+- After a valid tag resolves, the current assignee and checkout date are shown inline.
+- The user selects the **Condition at Return** from a compact segmented button group (keyboard-navigable).
+- An optional **Damage Notes** textarea appears only if the selected condition is worse than the condition at checkout.
+- **Enter** (or Tab → Enter) submits.
+
+### Item List (`item-list.component`)
+
+- The **search/filter bar** is auto-focused on page load.
+- Typing immediately filters the list (debounced).
+- **Arrow keys** navigate the result rows; **Enter** opens the focused row's detail page.
+- Status and condition are shown as color-coded badges on each row for at-a-glance scanning.
+- Items that are overdue on return are highlighted with a distinct row background.
+
+### Consumable List (`consumable-list.component`)
+
+- Consumables at or below their minimum quantity threshold are sorted to the top and flagged with a low-stock indicator.
+- Each row has inline **+** / **−** quick-adjust buttons for common single-unit changes.
+- For larger adjustments, clicking the quantity value opens a small inline input; **Enter** submits the delta.
+
+### Item Detail Page (`item-detail.component`)
+
+- Displays full item metadata, current checkout status, and checkout history in a timeline.
+- A prominent **Check Out** / **Check In** button reflects the item's current status and links directly to the pre-filled checkout or check-in form.
+
+### Dashboard (`inventory-dashboard.component`)
+
+- Summary cards link to pre-filtered list views (e.g., "Checked Out" card navigates to the item list filtered to `status: checked-out`).
+- Overdue items and low-stock consumables are surfaced as actionable lists, not just counts.
+
+### General Patterns
+
+- **Status badges** — color-coded consistently across all views: Available (green), Checked Out (blue), Retired (grey), Low Stock (amber).
+- **Condition badges** — New (green), Good (teal), Fair (yellow), Damaged (orange), Broken (red).
+- **Toast notifications** — non-blocking, appear bottom-right, auto-dismiss after 4 seconds. Errors persist until dismissed.
+- **Destructive actions** (archive/retire) require a confirmation dialog before executing.
+- **Forms** — all required fields are validated on submit, not on blur, to avoid interrupting fast keyboard entry.
+
+---
+
 ## Data Model
 
 ### `InventoryItem` (serialized)

@@ -105,25 +105,42 @@ export class LunchCheckManager {
 	}
 
 	private async getStudentsMatchingSearchCriteria2(tenantID: string, filter: QueryStudentLunchCheckRequest): Promise<Student[]> {
-		const studentIDsSet = new Set<string>();
-		const startDate = filter.startDate ? new Date(filter.startDate) : null;
-		const endDate = filter.endDate ? new Date(filter.endDate) : null;
-		const records = await lunchCheckDAO.getLunchCheckRecords(tenantID);
-		records.forEach(record => {
-			const lunchDate = new Date(record.lunchDate);
-			if ((!startDate || lunchDate >= startDate) && (!endDate || lunchDate <= endDate)) {
-				studentIDsSet.add(record.studentID);
-			}
-		});
+		let studentObjects: Student[] = [];
 
-		const studentIDs = Array.from(studentIDsSet);
-		console.log("getStudentsMatchingSearchCriteria2: tenantID=", tenantID, "filter=", filter, "matching studentIDs=", studentIDs);
-		const studentObjects = [];
-		
-		for (let i = 0; i < studentIDs.length; i += LunchCheckManager.CHUNK_SIZE) {
-			const chunk = studentIDs.slice(i, i + LunchCheckManager.CHUNK_SIZE);
-			const students = await studentDAO.getStudentsByIDs(chunk);
-			studentObjects.push(...students);
+		const startDate = filter.startDate ? filter.startDate : null;
+		if (startDate) {
+			const studentIDsSet = new Set<string>();
+			const endDate = filter.endDate ? filter.endDate : null;
+			let nextCursor: string | undefined;
+			do {
+				const { records, nextCursor: newCursor } = 
+					await lunchCheckDAO.getLunchCheckRecordsOnOrAfterDate(
+						tenantID, startDate, LunchCheckManager.CHUNK_SIZE, nextCursor
+					);
+
+				if (endDate) {
+					records.forEach(record => {
+						if (record.lunchDate <= endDate) {
+							studentIDsSet.add(record.studentID);
+						}
+					});
+				} else {
+					records.forEach(record => {
+						studentIDsSet.add(record.studentID);
+					});
+				}
+
+				nextCursor = newCursor;
+			} while (nextCursor);
+
+			const studentIDs = Array.from(studentIDsSet);
+			for (let i = 0; i < studentIDs.length; i += LunchCheckManager.CHUNK_SIZE) {
+				const chunk = studentIDs.slice(i, i + LunchCheckManager.CHUNK_SIZE);
+				studentObjects = studentObjects.concat(await studentDAO.getStudentsByIDs(chunk));
+			}
+		} else {
+			// If no date filter, get all students for the tenant
+			studentObjects = await studentDAO.getAllStudents(tenantID);
 		}
 
 		const result = studentObjects.filter(student => {
@@ -139,7 +156,7 @@ export class LunchCheckManager {
 			return true;
 		});
 
-		console.log("getStudentsMatchingSearchCriteria2: tenantID=", tenantID, "filter=", filter, "result=", result);
+		console.log("getStudentsMatchingSearchCriteria2: tenantID=", tenantID, "filter=", filter, "result length=", result.length);
 
 		return result;
 	}

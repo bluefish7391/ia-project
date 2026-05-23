@@ -1,3 +1,4 @@
+import { RunQueryResponse } from "@google-cloud/datastore/build/src/query";
 import { LunchCheckRecord, StudentLunchCheck } from "../../../shared/kinds";
 import { datastore } from "./datastore-factory";
 
@@ -18,6 +19,19 @@ export class LunchCheckDAO {
 			.filter("tenantID", "=", tenantID);
 		const data = await query.run();
 		return data[0] as LunchCheckRecord[];
+	}
+
+	async getLunchCheckRecordsOnOrAfterDate(tenantID: string, startDate: string, pageSize: number, startCursor?: string): Promise<{ records: LunchCheckRecord[]; nextCursor?: string }> {
+		let query = datastore.createQuery(LunchCheckDAO.LUNCH_CHECK_RECORD_KIND)
+			.filter("tenantID", "=", tenantID)
+			.filter("lunchDate", ">=", startDate)
+			.limit(pageSize);
+		if (startCursor) {
+			query = query.start(startCursor);
+		}
+		const [records, queryInfo] = await query.run() as RunQueryResponse;
+		const nextCursor = queryInfo.moreResults !== "NO_MORE_RESULTS" ? queryInfo.endCursor : undefined;
+		return { records: records as LunchCheckRecord[], nextCursor };
 	}
 
 	async getStudentLunchChecksForStudents(tenantID: string): Promise<StudentLunchCheck[]> {

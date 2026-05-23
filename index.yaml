@@ -1,0 +1,8 @@
+# Use this command to deploy the index file whenever it is updated:
+# gcloud datastore indexes create index.yaml --database=main
+
+indexes:
+  - kind: LunchCheckRecord
+    properties:
+      - name: tenantID
+      - name: lunchDate

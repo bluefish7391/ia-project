@@ -52,7 +52,7 @@ export class CreateStudentDialogueComponent {
 
   static open(dialog: MatDialog, data: CreateStudentDialogueData): Promise<Student | undefined> {
     return dialog
-      .open(CreateStudentDialogueComponent, { data, disableClose: true, width: '400px' })
+      .open(CreateStudentDialogueComponent, { data, width: '400px' })
       .afterClosed()
       .toPromise();
   }

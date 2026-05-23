@@ -9,7 +9,7 @@
 </div>
 
 <mat-dialog-content class="dialog-content">
-	<mat-tab-group [selectedIndex]="selectedTabIndex()" (selectedIndexChange)="selectedTabIndex.set($event)">
+	<mat-tab-group [selectedIndex]="selectedTabIndex()" (selectedIndexChange)="selectedTabIndex.set($event)" animationDuration="400ms">
 
 		<mat-tab label="Activity">
 			<div class="tab-content">

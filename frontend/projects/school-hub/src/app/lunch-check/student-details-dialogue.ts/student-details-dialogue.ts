@@ -172,7 +172,9 @@ export class StudentDetailsDialogue {
 	public static open(dialog: MatDialog, data: DialogData): Promise<StudentDetailsDialogueResult | undefined> {
 		const dialogRef = dialog.open(StudentDetailsDialogue, {
 			data: data,
-			autoFocus: false
+			autoFocus: false,
+			width: '640px',
+			minHeight: '520px',
 		});
 		return firstValueFrom(dialogRef.afterClosed());
 	}

@@ -15,6 +15,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Student } from 'shared/kinds';
 import { LunchCheckService } from '../lunch-check.service';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 export interface CreateStudentDialogueData {
   schoolStudentID: string;
@@ -31,6 +32,7 @@ export interface CreateStudentDialogueData {
     MatDialogActions,
     MatFormFieldModule,
     MatInputModule,
+	MatSlideToggleModule,
     MatProgressSpinnerModule,
   ],
   templateUrl: './create-student-dialogue.html',
@@ -44,7 +46,7 @@ export class CreateStudentDialogueComponent {
   protected readonly schoolStudentID = signal(this.data.schoolStudentID);
   protected readonly firstName = signal('');
   protected readonly lastName = signal('');
-  protected readonly contractSigned = signal(false);
+  protected readonly contractCompleted = signal(false);
   protected readonly isSaving = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
@@ -71,7 +73,7 @@ export class CreateStudentDialogueComponent {
     this.lunchCheckService.createStudent({ schoolStudentID, firstName, lastName }).subscribe({
       next: (student) => {
         this.lunchCheckService
-          .saveStudentLunchCheckConfig({ studentID: student.id, contractSigned: this.contractSigned() })
+          .saveStudentLunchCheckConfig({ studentID: student.id, contractSigned: this.contractCompleted() })
           .subscribe({
             next: () => {
               this.isSaving.set(false);

@@ -8,23 +8,38 @@ A web-based inventory management tool for the school IT department. The primary 
 
 ## Core Features
 
-### 1. Asset Registry
-- Add, edit, and archive any physical IT asset
-- Asset fields:
+### 1. Asset Registry — Serialized Items
+- Individual, uniquely identified assets that are tracked one-by-one (laptops, tablets, monitors, etc.)
+- Fields:
   - **Name** (e.g., "Lenovo Chromebook 14")
-  - **Asset Tag / Serial Number**
-  - **Category** (Laptop, Desktop, Monitor, Tablet, Printer, Network Equipment, Cable, Accessory, etc.)
+  - **Asset Tag** (required, unique per department)
+  - **Serial Number**
+  - **Category** (Laptop, Desktop, Monitor, Tablet, Printer, Network Equipment, etc.)
   - **Make / Model**
   - **Condition** (New, Good, Fair, Damaged, Broken)
   - **Status** (Available, Checked Out, Retired)
-  - **Department** (the department that owns this asset)
+  - **Department**
   - **Location** (Room number, closet label, cart name)
   - **Purchase Date**
   - **Warranty Expiration Date**
   - **Cost**
   - **Notes / Tags**
 
-### 2. Check-Out / Check-In
+### 2. Asset Registry — Consumables
+- Bulk items tracked by quantity rather than individual identity (cables, batteries, cleaning kits, etc.)
+- Fields:
+  - **Name** (e.g., "USB-C Charging Cable")
+  - **Category** (Cable, Accessory, Cleaning Supply, etc.)
+  - **Department**
+  - **Location**
+  - **Quantity on Hand** (required)
+  - **Minimum Quantity** (threshold for low-stock alert)
+  - **Cost per Unit**
+  - **Notes / Tags**
+- No per-unit checkout — quantity is adjusted directly when items are given out or restocked
+
+### 3. Check-Out / Check-In
+- Check-out and check-in apply only to **serialized items** — consumable quantities are adjusted directly
 - Any user (IT staff, teacher, or student) can initiate a checkout or return
 - **Student self-checkout**: when a student checks out an item, the permitting teacher's name must be entered and is stored on the record — the teacher does not need to interact with the system
 - When assignee type is "student", search and select from the existing student roster — no manual name entry
@@ -40,38 +55,39 @@ A web-based inventory management tool for the school IT department. The primary 
   - Any damage notes
 - View all currently checked-out items and overdue returns
 
-### 3. Search & Filter
-- Full-text search across name, serial number, and asset tag
-- Filter by: category, status, condition, location, assignee
-- Sort by any column (name, date, condition, etc.)
+### 4. Search & Filter
+- Serialized items and consumables are browsed in separate views
+- Full-text search across name, serial number, and asset tag (serialized); name and category (consumables)
+- Filter serialized items by: category, status, condition, location, assignee
+- Filter consumables by: category, location, low-stock
+- Sort by any column
 
-### 4. Inventory Dashboard
-- Summary cards: Total Assets, Checked Out, Low Stock items
-- Recently added assets
+### 5. Inventory Dashboard
+- Summary cards: Total Serialized Items, Checked Out, Consumables Low on Stock
+- Recently added items
 - Overdue check-outs (past expected return date)
 
-### 5. Low Stock / Consumables Tracking
-- Mark categories as consumables (cables, batteries, cleaning kits, etc.)
-- Set a minimum quantity threshold per consumable type
-- Dashboard alert when stock falls below threshold
+### 6. Low Stock Alerts
+- Dashboard alert when a consumable's quantity on hand falls below its minimum quantity threshold
 
-### 6. Reports & Export
+### 7. Reports & Export
 - Generate reports:
-  - Full inventory list
+  - Full serialized inventory list
   - All currently checked-out items
   - Overdue items
-  - Assets by condition
+  - Serialized items by condition
+  - Consumables stock levels
 - Export any report to **CSV**
 - Print-friendly view
 
-### 7. Audit Log
+### 8. Audit Log
 - Immutable log of every change to every asset:
   - Who made the change (logged-in user)
   - Timestamp
   - What changed (field, old value, new value)
   - Action type (Created, Updated, Checked Out, Checked In, Retired)
 
-### 8. Role-Based Access
+### 9. Role-Based Access
 - **IT Admin** — full CRUD on all assets, can view audit log and all reports
 - **IT Staff** — can check out/in, view inventory
 - **Student / Teacher** — can check out and return items; student checkouts require a permitting teacher name to be recorded
@@ -80,14 +96,14 @@ A web-based inventory management tool for the school IT department. The primary 
 
 ## Data Model
 
-### `InventoryItem`
+### `InventoryItem` (serialized)
 ```typescript
 interface InventoryItem {
   id: string;
   name: string;
-  assetTag: string;
-  serialNumber?: string;
-  category: AssetCategory;
+  assetTag: string;            // unique per department
+  serialNumber: string;
+  category: SerializedCategory;
   make?: string;
   model?: string;
   condition: AssetCondition;
@@ -98,21 +114,39 @@ interface InventoryItem {
   cost?: number;
   notes?: string;
   tags?: string[];
-  isConsumable: boolean;
-  minimumQuantity?: number;    // only if isConsumable
-  quantity?: number;           // only if isConsumable
   createdAt: string;
   updatedAt: string;
   organizationId: string;
-  departmentId: string;          // scoped to a department within the org
+  departmentId: string;
 }
 
-type AssetCategory =
+type SerializedCategory =
   | 'laptop' | 'desktop' | 'tablet' | 'monitor'
-  | 'printer' | 'network' | 'cable' | 'accessory' | 'other';
+  | 'printer' | 'network' | 'other';
 
 type AssetCondition = 'new' | 'good' | 'fair' | 'damaged' | 'broken';
 type AssetStatus = 'available' | 'checked-out' | 'retired';
+```
+
+### `Consumable` (bulk)
+```typescript
+interface Consumable {
+  id: string;
+  name: string;
+  category: ConsumableCategory;
+  location: string;
+  quantityOnHand: number;
+  minimumQuantity: number;     // triggers low-stock alert
+  costPerUnit?: number;
+  notes?: string;
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
+  organizationId: string;
+  departmentId: string;
+}
+
+type ConsumableCategory = 'cable' | 'accessory' | 'cleaning' | 'other';
 ```
 
 ### `CheckoutRecord`
@@ -162,9 +196,11 @@ projects/school-hub/src/app/
 └── it-inventory/
     ├── it-inventory.routes.ts
     ├── models/
-    │   └── inventory.model.ts
+    │   ├── inventory-item.model.ts
+    │   └── consumable.model.ts
     ├── services/
-    │   ├── inventory.service.ts
+    │   ├── inventory-item.service.ts
+    │   ├── consumable.service.ts
     │   └── checkout.service.ts
     ├── pages/
     │   ├── dashboard/
@@ -175,6 +211,10 @@ projects/school-hub/src/app/
     │   │   └── item-detail.component.ts/.html/.scss
     │   ├── item-form/
     │   │   └── item-form.component.ts/.html/.scss
+    │   ├── consumable-list/
+    │   │   └── consumable-list.component.ts/.html/.scss
+    │   ├── consumable-form/
+    │   │   └── consumable-form.component.ts/.html/.scss
     │   ├── checkout-form/
     │   │   └── checkout-form.component.ts/.html/.scss
     │   └── reports/
@@ -193,15 +233,20 @@ New router: `backend/src/routers/it-inventory-router.ts`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/inventory` | List all items (with filters) |
-| POST | `/inventory` | Create a new item |
-| GET | `/inventory/:id` | Get item details |
-| PUT | `/inventory/:id` | Update an item |
-| DELETE | `/inventory/:id` | Archive (soft delete) an item |
+| GET | `/inventory` | List serialized items (with filters) |
+| POST | `/inventory` | Create a serialized item |
+| GET | `/inventory/:id` | Get serialized item details |
+| PUT | `/inventory/:id` | Update a serialized item |
+| DELETE | `/inventory/:id` | Archive a serialized item |
 | GET | `/inventory/:id/checkouts` | Checkout history for an item |
 | POST | `/inventory/:id/checkout` | Check out an item |
 | POST | `/inventory/:id/checkin` | Check in an item |
 | GET | `/inventory/:id/audit` | Audit log for an item |
+| GET | `/consumables` | List consumables (with filters) |
+| POST | `/consumables` | Create a consumable |
+| GET | `/consumables/:id` | Get consumable details |
+| PUT | `/consumables/:id` | Update a consumable (including quantity) |
+| DELETE | `/consumables/:id` | Archive a consumable |
 | GET | `/inventory/reports/:type` | Generate a named report |
 
 ---
@@ -211,8 +256,9 @@ New router: `backend/src/routers/it-inventory-router.ts`
 ```
 organizations/{orgId}/
   departments/{deptId}/
-    inventoryItems/{itemId}
-    checkoutRecords/{recordId}
+    inventoryItems/{itemId}      ← serialized, individually tracked
+    consumables/{consumableId}   ← bulk, quantity-tracked
+    checkoutRecords/{recordId}   ← only applies to inventoryItems
     inventoryAuditLog/{entryId}
 ```
 
@@ -221,11 +267,11 @@ organizations/{orgId}/
 ## Phased Delivery
 
 ### Phase 1 — Core Inventory
-- Asset data model and Firestore collections
-- CRUD endpoints + IT Inventory router
-- Item list page with search/filter
-- Item detail page
-- Add/edit item form
+- `InventoryItem` and `Consumable` data models and Firestore collections
+- CRUD endpoints for both serialized items and consumables
+- Serialized item list page with search/filter
+- Serialized item detail and add/edit form
+- Consumable list page and add/edit form
 
 ### Phase 2 — Check-Out / Check-In
 - Checkout and check-in API endpoints

@@ -47,11 +47,13 @@ export class DetailsComponent {
 	});
 	private readonly startDate = computed(() => {
 		const start = this.rangeValue().start;
-		return start ? start.toISOString().split('T')[0] : '';
+		if (!start) return '';
+		return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
 	});
 	private readonly endDate = computed(() => {
 		const end = this.rangeValue().end;
-		return end ? end.toISOString().split('T')[0] : '';
+		if (!end) return '';
+		return `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
 	});
 
 	// ─── Search state ────────────────────────────────────────────────────────

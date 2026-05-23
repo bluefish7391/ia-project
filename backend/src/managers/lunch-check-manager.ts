@@ -106,12 +106,18 @@ export class LunchCheckManager {
 
 	private async getStudentsMatchingSearchCriteria2(tenantID: string, filter: QueryStudentLunchCheckRequest): Promise<Student[]> {
 		const studentIDsSet = new Set<string>();
+		const startDate = filter.startDate ? new Date(filter.startDate) : null;
+		const endDate = filter.endDate ? new Date(filter.endDate) : null;
 		const records = await lunchCheckDAO.getLunchCheckRecords(tenantID);
 		records.forEach(record => {
-			studentIDsSet.add(record.studentID);
+			const lunchDate = new Date(record.lunchDate);
+			if ((!startDate || lunchDate >= startDate) && (!endDate || lunchDate <= endDate)) {
+				studentIDsSet.add(record.studentID);
+			}
 		});
 
 		const studentIDs = Array.from(studentIDsSet);
+		console.log("getStudentsMatchingSearchCriteria2: tenantID=", tenantID, "filter=", filter, "matching studentIDs=", studentIDs);
 		const studentObjects = [];
 		
 		for (let i = 0; i < studentIDs.length; i += LunchCheckManager.CHUNK_SIZE) {

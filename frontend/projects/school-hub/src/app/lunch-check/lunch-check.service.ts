@@ -31,6 +31,10 @@ export class LunchCheckService {
 		return this.api.post<Student>('students', data);
 	}
 
+	updateStudent(id: string, data: { schoolStudentID: string; firstName: string; lastName: string }): Observable<Student> {
+		return this.api.put<Student>(`students/${id}`, data);
+	}
+
 	saveStudentLunchCheckConfig(data: SaveStudentLunchCheckConfigRequest): Observable<SaveStudentLunchCheckConfigResponse> {
 		return this.api.post<SaveStudentLunchCheckConfigResponse>('lunch-check/student-lunch-check', data);
 	}

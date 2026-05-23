@@ -46,7 +46,42 @@
 	padding-top: 1.25rem;
 	display: flex;
 	flex-direction: column;
+}
+
+// ─── Tab Content ─────────────────────────────────────────────────────────────
+
+.tab-content {
+	padding-top: 1rem;
+	display: flex;
+	flex-direction: column;
 	gap: 1rem;
+}
+
+.edit-tab {
+	gap: 0.25rem;
+
+	.full-width {
+		width: 100%;
+	}
+
+	.slide-toggle-row {
+		padding: 0.25rem 0 0.5rem;
+	}
+
+	.error-text {
+		margin: 0 0 0.5rem;
+		color: var(--mat-sys-error);
+		font-size: 0.85rem;
+		line-height: 1.5;
+	}
+}
+
+// ─── Edit Actions ────────────────────────────────────────────────────────────
+
+.edit-actions {
+	display: flex;
+	justify-content: flex-end;
+	width: 100%;
 }
 
 // ─── Filter Bar ──────────────────────────────────────────────────────────────

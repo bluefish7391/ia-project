@@ -1,5 +1,5 @@
-import { Component, computed, effect, inject, model, signal, viewChild } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import {
@@ -13,19 +13,25 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { SaveStudentLunchCheckConfigRequest, StudentLunchCheckCompositeRecord } from 'shared/kinds';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SaveStudentLunchCheckConfigRequest, Student, StudentLunchCheckCompositeRecord } from 'shared/kinds';
 import { firstValueFrom } from 'rxjs';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ConfirmDialogueComponent } from '../confirm-dialogue/confirm-dialogue';
 import { LunchCheckService } from '../lunch-check.service';
 import { MessageService } from '../message-service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface DialogData {
 	student: StudentLunchCheckCompositeRecord;
+}
+
+export interface StudentDetailsDialogueResult {
+	contractSigned: boolean;
+	student: Student;
 }
 
 interface ClockEvent {
@@ -54,6 +60,8 @@ function formatTimeWithDate(d: Date): string {
 		MatPaginatorModule,
 		MatDatepickerModule,
 		ReactiveFormsModule,
+		MatTabsModule,
+		MatProgressSpinnerModule,
 	],
 	templateUrl: './student-details-dialogue.html',
 	styleUrl: './student-details-dialogue.scss',
@@ -65,9 +73,21 @@ export class StudentDetailsDialogue {
 	private readonly lunchCheckService = inject(LunchCheckService);
 	readonly dialogRef = inject(MatDialogRef<StudentDetailsDialogue>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
+
 	protected readonly contractCompleted = signal(false);
+	protected readonly currentStudent = signal<Student>({ ...this.data.student.student });
 	protected readonly completeHistory = signal<ClockEvent[]>([]);
 	protected headerText: string = '';
+
+	protected readonly selectedTabIndex = signal(0);
+
+	// ─── Edit tab signals ────────────────────────────────────────────────────
+	protected readonly editSchoolStudentID = signal(this.data.student.student.schoolStudentID);
+	protected readonly editFirstName = signal(this.data.student.student.firstName);
+	protected readonly editLastName = signal(this.data.student.student.lastName);
+	protected readonly editContractCompleted = signal(false);
+	protected readonly isSaving = signal(false);
+	protected readonly editErrorMessage = signal<string | null>(null);
 
 	protected readonly range = new FormGroup({
 		start: new FormControl<Date | null>(new Date()),
@@ -118,15 +138,20 @@ export class StudentDetailsDialogue {
 		this.headerText = `Viewing lunch check details for ${this.data.student.student.firstName} ${this.data.student.student.lastName}`;
 		this.setupCompleteHistory();
 
-		this.contractCompleted.set(this.data.student.studentLunchCheck?.contractSigned ?? false);
-		console.log("data: ", this.data);
+		const initialContractSigned = this.data.student.studentLunchCheck?.contractSigned ?? false;
+		this.contractCompleted.set(initialContractSigned);
+		this.editContractCompleted.set(initialContractSigned);
 
 		this.dialogRef.backdropClick().subscribe(() => {
-			this.dialogRef.close(this.contractCompleted());
+			this.dialogRef.close(this.buildResult());
 		});
 		this.dialogRef.keydownEvents().subscribe((e) => {
-			if (e.key === 'Escape') this.dialogRef.close(this.contractCompleted());
+			if (e.key === 'Escape') this.dialogRef.close(this.buildResult());
 		});
+	}
+
+	private buildResult(): StudentDetailsDialogueResult {
+		return { contractSigned: this.contractCompleted(), student: this.currentStudent() };
 	}
 
 	private setupCompleteHistory(): void {
@@ -144,7 +169,7 @@ export class StudentDetailsDialogue {
 		this.completeHistory.update((history) => history.sort((a: ClockEvent, b: ClockEvent) => b.time.getTime() - a.time.getTime()));
 	}
 
-	public static open(dialog: MatDialog, data: DialogData): Promise<boolean | undefined> {
+	public static open(dialog: MatDialog, data: DialogData): Promise<StudentDetailsDialogueResult | undefined> {
 		const dialogRef = dialog.open(StudentDetailsDialogue, {
 			data: data,
 			autoFocus: false
@@ -161,31 +186,41 @@ export class StudentDetailsDialogue {
 		this.pageSize.set(event.pageSize);
 	}
 
-	protected async onDisplayContractStatusChange(newValue: boolean): Promise<void> {
-		await ConfirmDialogueComponent.open(this.dialog, {
-			message: `Are you sure you want to set the contract status to ${newValue ? 'signed' : 'unsigned'}?`
-		}).then((result) => {
-			if (result && result.userChoice) {
+	protected async onSaveDetails(): Promise<void> {
+		const schoolStudentID = this.editSchoolStudentID().trim();
+		const firstName = this.editFirstName().trim();
+		const lastName = this.editLastName().trim();
+
+		if (!schoolStudentID || !firstName || !lastName) {
+			this.editErrorMessage.set('Student ID, first name, and last name are all required.');
+			return;
+		}
+
+		this.editErrorMessage.set(null);
+		this.isSaving.set(true);
+
+		try {
+			const updatedStudent = await firstValueFrom(
+				this.lunchCheckService.updateStudent(this.data.student.student.id, { schoolStudentID, firstName, lastName })
+			);
+			await firstValueFrom(
 				this.lunchCheckService.saveStudentLunchCheckConfig({
 					studentID: this.data.student.student.id,
-					contractSigned: newValue
-				} satisfies SaveStudentLunchCheckConfigRequest).subscribe({
-					next: () => {
-						this.matSnackBar.open('Changes saved successfully.', 'Close', { duration: 3000 });
-						this.contractCompleted.set(newValue);
-					},
-					error: () => {
-						this.matSnackBar.open('An error occurred while saving the student lunch check configuration. Please try again.', 'Close', { duration: 3000 });
-						this.contractCompleted.set(!newValue);
-					}
-				});
-			} else {
-				this.contractCompleted.set(!newValue);
-			}
-		});
+					contractSigned: this.editContractCompleted()
+				} satisfies SaveStudentLunchCheckConfigRequest)
+			);
+			this.contractCompleted.set(this.editContractCompleted());
+			this.currentStudent.set(updatedStudent);
+			this.headerText = `Viewing lunch check details for ${updatedStudent.firstName} ${updatedStudent.lastName}`;
+			this.matSnackBar.open('Changes saved successfully.', 'Close', { duration: 3000 });
+		} catch {
+			this.editErrorMessage.set('An error occurred while saving. Please try again.');
+		} finally {
+			this.isSaving.set(false);
+		}
 	}
 
 	protected close(): void {
-		this.dialogRef.close(this.contractCompleted());
+		this.dialogRef.close(this.buildResult());
 	}
 }

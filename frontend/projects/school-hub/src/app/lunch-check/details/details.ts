@@ -13,7 +13,7 @@ import { LunchCheckService } from '../lunch-check.service';
 import { StudentListComponent } from '../student-list/student-list';
 import { MatDialog } from '@angular/material/dialog';
 import { MessageService } from '../message-service';
-import { StudentDetailsDialogue } from '../student-details-dialogue.ts/student-details-dialogue';
+import { StudentDetailsDialogue, StudentDetailsDialogueResult } from '../student-details-dialogue.ts/student-details-dialogue';
 import { MatIcon } from '@angular/material/icon';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -148,15 +148,14 @@ export class DetailsComponent {
 			lunchCheckRecords: lunchCheckHistory.records
 		};
 
-		const originalStatus = studentWithContractStatus.contractSigned;
-		const finalStatus = await StudentDetailsDialogue.open(this.dialog, { student: compositeRecord });
+		const result: StudentDetailsDialogueResult | undefined = await StudentDetailsDialogue.open(this.dialog, { student: compositeRecord });
 
-		if (finalStatus !== undefined && finalStatus !== originalStatus) {
+		if (result !== undefined) {
 			this.results.update((current) => ({
 				...current,
 				rows: current.rows.map((row) =>
 					row.student.id === studentWithContractStatus.student.id
-						? { ...row, contractSigned: finalStatus }
+						? { ...row, contractSigned: result.contractSigned, student: result.student }
 						: row
 				),
 			}));

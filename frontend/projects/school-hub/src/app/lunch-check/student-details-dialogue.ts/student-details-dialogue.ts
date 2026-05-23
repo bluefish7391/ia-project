@@ -1,12 +1,11 @@
-import { Component, computed, effect, EventEmitter, inject, model, Output, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, model, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule, MatIconButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import {
 	MAT_DIALOG_DATA,
 	MatDialog,
 	MatDialogActions,
-	MatDialogClose,
 	MatDialogContent,
 	MatDialogRef,
 	MatDialogTitle,
@@ -15,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { SaveStudentLunchCheckConfigRequest, StudentLunchCheckCompositeRecord } from 'shared/kinds';
+import { firstValueFrom } from 'rxjs';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
@@ -109,8 +109,6 @@ export class StudentDetailsDialogue {
 		return this.filteredHistory().slice(page * size, (page + 1) * size);
 	});
 
-	@Output() contractStatusChanged = new EventEmitter<boolean>();
-
 	constructor() {
 		effect(() => {
 			this.rangeValue();
@@ -122,6 +120,13 @@ export class StudentDetailsDialogue {
 
 		this.contractCompleted.set(this.data.student.studentLunchCheck?.contractSigned ?? false);
 		console.log("data: ", this.data);
+
+		this.dialogRef.backdropClick().subscribe(() => {
+			this.dialogRef.close(this.contractCompleted());
+		});
+		this.dialogRef.keydownEvents().subscribe((e) => {
+			if (e.key === 'Escape') this.dialogRef.close(this.contractCompleted());
+		});
 	}
 
 	private setupCompleteHistory(): void {
@@ -139,19 +144,12 @@ export class StudentDetailsDialogue {
 		this.completeHistory.update((history) => history.sort((a: ClockEvent, b: ClockEvent) => b.time.getTime() - a.time.getTime()));
 	}
 
-	public static open(
-		dialog: MatDialog,
-		data: DialogData,
-		onContractStatusChanged?: (status: boolean) => void
-	): Promise<void> {
+	public static open(dialog: MatDialog, data: DialogData): Promise<boolean | undefined> {
 		const dialogRef = dialog.open(StudentDetailsDialogue, {
 			data: data,
 			autoFocus: false
 		});
-		if (onContractStatusChanged) {
-			dialogRef.componentInstance.contractStatusChanged.subscribe(onContractStatusChanged);
-		}
-		return dialogRef.afterClosed().toPromise();
+		return firstValueFrom(dialogRef.afterClosed());
 	}
 
 	protected resetDateFilter(): void {
@@ -175,7 +173,6 @@ export class StudentDetailsDialogue {
 					next: () => {
 						this.matSnackBar.open('Changes saved successfully.', 'Close', { duration: 3000 });
 						this.contractCompleted.set(newValue);
-						this.contractStatusChanged.emit(newValue);
 					},
 					error: () => {
 						this.matSnackBar.open('An error occurred while saving the student lunch check configuration. Please try again.', 'Close', { duration: 3000 });
@@ -189,6 +186,6 @@ export class StudentDetailsDialogue {
 	}
 
 	protected close(): void {
-		this.dialogRef.close();
+		this.dialogRef.close(this.contractCompleted());
 	}
 }

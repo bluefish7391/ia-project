@@ -7,8 +7,8 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Subject, debounceTime, distinctUntilChanged, switchMap, catchError, of, startWith } from 'rxjs';
-import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, LunchCheckRecord, QueryStudentLunchCheckResponse, QueryStudentLunchCheckWithContractsResponse, SaveStudentLunchCheckConfigRequest, Student, StudentLunchCheck, StudentLunchCheckCompositeRecord, StudentWithContractStatus } from '../../../../../../../shared/kinds';
+import { Subject, debounceTime, distinctUntilChanged, switchMap, catchError, of } from 'rxjs';
+import { GetStudentLunchCheckInAndOutHistoryRequest, GetStudentLunchCheckInAndOutHistoryResponse, QueryStudentLunchCheckWithContractsResponse, StudentLunchCheckCompositeRecord, StudentWithContractStatus } from '../../../../../../../shared/kinds';
 import { LunchCheckService } from '../lunch-check.service';
 import { StudentListComponent } from '../student-list/student-list';
 import { MatDialog } from '@angular/material/dialog';
@@ -148,9 +148,20 @@ export class DetailsComponent {
 			lunchCheckRecords: lunchCheckHistory.records
 		};
 
-		await StudentDetailsDialogue.open(this.dialog, { student: compositeRecord }, (newStatus) => {
-			this.onContractStatusChanged(newStatus);
-		});
+		const originalStatus = studentWithContractStatus.contractSigned;
+		const finalStatus = await StudentDetailsDialogue.open(this.dialog, { student: compositeRecord });
+
+		if (finalStatus !== undefined && finalStatus !== originalStatus) {
+			this.results.update((current) => ({
+				...current,
+				rows: current.rows.map((row) =>
+					row.student.id === studentWithContractStatus.student.id
+						? { ...row, contractSigned: finalStatus }
+						: row
+				),
+			}));
+		}
+
 		this.studentSelected.set(null);
 	}
 
@@ -158,22 +169,4 @@ export class DetailsComponent {
 		this.range.reset();
 	}
 
-	protected onContractStatusChanged(newStatus: boolean): void {
-		const selectedStudent = this.studentSelected();
-		if (!selectedStudent) {
-			return;
-		}
-
-		this.results.update((current) => ({
-			...current,
-			rows: current.rows.map((r) =>
-				r.student.id === selectedStudent.student.id
-					? {
-						...r,
-						contractSigned: newStatus
-					}
-					: r,
-			),
-		}));
-	}
 }

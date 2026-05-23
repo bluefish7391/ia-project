@@ -2,7 +2,7 @@
 
 ## Overview
 
-A web-based inventory management tool for the school IT department. The primary purpose is tracking check-outs and check-ins of physical technology assets (devices, peripherals, cables, accessories). Assets are scoped per department for flexibility. Students may check items in and out themselves with a teacher's permission, which is recorded on the checkout. Built as one of the 10 school tools within the `school-hub` app.
+A web-based inventory management tool for the school IT department. The primary purpose is tracking check-outs and check-ins of physical technology assets (devices, peripherals, cables, accessories). Assets are scoped per department (game design/embedded) for flexibility. Students may check items in and out themselves with a teacher's permission, which is recorded on the checkout. Built as one of the 10 school tools within the `school-hub` app.
 
 ---
 
@@ -43,10 +43,12 @@ A web-based inventory management tool for the school IT department. The primary 
 - Check-out and check-in apply only to **serialized items** — consumable quantities are adjusted directly
 - Any user (IT staff, teacher, or student) can initiate a checkout or return
 - **Student self-checkout**: when a student checks out an item, the permitting teacher must be selected from the official staff roster and is stored on the record — the teacher does not need to interact with the system
-- When assignee type is "student", search and select from the existing student roster — no manual name entry
+- **Staff/teacher self-checkout**: an IT Admin, IT Staff member, or teacher may check out an item for themselves. Selecting "Myself" as the assignee type auto-fills the assignee with the logged-in user's identity — no manual entry or permitting teacher is required
+- When assignee type is "Student", search and select from the existing student roster — no manual name entry
+- When assignee type is "Myself", the assignee is automatically set to the currently logged-in user; a direct link to their user account is stored on the record
 - Record:
-  - Assignee (student record link, or free-text name for staff/classroom)
-  - Permitting teacher (required when the checkout is performed by a student; selected from the staff roster)
+  - Assignee (student record link, logged-in user link for self-checkouts, or free-text name for staff/classroom)
+  - Permitting teacher (required when the checkout is performed by a student; selected from the staff roster; not applicable for self-checkouts)
   - Date checked out
   - Expected return date
   - Condition at checkout
@@ -89,9 +91,10 @@ A web-based inventory management tool for the school IT department. The primary 
   - Action type (Created, Updated, Checked Out, Checked In, Retired)
 
 ### 9. Role-Based Access
-- **IT Admin** — full CRUD on all assets, can view audit log and all reports
-- **IT Staff** — can check out/in, view inventory
-- **Student / Teacher** — can check out and return items; student checkouts require a permitting teacher to be selected from the staff roster
+- **IT Admin** — full CRUD on all assets, can view audit log and all reports; may check out items for themselves (self-checkout) or on behalf of staff/students
+- **IT Staff** — can check out/in, view inventory; may check out items for themselves (self-checkout)
+- **Teacher** — can check out and return items; may check out items for themselves (self-checkout); student checkouts they initiate require a permitting teacher (which may be themselves) to be selected from the staff roster
+- **Student** — can check out and return items; checkouts require a permitting teacher to be selected from the staff roster
 
 ---
 
@@ -105,11 +108,12 @@ The checkout form is the most-used screen and is optimized for a fast, sequentia
 
 1. **Asset Tag field** — auto-focused on component load. The user types or scans the asset tag.
 2. After a valid tag is entered, the item's name, condition, and current status appear inline below the field as a confirmation badge. If the item is already checked out, an error is shown immediately and focus stays on the asset tag field.
-3. **Enter** moves focus to the **Assignee Type** selector (Student / Staff / Classroom).
-4. **Enter** from Assignee Type moves focus to the **Assignee search field**, which is a live typeahead backed by the student roster (if "Student") or a free-text input (if "Staff" or "Classroom").
-5. If Assignee Type is "Student": **Enter** on a selected student moves focus to the **Permitting Teacher search field** — a live typeahead backed by the staff roster.
-6. **Enter** from the permitting teacher selection moves focus to the **Expected Return Date** field.
-7. **Enter** from the date field submits the form.
+3. **Enter** moves focus to the **Assignee Type** selector (Myself / Student / Staff / Classroom).
+4. **Enter** from Assignee Type moves focus to the next relevant field:
+   - **"Myself"**: the assignee is auto-filled with the logged-in user's name and a confirmation badge is shown — focus jumps directly to the **Expected Return Date** field, skipping the assignee search and permitting teacher fields entirely.
+   - **"Student"**: focus moves to the **Assignee search field**, a live typeahead backed by the student roster. **Enter** on a selected student moves focus to the **Permitting Teacher search field** — a live typeahead backed by the staff roster. **Enter** from the permitting teacher selection moves focus to the **Expected Return Date** field.
+   - **"Staff" / "Classroom"**: focus moves to a free-text **Assignee name field**. **Enter** moves focus to the **Expected Return Date** field.
+5. **Enter** from the date field submits the form.
 
 Additional checkout form behaviors:
 - If the asset tag resolves to an item that is already checked out, the form offers a shortcut to jump directly to the **check-in flow** for that item.
@@ -219,7 +223,9 @@ type ConsumableCategory = 'cable' | 'accessory' | 'cleaning' | 'other';
 interface CheckoutRecord {
   id: string;
   itemId: string;
-  assigneeType: 'student' | 'staff' | 'classroom';
+  assigneeType: 'self' | 'student' | 'staff' | 'classroom';
+  // Self: resolved from the logged-in user's account
+  assigneeUserId?: string;     // links to the user's account record (required when assigneeType === 'self')
   // Students: resolved from existing student records
   studentId?: string;          // links to Student record (required when assigneeType === 'student')
   assigneeName: string;        // denormalized display name
@@ -231,8 +237,8 @@ interface CheckoutRecord {
   conditionIn?: AssetCondition;
   damageNotes?: string;
   checkedOutBy: string;        // uid of the user who performed the checkout
-  permittingTeacherId?: string;   // required when checkedOutBy is a student; links to staff roster
-  permittingTeacherName?: string; // denormalized display name
+  permittingTeacherId?: string;   // required when assigneeType === 'student'; links to staff roster
+  permittingTeacherName?: string; // denormalized display name; omitted for self-checkouts
   checkedInBy?: string;
   organizationId: string;
   departmentId: string;        // used to scope queries within the org
@@ -375,5 +381,6 @@ organizations/{orgId}/
 
 1. **Asset scope** — Assets are scoped per department within an organization.
 2. **Student integration** — Checkouts can be linked to existing student records; students are looked up from the existing roster. Students may perform checkouts themselves; the permitting teacher is selected from the staff roster and their identity is recorded on the checkout record, but no teacher action is required in the system.
-3. **Notifications** — No email notifications.
-4. **QR codes** — Not included; asset lookup is done manually via search.
+3. **Staff/teacher self-checkout** — IT Admin, IT Staff, and teachers may check out items for themselves. Selecting "Myself" as the assignee type auto-fills the assignee from the logged-in user's account and stores a direct link to that account (`assigneeUserId`) on the checkout record. No permitting teacher is required for self-checkouts.
+4. **Notifications** — No email notifications.
+5. **QR codes** — Not included; asset lookup is done manually via search.

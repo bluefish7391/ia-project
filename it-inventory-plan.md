@@ -41,11 +41,11 @@ A web-based inventory management tool for the school IT department. The primary 
 ### 3. Check-Out / Check-In
 - Check-out and check-in apply only to **serialized items** — consumable quantities are adjusted directly
 - Any user (IT staff, teacher, or student) can initiate a checkout or return
-- **Student self-checkout**: when a student checks out an item, the permitting teacher's name must be entered and is stored on the record — the teacher does not need to interact with the system
+- **Student self-checkout**: when a student checks out an item, the permitting teacher must be selected from the official staff roster and is stored on the record — the teacher does not need to interact with the system
 - When assignee type is "student", search and select from the existing student roster — no manual name entry
 - Record:
   - Assignee (student record link, or free-text name for staff/classroom)
-  - Permitting teacher name (required when the checkout is performed by a student)
+  - Permitting teacher (required when the checkout is performed by a student; selected from the staff roster)
   - Date checked out
   - Expected return date
   - Condition at checkout
@@ -90,7 +90,7 @@ A web-based inventory management tool for the school IT department. The primary 
 ### 9. Role-Based Access
 - **IT Admin** — full CRUD on all assets, can view audit log and all reports
 - **IT Staff** — can check out/in, view inventory
-- **Student / Teacher** — can check out and return items; student checkouts require a permitting teacher name to be recorded
+- **Student / Teacher** — can check out and return items; student checkouts require a permitting teacher to be selected from the staff roster
 
 ---
 
@@ -166,7 +166,8 @@ interface CheckoutRecord {
   conditionIn?: AssetCondition;
   damageNotes?: string;
   checkedOutBy: string;        // uid of the user who performed the checkout
-  permittingTeacherName?: string; // required when checkedOutBy is a student
+  permittingTeacherId?: string;   // required when checkedOutBy is a student; links to staff roster
+  permittingTeacherName?: string; // denormalized display name
   checkedInBy?: string;
   organizationId: string;
   departmentId: string;        // used to scope queries within the org
@@ -274,7 +275,7 @@ organizations/{orgId}/
 
 ### Phase 2 — Check-Out / Check-In
 - Checkout and check-in API endpoints
-- Checkout form with student search and permitting teacher field
+- Checkout form with student search and permitting teacher search/select (staff roster)
 - Return (check-in) form
 - Overdue items view on dashboard
 
@@ -306,6 +307,6 @@ organizations/{orgId}/
 ## Resolved Decisions
 
 1. **Asset scope** — Assets are scoped per department within an organization.
-2. **Student integration** — Checkouts can be linked to existing student records; students are looked up from the existing roster. Students may perform checkouts themselves; the permitting teacher's name is recorded on the checkout record but no teacher action is required in the system.
+2. **Student integration** — Checkouts can be linked to existing student records; students are looked up from the existing roster. Students may perform checkouts themselves; the permitting teacher is selected from the staff roster and their identity is recorded on the checkout record, but no teacher action is required in the system.
 3. **Notifications** — No email notifications.
 4. **QR codes** — Not included; asset lookup is done manually via search.

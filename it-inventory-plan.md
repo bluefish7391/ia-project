@@ -117,7 +117,7 @@ interface InventoryItem {
   createdAt: string;
   updatedAt: string;
   organizationId: string;
-  departmentId: string;
+  departmentId: string;        // used to scope queries within the org
 }
 
 type SerializedCategory =
@@ -143,7 +143,7 @@ interface Consumable {
   createdAt: string;
   updatedAt: string;
   organizationId: string;
-  departmentId: string;
+  departmentId: string;        // used to scope queries within the org
 }
 
 type ConsumableCategory = 'cable' | 'accessory' | 'cleaning' | 'other';
@@ -169,7 +169,7 @@ interface CheckoutRecord {
   permittingTeacherName?: string; // required when checkedOutBy is a student
   checkedInBy?: string;
   organizationId: string;
-  departmentId: string;
+  departmentId: string;        // used to scope queries within the org
 }
 ```
 
@@ -255,11 +255,10 @@ New router: `backend/src/routers/it-inventory-router.ts`
 
 ```
 organizations/{orgId}/
-  departments/{deptId}/
-    inventoryItems/{itemId}      ← serialized, individually tracked
-    consumables/{consumableId}   ← bulk, quantity-tracked
-    checkoutRecords/{recordId}   ← only applies to inventoryItems
-    inventoryAuditLog/{entryId}
+  inventoryItems/{itemId}      ← serialized, individually tracked; departmentId field for scoping
+  consumables/{consumableId}   ← bulk, quantity-tracked; departmentId field for scoping
+  checkoutRecords/{recordId}   ← only applies to inventoryItems; departmentId field for scoping
+  inventoryAuditLog/{entryId}
 ```
 
 ---

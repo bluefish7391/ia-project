@@ -16,7 +16,9 @@
 }
 
 .dialog-content {
-  padding-top: 0.75rem;
+  padding-top: 1.25rem;
+  overflow: visible;
+  max-height: unset;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;

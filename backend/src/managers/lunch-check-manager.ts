@@ -5,6 +5,8 @@ import { BadRequestError } from "../kinds";
 import { RequestContext } from "../request-context";
 
 export class LunchCheckManager {
+	static readonly CHUNK_SIZE = 300;
+
 	async getAllStudents(requestContext: RequestContext, filter: QueryStudentLunchCheckRequest): Promise<QueryStudentLunchCheckResponse> {
 		const tenantID = requestContext.getCurrentTenantID();
 		// Validate lunchDate format
@@ -110,7 +112,13 @@ export class LunchCheckManager {
 		});
 
 		const studentIDs = Array.from(studentIDsSet);
-		const studentObjects = await studentDAO.getStudentsByIDs(studentIDs);
+		const studentObjects = [];
+		
+		for (let i = 0; i < studentIDs.length; i += LunchCheckManager.CHUNK_SIZE) {
+			const chunk = studentIDs.slice(i, i + LunchCheckManager.CHUNK_SIZE);
+			const students = await studentDAO.getStudentsByIDs(chunk);
+			studentObjects.push(...students);
+		}
 
 		const result = studentObjects.filter(student => {
 			if (filter.schoolStudentID && student.schoolStudentID.indexOf(filter.schoolStudentID) == -1) {

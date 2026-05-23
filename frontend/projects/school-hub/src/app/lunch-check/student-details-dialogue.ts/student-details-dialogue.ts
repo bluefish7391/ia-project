@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, model, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, EventEmitter, inject, model, Output, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule, MatIconButton } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -26,10 +26,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface DialogData {
 	student: StudentLunchCheckCompositeRecord;
-}
-
-export interface DialogueResult {
-	contractCompleted?: boolean;
 }
 
 interface ClockEvent {
@@ -113,6 +109,8 @@ export class StudentDetailsDialogue {
 		return this.filteredHistory().slice(page * size, (page + 1) * size);
 	});
 
+	@Output() contractStatusChanged = new EventEmitter<boolean>();
+
 	constructor() {
 		effect(() => {
 			this.rangeValue();
@@ -141,19 +139,19 @@ export class StudentDetailsDialogue {
 		this.completeHistory.update((history) => history.sort((a: ClockEvent, b: ClockEvent) => b.time.getTime() - a.time.getTime()));
 	}
 
-	public static open(dialog: MatDialog, data: DialogData): Promise<DialogueResult | undefined> {
+	public static open(
+		dialog: MatDialog,
+		data: DialogData,
+		onContractStatusChanged?: (status: boolean) => void
+	): Promise<void> {
 		const dialogRef = dialog.open(StudentDetailsDialogue, {
 			data: data,
 			autoFocus: false
 		});
+		if (onContractStatusChanged) {
+			dialogRef.componentInstance.contractStatusChanged.subscribe(onContractStatusChanged);
+		}
 		return dialogRef.afterClosed().toPromise();
-	}
-
-	protected close(): void {
-		const result: DialogueResult = {
-			contractCompleted: this.contractCompleted(),
-		};
-		this.dialogRef.close(result);
 	}
 
 	protected resetDateFilter(): void {
@@ -177,6 +175,7 @@ export class StudentDetailsDialogue {
 					next: () => {
 						this.matSnackBar.open('Changes saved successfully.', 'Close', { duration: 3000 });
 						this.contractCompleted.set(newValue);
+						this.contractStatusChanged.emit(newValue);
 					},
 					error: () => {
 						this.matSnackBar.open('An error occurred while saving the student lunch check configuration. Please try again.', 'Close', { duration: 3000 });
@@ -187,5 +186,9 @@ export class StudentDetailsDialogue {
 				this.contractCompleted.set(!newValue);
 			}
 		});
+	}
+
+	protected close(): void {
+		this.dialogRef.close();
 	}
 }

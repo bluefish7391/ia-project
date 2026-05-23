@@ -73,6 +73,8 @@ export class DetailsComponent {
 	protected readonly results = signal<QueryStudentLunchCheckWithContractsResponse>({ rows: [] });
 	protected readonly studentResults = computed(() => this.results().rows);
 
+	protected readonly studentSelected = signal<StudentWithContractStatus | null>(null);
+
 	constructor() {
 		this.searchTrigger$.pipe(
 			debounceTime(400),
@@ -114,6 +116,8 @@ export class DetailsComponent {
 
 	// ─── Handlers ────────────────────────────────────────────────────────────
 	protected async onSelectStudent(studentWithContractStatus: StudentWithContractStatus): Promise<void> {
+		this.studentSelected.set(studentWithContractStatus);
+		
 		const request: GetStudentLunchCheckInAndOutHistoryRequest = {
 			studentID: studentWithContractStatus.student.id,
 			startDate: this.longAgo, // All time records
@@ -136,34 +140,38 @@ export class DetailsComponent {
 			student: studentWithContractStatus.student,
 			studentLunchCheck: { 
 				studentID: studentWithContractStatus.student.id,
-				tenantID: '', // This field is not used in the details view, so we can leave it empty
+				tenantID: studentWithContractStatus.student.tenantID,
 				contractSigned: studentWithContractStatus.contractSigned 
 			},
 			lunchCheckRecords: lunchCheckHistory.records
 		};
 
-		const result = await StudentDetailsDialogue.open(this.dialog, { student: compositeRecord });
-		if (!result) {
-			return;
-		}
-
-		if (result.contractCompleted !== undefined &&
-			result.contractCompleted !== (compositeRecord.studentLunchCheck?.contractSigned ?? false)) {
-			this.results.update((current) => ({
-				...current,
-				rows: current.rows.map((r) =>
-					r.student.id === compositeRecord.student.id
-						? {
-							...r,
-							contractSigned: result.contractCompleted!
-						}
-						: r,
-				),
-			}));
-		}
+		await StudentDetailsDialogue.open(this.dialog, { student: compositeRecord }, (newStatus) => {
+			this.onContractStatusChanged(newStatus);
+		});
+		this.studentSelected.set(null);
 	}
 
 	protected resetDateFilter(): void {
 		this.range.reset();
+	}
+
+	protected onContractStatusChanged(newStatus: boolean): void {
+		const selectedStudent = this.studentSelected();
+		if (!selectedStudent) {
+			return;
+		}
+
+		this.results.update((current) => ({
+			...current,
+			rows: current.rows.map((r) =>
+				r.student.id === selectedStudent.student.id
+					? {
+						...r,
+						contractSigned: newStatus
+					}
+					: r,
+			),
+		}));
 	}
 }

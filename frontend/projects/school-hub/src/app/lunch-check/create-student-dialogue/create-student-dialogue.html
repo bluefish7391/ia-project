@@ -1,5 +1,8 @@
 <div mat-dialog-title class="dialog-header">
 	<div class="header-text"><span class="header-label">Create Student</span></div>
+	<button mat-icon-button class="dialog-header__close" aria-label="Close dialog" (click)="onCancel()" [disabled]="isSaving()">
+		<mat-icon>close</mat-icon>
+	</button>
 </div>
 <mat-dialog-content class="dialog-content">
 	<mat-form-field appearance="outline" class="full-width">
@@ -25,7 +28,6 @@
 	}
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-	<button matButton (click)="onCancel()" [disabled]="isSaving()">Cancel</button>
 	<button mat-flat-button (click)="onSubmit()" [disabled]="isSaving()">
 		@if (isSaving()) {
 		<mat-spinner diameter="18" />

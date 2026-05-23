@@ -16,6 +16,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Student } from 'shared/kinds';
 import { LunchCheckService } from '../lunch-check.service';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface CreateStudentDialogueData {
   schoolStudentID: string;
@@ -34,6 +35,7 @@ export interface CreateStudentDialogueData {
     MatInputModule,
 	MatSlideToggleModule,
     MatProgressSpinnerModule,
+	MatIconModule,
   ],
   templateUrl: './create-student-dialogue.html',
   styleUrl: './create-student-dialogue.scss',
@@ -52,7 +54,7 @@ export class CreateStudentDialogueComponent {
 
   static open(dialog: MatDialog, data: CreateStudentDialogueData): Promise<Student | undefined> {
     return dialog
-      .open(CreateStudentDialogueComponent, { data, width: '400px' })
+      .open(CreateStudentDialogueComponent, { data, width: '400px', autoFocus: 'dialog' })
       .afterClosed()
       .toPromise();
   }

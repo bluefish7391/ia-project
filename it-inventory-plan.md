@@ -37,6 +37,7 @@ A web-based inventory management tool for the school IT department. The primary 
   - **Cost per Unit**
   - **Notes / Tags**
 - No per-unit checkout — quantity is adjusted directly when items are given out or restocked
+- Quantity adjustments use an **atomic server-side increment** (`FieldValue.increment()`) to prevent race conditions when multiple users adjust stock simultaneously
 
 ### 3. Check-Out / Check-In
 - Check-out and check-in apply only to **serialized items** — consumable quantities are adjusted directly
@@ -246,7 +247,8 @@ New router: `backend/src/routers/it-inventory-router.ts`
 | GET | `/consumables` | List consumables (with filters) |
 | POST | `/consumables` | Create a consumable |
 | GET | `/consumables/:id` | Get consumable details |
-| PUT | `/consumables/:id` | Update a consumable (including quantity) |
+| PUT | `/consumables/:id` | Update a consumable's metadata (name, location, etc.) |
+| POST | `/consumables/:id/adjust` | Atomically adjust quantity on hand (`delta`: positive = restock, negative = dispense) |
 | DELETE | `/consumables/:id` | Archive a consumable |
 | GET | `/inventory/reports/:type` | Generate a named report |
 
@@ -289,6 +291,7 @@ organizations/{orgId}/
 
 ### Phase 5 — Polish
 - Low stock alerts and consumables tracking
+  - Quantity adjustments **must** use `FieldValue.increment(delta)` on the backend — never read-modify-write — to ensure correctness under concurrent updates
 - Warranty expiration warnings
 - Role-based UI (hide write actions for read-only users)
 

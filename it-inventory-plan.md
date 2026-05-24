@@ -2,7 +2,7 @@
 
 ## Overview
 
-A web-based inventory management tool for the school IT department. The primary purpose is tracking check-outs and check-ins of physical technology assets (devices, peripherals, cables, accessories). Assets are scoped per department (game design/embedded) for flexibility. Students may check items in and out themselves with a teacher's permission, which is recorded on the checkout. Built as one of the 10 school tools within the `school-hub` app.
+A web-based inventory management tool for the school IT department. The primary purpose is tracking check-outs and check-ins of physical technology assets (devices, peripherals, cables, accessories). Students may check items in and out themselves with a teacher's permission, which is recorded on the checkout. Built as one of the 10 school tools within the `school-hub` app.
 
 ---
 
@@ -12,13 +12,12 @@ A web-based inventory management tool for the school IT department. The primary 
 - Individual, uniquely identified assets that are tracked one-by-one (laptops, tablets, monitors, etc.)
 - Fields:
   - **Name** (e.g., "Lenovo Chromebook 14")
-  - **Asset Tag** (required, unique per department)
+  - **Asset Tag** (required, unique per organization)
   - **Serial Number**
   - **Category** (Laptop, Desktop, Monitor, Tablet, Printer, Network Equipment, etc.)
   - **Make / Model**
   - **Condition** (New, Good, Fair, Damaged, Broken)
   - **Status** (Available, Checked Out, Retired)
-  - **Department**
   - **Location** (Room number, closet label, cart name)
   - **Purchase Date**
   - **Warranty Expiration Date**
@@ -30,7 +29,6 @@ A web-based inventory management tool for the school IT department. The primary 
 - Fields:
   - **Name** (e.g., "USB-C Charging Cable")
   - **Category** (Cable, Accessory, Cleaning Supply, etc.)
-  - **Department**
   - **Location**
   - **Quantity on Hand** (required)
   - **Minimum Quantity** (threshold for low-stock alert)
@@ -169,8 +167,9 @@ Additional checkout form behaviors:
 ```typescript
 interface InventoryItem {
   id: string;
+  tenantId: string;
   name: string;
-  assetTag: string;            // unique per department
+  assetTag: string;            // unique per organization
   serialNumber: string;
   category: SerializedCategory;
   make?: string;
@@ -186,7 +185,6 @@ interface InventoryItem {
   createdAt: string;
   updatedAt: string;
   organizationId: string;
-  departmentId: string;        // used to scope queries within the org
 }
 
 type SerializedCategory =
@@ -201,6 +199,7 @@ type AssetStatus = 'available' | 'checked-out' | 'retired';
 ```typescript
 interface Consumable {
   id: string;
+  tenantId: string;
   name: string;
   category: ConsumableCategory;
   location: string;
@@ -212,7 +211,6 @@ interface Consumable {
   createdAt: string;
   updatedAt: string;
   organizationId: string;
-  departmentId: string;        // used to scope queries within the org
 }
 
 type ConsumableCategory = 'cable' | 'accessory' | 'cleaning' | 'other';
@@ -222,6 +220,7 @@ type ConsumableCategory = 'cable' | 'accessory' | 'cleaning' | 'other';
 ```typescript
 interface CheckoutRecord {
   id: string;
+  tenantId: string;
   itemId: string;
   assigneeType: 'self' | 'student' | 'staff' | 'classroom';
   // Self: resolved from the logged-in user's account
@@ -241,7 +240,6 @@ interface CheckoutRecord {
   permittingTeacherName?: string; // denormalized display name; omitted for self-checkouts
   checkedInBy?: string;
   organizationId: string;
-  departmentId: string;        // used to scope queries within the org
 }
 ```
 
@@ -249,6 +247,7 @@ interface CheckoutRecord {
 ```typescript
 interface AuditEntry {
   id: string;
+  tenantId: string;
   itemId: string;
   action: 'created' | 'updated' | 'checked-out' | 'checked-in' | 'retired';
   changedBy: string;           // uid
@@ -328,9 +327,9 @@ New router: `backend/src/routers/it-inventory-router.ts`
 
 ```
 organizations/{orgId}/
-  inventoryItems/{itemId}      ← serialized, individually tracked; departmentId field for scoping
-  consumables/{consumableId}   ← bulk, quantity-tracked; departmentId field for scoping
-  checkoutRecords/{recordId}   ← only applies to inventoryItems; departmentId field for scoping
+  inventoryItems/{itemId}      ← serialized, individually tracked
+  consumables/{consumableId}   ← bulk, quantity-tracked
+  checkoutRecords/{recordId}   ← only applies to inventoryItems
   inventoryAuditLog/{entryId}
 ```
 
@@ -379,7 +378,7 @@ organizations/{orgId}/
 
 ## Resolved Decisions
 
-1. **Asset scope** — Assets are scoped per department within an organization.
+1. **Asset scope** — Assets are scoped per organization.
 2. **Student integration** — Checkouts can be linked to existing student records; students are looked up from the existing roster. Students may perform checkouts themselves; the permitting teacher is selected from the staff roster and their identity is recorded on the checkout record, but no teacher action is required in the system.
 3. **Staff/teacher self-checkout** — IT Admin, IT Staff, and teachers may check out items for themselves. Selecting "Myself" as the assignee type auto-fills the assignee from the logged-in user's account and stores a direct link to that account (`assigneeUserId`) on the checkout record. No permitting teacher is required for self-checkouts.
 4. **Notifications** — No email notifications.

@@ -2,7 +2,7 @@
 
 ## Overview
 
-A web-based inventory management tool for the school IT department. The primary purpose is tracking check-outs and check-ins of physical technology assets (devices, peripherals, cables, accessories). Students may check items in and out themselves with a teacher's permission, which is recorded on the checkout. Built as one of the 10 school tools within the `school-hub` app.
+A web-based inventory management tool for the school IT department. The primary purpose is tracking check-outs and check-ins of physical technology assets (devices, peripherals, cables, accessories). The system supports a structured checkout workflow: a Receiver who wants an item must first obtain permission from a Permission Giver, then complete the transaction with a Checkout Process Recorder. Self-checkout is supported for users who hold the necessary system permissions. Built as one of the 10 school tools within the `school-hub` app.
 
 ---
 
@@ -39,14 +39,16 @@ A web-based inventory management tool for the school IT department. The primary 
 
 ### 3. Check-Out / Check-In
 - Check-out and check-in apply only to **serialized items** — consumable quantities are adjusted directly
-- Any user (IT staff, teacher, or student) can initiate a checkout or return
-- **Student self-checkout**: when a student checks out an item, the permitting teacher must be selected from the official staff roster and is stored on the record — the teacher does not need to interact with the system
-- **Staff/teacher self-checkout**: an IT Admin, IT Staff member, or teacher may check out an item for themselves. Selecting "Myself" as the assignee type auto-fills the assignee with the logged-in user's identity — no manual entry or permitting teacher is required
-- When assignee type is "Student", search and select from the existing student roster — no manual name entry
-- When assignee type is "Myself", the assignee is automatically set to the currently logged-in user; a direct link to their user account is stored on the record
+- The checkout process involves three roles: the **Receiver** (person receiving the item), the **Permission Giver** (person authorizing the checkout), and the **Process Recorder** (person filling out the checkout form in the system)
+- **Standard checkout**: the Receiver first obtains permission from a Permission Giver, then visits a Process Recorder to complete the checkout. The Process Recorder records all three parties on the checkout form
+- **Self-checkout**: if the logged-in user holds the Permission Giver role, they may act as their own Permission Giver. The Process Recorder, Permission Giver, and Receiver fields may all be set to the same person
+- Receiver may be looked up from the existing student or staff roster, or entered as free text for external parties
+- Permission Giver must be a user with the Permission Giver role in the system
+- The Process Recorder is the logged-in user completing the form
 - Record:
-  - Assignee (student record link, logged-in user link for self-checkouts, or free-text name for staff/classroom)
-  - Permitting teacher (required when the checkout is performed by a student; selected from the staff roster; not applicable for self-checkouts)
+  - Receiver (student record link, user account link, or free-text name for external parties)
+  - Permission Giver (required; link to the user who authorized the checkout; may be the same as the Receiver or Process Recorder)
+  - Process Recorder (the logged-in user who submitted the form; stored as a user account link)
   - Date checked out
   - Expected return date
   - Condition at checkout
@@ -59,7 +61,7 @@ A web-based inventory management tool for the school IT department. The primary 
 ### 4. Search & Filter
 - Serialized items and consumables are browsed in separate views
 - Full-text search across name, serial number, and asset tag (serialized); name and category (consumables)
-- Filter serialized items by: category, status, condition, location, assignee
+- Filter serialized items by: category, status, condition, location, receiver
 - Filter consumables by: category, location, low-stock
 - Sort by any column
 
@@ -89,10 +91,11 @@ A web-based inventory management tool for the school IT department. The primary 
   - Action type (Created, Updated, Checked Out, Checked In, Retired)
 
 ### 9. Role-Based Access
-- **IT Admin** — full CRUD on all assets, can view audit log and all reports; may check out items for themselves (self-checkout) or on behalf of staff/students
-- **IT Staff** — can check out/in, view inventory; may check out items for themselves (self-checkout)
-- **Teacher** — can check out and return items; may check out items for themselves (self-checkout); student checkouts they initiate require a permitting teacher (which may be themselves) to be selected from the staff roster
-- **Student** — can check out and return items; checkouts require a permitting teacher to be selected from the staff roster
+- **Inventory Admin** — all Inventory Manager capabilities plus: generate and export reports, view the full audit log, grant system permissions to other users, and assign roles to users
+- **Inventory Manager** — full CRUD on all inventory items and consumables; can view inventory lists and item details
+- **Checkout Process Recorder** — can fill out and submit checkout and check-in forms; records the Receiver and Permission Giver on each transaction
+- **Permission Giver** — can authorize Receivers to check out items; their identity is recorded on every checkout they approve; may also serve as the Process Recorder or Receiver on the same transaction
+- **Receiver** — any user in the system who may receive items via the checkout process; their identity is recorded on every checkout
 
 ---
 
@@ -106,11 +109,11 @@ The checkout form is the most-used screen and is optimized for a fast, sequentia
 
 1. **Asset Tag field** — auto-focused on component load. The user types or scans the asset tag.
 2. After a valid tag is entered, the item's name, condition, and current status appear inline below the field as a confirmation badge. If the item is already checked out, an error is shown immediately and focus stays on the asset tag field.
-3. **Enter** moves focus to the **Assignee Type** selector (Myself / Student / Staff / Classroom).
-4. **Enter** from Assignee Type moves focus to the next relevant field:
-   - **"Myself"**: the assignee is auto-filled with the logged-in user's name and a confirmation badge is shown — focus jumps directly to the **Expected Return Date** field, skipping the assignee search and permitting teacher fields entirely.
-   - **"Student"**: focus moves to the **Assignee search field**, a live typeahead backed by the student roster. **Enter** on a selected student moves focus to the **Permitting Teacher search field** — a live typeahead backed by the staff roster. **Enter** from the permitting teacher selection moves focus to the **Expected Return Date** field.
-   - **"Staff" / "Classroom"**: focus moves to a free-text **Assignee name field**. **Enter** moves focus to the **Expected Return Date** field.
+3. **Enter** moves focus to the **Receiver Type** selector (Myself / Student / Staff / External).
+4. **Enter** from Receiver Type moves focus to the next relevant field:
+   - **"Myself"**: the receiver is auto-filled with the logged-in user's name and a confirmation badge is shown — focus moves to the **Permission Giver** field. If the logged-in user holds the Permission Giver role, that field is also auto-filled with their identity and focus jumps directly to the **Expected Return Date** field.
+   - **"Student"**: focus moves to the **Receiver search field**, a live typeahead backed by the student roster. **Enter** on a selected student moves focus to the **Permission Giver search field** — a live typeahead backed by users with the Permission Giver role. **Enter** from the permission giver selection moves focus to the **Expected Return Date** field.
+   - **"Staff" / "External"**: focus moves to a free-text **Receiver name field**. **Enter** moves focus to the **Permission Giver search field**. **Enter** from the permission giver selection moves focus to the **Expected Return Date** field.
 5. **Enter** from the date field submits the form.
 
 Additional checkout form behaviors:
@@ -122,7 +125,7 @@ Additional checkout form behaviors:
 
 - Accessible from the checkout form shortcut (when a checked-out item is scanned) or from the item detail page.
 - Asset tag field is auto-focused.
-- After a valid tag resolves, the current assignee and checkout date are shown inline.
+- After a valid tag resolves, the current receiver and checkout date are shown inline.
 - The user selects the **Condition at Return** from a compact segmented button group (keyboard-navigable).
 - An optional **Damage Notes** textarea appears only if the selected condition is worse than the condition at checkout.
 - **Enter** (or Tab → Enter) submits.
@@ -222,23 +225,20 @@ interface CheckoutRecord {
   id: string;
   tenantId: string;
   itemId: string;
-  assigneeType: 'self' | 'student' | 'staff' | 'classroom';
-  // Self: resolved from the logged-in user's account
-  assigneeUserId?: string;     // links to the user's account record (required when assigneeType === 'self')
-  // Students: resolved from existing student records
-  studentId?: string;          // links to Student record (required when assigneeType === 'student')
-  assigneeName: string;        // denormalized display name
-  // Staff/classroom: free-text name
+  receiverUserId?: string;     // links to the user's account record (when receiver has a system account)
+  receiverName: string;        // denormalized display name
   checkedOutAt: string;        // ISO datetime
   expectedReturnAt?: string;
   checkedInAt?: string;
   conditionOut: AssetCondition;
   conditionIn?: AssetCondition;
   damageNotes?: string;
-  checkedOutBy: string;        // uid of the user who performed the checkout
-  permittingTeacherId?: string;   // required when assigneeType === 'student'; links to staff roster
-  permittingTeacherName?: string; // denormalized display name; omitted for self-checkouts
-  checkedInBy?: string;
+  checkOutUserId: string;      // uid of the logged-in user who filled out and submitted the checkout form
+  checkOutUserName: string;    // denormalized display name
+  checkInUserId?: string;      // uid of the logged-in user who completed the check-in form (may differ from checkOutUserId)
+  checkInUserName?: string;    // denormalized display name
+  permissionGiverId: string;   // uid of the user who authorized the checkout; must hold the Permission Giver role
+  permissionGiverName: string; // denormalized display name
   organizationId: string;
 }
 ```
@@ -346,7 +346,7 @@ organizations/{orgId}/
 
 ### Phase 2 — Check-Out / Check-In
 - Checkout and check-in API endpoints
-- Checkout form with student search and permitting teacher search/select (staff roster)
+- Checkout form with receiver search (student/staff roster) and permission giver search/select
 - Return (check-in) form
 - Overdue items view on dashboard
 
@@ -379,7 +379,7 @@ organizations/{orgId}/
 ## Resolved Decisions
 
 1. **Asset scope** — Assets are scoped per organization.
-2. **Student integration** — Checkouts can be linked to existing student records; students are looked up from the existing roster. Students may perform checkouts themselves; the permitting teacher is selected from the staff roster and their identity is recorded on the checkout record, but no teacher action is required in the system.
-3. **Staff/teacher self-checkout** — IT Admin, IT Staff, and teachers may check out items for themselves. Selecting "Myself" as the assignee type auto-fills the assignee from the logged-in user's account and stores a direct link to that account (`assigneeUserId`) on the checkout record. No permitting teacher is required for self-checkouts.
+2. **Receiver lookup** — Receivers may be linked to existing student or staff user records for identity tracking, or entered as free text for external parties. Students are looked up from the existing student roster; staff with system accounts are searched by name.
+3. **Self-checkout** — Any user who holds the Permission Giver role may act as their own Permission Giver. During a self-checkout, the Receiver, Permission Giver, and Process Recorder fields may all be set to the currently logged-in user. The `receiverUserId` and `permissionGiverId` fields both store that user's account link on the checkout record.
 4. **Notifications** — No email notifications.
 5. **QR codes** — Not included; asset lookup is done manually via search.

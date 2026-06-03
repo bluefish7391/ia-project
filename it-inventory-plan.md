@@ -35,7 +35,7 @@ A web-based inventory management tool for the school IT department. The primary 
   - **Cost per Unit**
   - **Notes / Tags**
 - No per-unit checkout — quantity is adjusted directly when items are given out or restocked
-- Quantity adjustments use an **atomic server-side increment** (`FieldValue.increment()`) to prevent race conditions when multiple users adjust stock simultaneously
+- Quantity adjustments use a **Datastore transaction** on the backend: the server reads the current quantity, validates that applying the delta would not produce a negative value (rejecting the request with a 400 if it would), then writes the updated quantity within the same transaction. This prevents both race conditions and invalid stock levels.
 
 ### 3. Check-Out / Check-In
 - Check-out and check-in apply only to **serialized items** — consumable quantities are adjusted directly
@@ -95,7 +95,8 @@ A web-based inventory management tool for the school IT department. The primary 
 - **Inventory Manager** — full CRUD on all inventory items and consumables; can view inventory lists and item details
 - **Checkout Process Recorder** — can fill out and submit checkout and check-in forms; records the Receiver and Permission Giver on each transaction
 - **Permission Giver** — can authorize Receivers to check out items; their identity is recorded on every checkout they approve; may also serve as the Process Recorder or Receiver on the same transaction
-- **Receiver** — any user in the system who may receive items via the checkout process; their identity is recorded on every checkout
+
+> **Note:** "Receiver" is not a grantable system role — it is an actor label identifying who received the item on a given checkout. Any person (student, staff, or external party) may act as a Receiver without holding any special permission.
 
 ---
 
@@ -225,22 +226,25 @@ interface CheckoutRecord {
   id: string;
   tenantId: string;
   itemId: string;
+  receiverType: ReceiverType;  // how the receiver was identified on this checkout
   receiverUserId?: string;     // links to the user's account record (when receiver has a system account)
-  receiverName: string;        // denormalized display name
+  receiverName: string;        // denormalized display name; snapshot at time of checkout
   checkedOutAt: string;        // ISO datetime
   expectedReturnAt?: string;
   checkedInAt?: string;
   conditionOut: AssetCondition;
   conditionIn?: AssetCondition;
   damageNotes?: string;
-  checkOutUserId: string;      // uid of the logged-in user who filled out and submitted the checkout form
-  checkOutUserName: string;    // denormalized display name
-  checkInUserId?: string;      // uid of the logged-in user who completed the check-in form (may differ from checkOutUserId)
-  checkInUserName?: string;    // denormalized display name
+  checkOutProcessRecorderId: string;   // uid of the Process Recorder who submitted the checkout form
+  checkOutProcessRecorderName: string; // denormalized display name
+  checkInProcessRecorderId?: string;   // uid of the Process Recorder who completed the check-in form (may differ from checkOutProcessRecorderId)
+  checkInProcessRecorderName?: string; // denormalized display name
   permissionGiverId: string;   // uid of the user who authorized the checkout; must hold the Permission Giver role
   permissionGiverName: string; // denormalized display name
   organizationId: string;
 }
+
+type ReceiverType = 'self' | 'student' | 'staff' | 'external';
 ```
 
 ### `AuditEntry`
@@ -248,7 +252,8 @@ interface CheckoutRecord {
 interface AuditEntry {
   id: string;
   tenantId: string;
-  itemId: string;
+  itemId?: string;             // set for serialized item entries
+  consumableId?: string;       // set for consumable entries
   action: 'created' | 'updated' | 'checked-out' | 'checked-in' | 'retired';
   changedBy: string;           // uid
   changedByName: string;
@@ -272,7 +277,8 @@ projects/school-hub/src/app/
     ├── services/
     │   ├── inventory-item.service.ts
     │   ├── consumable.service.ts
-    │   └── checkout.service.ts
+    │   ├── checkout.service.ts
+    │   └── audit.service.ts
     ├── pages/
     │   ├── dashboard/
     │   │   └── inventory-dashboard.component.ts/.html/.scss
@@ -288,6 +294,8 @@ projects/school-hub/src/app/
     │   │   └── consumable-form.component.ts/.html/.scss
     │   ├── checkout-form/
     │   │   └── checkout-form.component.ts/.html/.scss
+    │   ├── audit-log/
+    │   │   └── audit-log.component.ts/.html/.scss
     │   └── reports/
     │       └── reports.component.ts/.html/.scss
     └── components/
@@ -302,43 +310,48 @@ projects/school-hub/src/app/
 
 New router: `backend/src/routers/it-inventory-router.ts`
 
+List endpoints support cursor-based pagination. Clients pass `pageSize` (integer) and `cursor` (opaque string from a previous response) as query parameters. Responses include `{ items: [...], nextCursor?: string }` — `nextCursor` is absent when no further pages exist.
+
+> **Route registration order:** `GET /inventory/reports/:type` must be registered before `GET /inventory/:id` in Express to avoid the reports path being matched as an item ID.
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/inventory` | List serialized items (with filters) |
+| GET | `/inventory` | List serialized items (with filters, paginated) |
 | POST | `/inventory` | Create a serialized item |
+| GET | `/inventory/reports/:type` | Generate a named report (registered before `/:id`) |
 | GET | `/inventory/:id` | Get serialized item details |
 | PUT | `/inventory/:id` | Update a serialized item |
-| DELETE | `/inventory/:id` | Archive a serialized item |
+| PATCH | `/inventory/:id` | Retire a serialized item (`{ status: 'retired' }`) |
 | GET | `/inventory/:id/checkouts` | Checkout history for an item |
 | POST | `/inventory/:id/checkout` | Check out an item |
 | POST | `/inventory/:id/checkin` | Check in an item |
 | GET | `/inventory/:id/audit` | Audit log for an item |
-| GET | `/consumables` | List consumables (with filters) |
+| GET | `/consumables` | List consumables (with filters, paginated) |
 | POST | `/consumables` | Create a consumable |
 | GET | `/consumables/:id` | Get consumable details |
 | PUT | `/consumables/:id` | Update a consumable's metadata (name, location, etc.) |
-| POST | `/consumables/:id/adjust` | Atomically adjust quantity on hand (`delta`: positive = restock, negative = dispense) |
-| DELETE | `/consumables/:id` | Archive a consumable |
-| GET | `/inventory/reports/:type` | Generate a named report |
+| POST | `/consumables/:id/adjust` | Adjust quantity on hand (`delta`: positive = restock, negative = dispense); server rejects any delta that would produce a negative quantity with HTTP 400 |
+| PATCH | `/consumables/:id` | Archive a consumable (`{ status: 'retired' }`) |
 
 ---
 
-## Firestore Collections
+## Datastore Kinds
 
-```
-organizations/{orgId}/
-  inventoryItems/{itemId}      ← serialized, individually tracked
-  consumables/{consumableId}   ← bulk, quantity-tracked
-  checkoutRecords/{recordId}   ← only applies to inventoryItems
-  inventoryAuditLog/{entryId}
-```
+All entities are stored in Google Cloud Datastore as flat kinds, consistent with the rest of the backend. Each entity carries a `tenantID` property for multi-tenant filtering.
+
+| Kind | Description |
+|------|-------------|
+| `InventoryItem` | Serialized, individually tracked assets |
+| `Consumable` | Bulk, quantity-tracked items |
+| `CheckoutRecord` | Checkout/check-in records; only applies to `InventoryItem` entities |
+| `InventoryAuditLog` | Immutable audit entries for both `InventoryItem` and `Consumable` changes |
 
 ---
 
 ## Phased Delivery
 
 ### Phase 1 — Core Inventory
-- `InventoryItem` and `Consumable` data models and Firestore collections
+- `InventoryItem` and `Consumable` data models and Datastore kinds
 - CRUD endpoints for both serialized items and consumables
 - Serialized item list page with search/filter
 - Serialized item detail and add/edit form
@@ -360,7 +373,7 @@ organizations/{orgId}/
 
 ### Phase 5 — Polish
 - Low stock alerts and consumables tracking
-  - Quantity adjustments **must** use `FieldValue.increment(delta)` on the backend — never read-modify-write — to ensure correctness under concurrent updates
+  - Quantity adjustments **must** use a Datastore transaction on the backend (read current value, validate the result would be ≥ 0, write within the same transaction) — never a bare read-modify-write — to ensure correctness under concurrent updates
 - Warranty expiration warnings
 - Role-based UI (hide write actions for read-only users)
 
@@ -383,3 +396,5 @@ organizations/{orgId}/
 3. **Self-checkout** — Any user who holds the Permission Giver role may act as their own Permission Giver. During a self-checkout, the Receiver, Permission Giver, and Process Recorder fields may all be set to the currently logged-in user. The `receiverUserId` and `permissionGiverId` fields both store that user's account link on the checkout record.
 4. **Notifications** — No email notifications.
 5. **QR codes** — Not included; asset lookup is done manually via search.
+6. **Initial role seeding** — The Sys Admin (existing system-level administrator) is responsible for granting the first Inventory Admin role. No in-app bootstrap flow is required.
+7. **Receiver as actor label** — "Receiver" is not a grantable system role. Any person (student, staff, or external party) may act as a Receiver on a checkout; the label appears only on `CheckoutRecord` to identify who received the item.
